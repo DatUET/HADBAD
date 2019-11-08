@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "421310168729",
+    "firebase_url": "https://hadad-social-network.firebaseio.com",
+    "project_id": "hadad-social-network",
+    "storage_bucket": "hadad-social-network.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:421310168729:android:6dd2ff30cf57426ede0208",
+        "android_client_info": {
+          "package_name": "com.example.hadad"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "421310168729-7n0gbk83fkpinls7lle55v1ju1ta0cc7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.hadad",
+            "certificate_hash": "73def20a09bd35673244386f07eba207b0e95706"
+          }
+        },
+        {
+          "client_id": "421310168729-hq0vodtu3iiai30d5tn70kialturhti9.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDB12oo9nVfoQWVmTKRjw-bRbeNMOLMP6M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "421310168729-hq0vodtu3iiai30d5tn70kialturhti9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
