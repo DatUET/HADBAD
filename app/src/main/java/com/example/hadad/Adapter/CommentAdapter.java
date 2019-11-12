@@ -47,6 +47,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 	public CommentAdapter() {
 	}
 
+	// build file layout cho từng item chat
 	@NonNull
 	@Override
 	public CommentViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -57,6 +58,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		return commentViewHolder;
 	}
 
+	// đưa dữ liệu và xử lý sự kiện cho từng thành phần trong item
 	@Override
 	public void onBindViewHolder(@NonNull final CommentViewHolder commentViewHolder, int i) {
 		Comment comment = commentList.get(i);
@@ -69,6 +71,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		String uDp = comment.getuDp();
 		String uName = comment.getuName();
 
+		// lấy thời gian của hệ thống
 		Calendar cal = Calendar.getInstance(Locale.ENGLISH);
 		cal.setTimeInMillis(Long.parseLong(timestamp));
 		String cTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
@@ -78,7 +81,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		commentViewHolder.txt_time.setText(cTime);
 
 		try {
-			Picasso.get().load(uDp).placeholder(R.drawable.ic_defaut_img).into(commentViewHolder.img_avatar);
+			Picasso.get().load(uDp).placeholder(R.drawable.user).into(commentViewHolder.img_avatar); // tải ảnh của người cmt vào ImageView
 		}
 		catch (Exception ex)
 		{
@@ -90,11 +93,12 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 			public void onClick(View v) {
 				Intent intent = new Intent(context, ThereProfileActivity.class);
 				intent.putExtra("uid", uid);
-				ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity)context, commentViewHolder.img_avatar, ViewCompat.getTransitionName(commentViewHolder.img_avatar));
+				ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity)context, commentViewHolder.img_avatar, ViewCompat.getTransitionName(commentViewHolder.img_avatar)); // hiệu ứng chuyển activity
 				context.startActivity(intent, activityOptionsCompat.toBundle());
 			}
 		});
 
+		// nếu người dùng bấm vào item nào và id hiện tại đc lưu phải tùng với id của tk cmt thì show thông báo hỏi muốn xóa hay ko
 		commentViewHolder.itemView.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -126,6 +130,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post").child(postId);
 		reference.child("Comments").child(cId).removeValue();
 
+		// sau khi xóa cập nhật lại số lượng đã cmt
 		reference.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

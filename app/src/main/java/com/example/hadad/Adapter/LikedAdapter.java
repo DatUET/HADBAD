@@ -1,6 +1,5 @@
 package com.example.hadad.Adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
@@ -42,7 +41,7 @@ public class LikedAdapter extends RecyclerView.Adapter<LikedAdapter.LikedListVie
         final User user = userList.get(i);
         likedListViewHolder.txt_name.setText(user.getName());
         try {
-            Picasso.get().load(user.getImage()).placeholder(R.drawable.ic_defaut_img).into(likedListViewHolder.img_avatar);
+            Picasso.get().load(user.getImage()).placeholder(R.drawable.user).into(likedListViewHolder.img_avatar);
         }
         catch (Exception ex)
         {
@@ -54,7 +53,6 @@ public class LikedAdapter extends RecyclerView.Adapter<LikedAdapter.LikedListVie
             public void onClick(View v) {
                 Intent intent = new Intent(context, ThereProfileActivity.class);
                 intent.putExtra("uid", user.getUid());
-                intent.putExtra("fromHome", true);
                 context.startActivity(intent);
             }
         });

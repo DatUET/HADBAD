@@ -3,6 +3,9 @@ package com.example.hadad;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -58,6 +61,41 @@ public class LoginActivity extends AppCompatActivity {
 		addEvent();
 	}
 
+	private void addControl() {
+		//Actionbar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setTitle("Login");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+
+		//bật chế độ back
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
+
+		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+				.requestIdToken(LoginActivity.this.getResources().getString(R.string.default_web_client_id))
+				.requestEmail().build();
+
+		mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
+
+		emailEd = findViewById(R.id.emailEd);
+		passwordEd = findViewById(R.id.passwordEd);
+		btn_login = findViewById(R.id.btn_login);
+		not_have_account = findViewById(R.id.not_have_account);
+		recover_pass = findViewById(R.id.recover_pass);
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setCanceledOnTouchOutside(false);
+		btn_googlelogin = findViewById(R.id.btn_googlelogin);
+
+		SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
+		String emailLast = sharedPreferences.getString("EMAIL_LAST", "None");
+		if (!emailLast.equals("None"))
+		{
+			emailEd.setText(emailLast);
+		}
+
+		firebaseAuth = FirebaseAuth.getInstance();
+	}
+
 	private void addEvent() {
 		not_have_account.setOnClickListener(new View.OnClickListener() {
 			@Override
@@ -104,34 +142,6 @@ public class LoginActivity extends AppCompatActivity {
 		});
 	}
 
-
-	private void addControl() {
-		//Actionbar
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setTitle("Login");
-		//bật chế độ back
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-				.requestIdToken(LoginActivity.this.getResources().getString(R.string.default_web_client_id))
-				.requestEmail().build();
-
-		mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-		emailEd = findViewById(R.id.emailEd);
-		passwordEd = findViewById(R.id.passwordEd);
-		btn_login = findViewById(R.id.btn_login);
-		not_have_account = findViewById(R.id.not_have_account);
-		recover_pass = findViewById(R.id.recover_pass);
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
-		btn_googlelogin = findViewById(R.id.btn_googlelogin);
-
-
-		firebaseAuth = FirebaseAuth.getInstance();
-	}
-
 	@Override
 	public boolean onSupportNavigateUp() {
 		onBackPressed(); //quay lại acti trước
@@ -147,6 +157,10 @@ public class LoginActivity extends AppCompatActivity {
 					public void onComplete(@NonNull Task<AuthResult> task) {
 						if(task.isSuccessful()) {
 							progressDialog.dismiss();
+							SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
+							final SharedPreferences.Editor editor = sharedPreferences.edit();
+							editor.putString("EMAIL_LAST", emailEd.getText().toString());
+							editor.apply();
 							FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 							Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
 							startActivity(intent);

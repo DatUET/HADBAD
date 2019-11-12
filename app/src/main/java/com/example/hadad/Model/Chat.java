@@ -1,5 +1,12 @@
 package com.example.hadad.Model;
 
+/**
+ * Tạo đối tượng chat và các thuộc tính cho chat
+ * sender, reciver là ID của người gửi và người nhận
+ * message: Nội dung tin nhắn
+ * image, video: URL của ảnh hoặc video đã gửi
+ * isseen: check người dùng đã xem tin nhắn hay chưa
+ */
 public class Chat {
 	String sender, reciver, message, timestamp, image, video;
 	boolean isseen;

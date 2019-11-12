@@ -1,15 +1,15 @@
 package com.example.hadad.Model;
-
-import java.util.List;
-
+/**
+ * Đối tượng người dùng
+ */
 public class User {
 	private String email;
 	private String name;
-	private String uid;
+	private String uid; //id của người dùng do google Authentication tạo
 	private String phone;
-	private String image;
-	private String cover;
-	private String subscribers;
+	private String image; //URL của ảnh đại diện người dùng
+	private String cover; //URL của ảnh bìa
+	private String subscribers; // danh sách người dùng khác đang được theo dõi
 
 	public User(String email, String name, String uid, String phone, String image, String cover, String subscribers) {
 		this.email = email;

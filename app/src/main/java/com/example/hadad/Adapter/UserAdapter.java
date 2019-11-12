@@ -57,7 +57,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 		userViewHolder.txt_name.setText(name);
 		userViewHolder.txt_email.setText(email);
 		try {
-			Picasso.get().load(avatar).placeholder(R.drawable.ic_defaut_img).into(userViewHolder.img_avatar);
+			Picasso.get().load(avatar).placeholder(R.drawable.user).into(userViewHolder.img_avatar);
 		}
 		 catch (Exception ex)
 		 {

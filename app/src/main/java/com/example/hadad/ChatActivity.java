@@ -129,6 +129,92 @@ public class ChatActivity extends AppCompatActivity {
 		addEvent();
 	}
 
+	private void addControl() {
+		toolbar = findViewById(R.id.toolbar);
+		setSupportActionBar(toolbar);
+		toolbar.setTitle("");
+		recycler_chats = findViewById(R.id.recycler_chats);
+		img_avatar = findViewById(R.id.img_avatar);
+		txt_name = findViewById(R.id.txt_name);
+		txt_online = findViewById(R.id.txt_online);
+		txt_inputmes = findViewById(R.id.txt_inputmes);
+		btn_send = findViewById(R.id.btn_send);
+		btn_send_img = findViewById(R.id.btn_send_img);
+		btn_send_video = findViewById(R.id.btn_send_video);
+		img_chat = findViewById(R.id.img_chat);
+		img_delete = findViewById(R.id.img_delete);
+		img_delete_video = findViewById(R.id.img_delete_video);
+		layout_profile = findViewById(R.id.layout_profile);
+		layout_imgchat = findViewById(R.id.layout_imgchat);
+		layout_videochat = findViewById(R.id.layout_videochat);
+		video_chat = findViewById(R.id.video_chat);
+		listKeyChat = new ArrayList<>();
+		requestQueue = Volley.newRequestQueue(getApplicationContext());
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setCanceledOnTouchOutside(false);
+
+
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+		linearLayoutManager.setStackFromEnd(true);
+		recycler_chats.setHasFixedSize(true);
+		linearLayoutManager.setStackFromEnd(true);
+		recycler_chats.setLayoutManager(linearLayoutManager);
+
+
+		firebaseAuth = FirebaseAuth.getInstance();
+		Intent intent = getIntent();
+		uid = intent.getStringExtra("uid");
+		img_avatar.setTransitionName("transition" + uid);
+
+		firebaseDatabase = FirebaseDatabase.getInstance();
+		usersDbRef = firebaseDatabase.getReference("Users");
+
+		Query userQuery = usersDbRef.orderByChild("uid").equalTo(uid);
+		userQuery.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				for (DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					String name = snapshot.child("name").getValue() + "";
+					hisImage = snapshot.child("image").getValue() + "";
+					String onlineStatus = snapshot.child("onlineStatus").getValue() + "";
+					String typingStatus = snapshot.child("typingTo").getValue() + "";
+
+					txt_name.setText(name);
+					if (typingStatus.equals(myuid))
+					{
+						txt_online.setText("Typing...");
+					}
+					else {
+						if (onlineStatus.equals("online")) {
+							txt_online.setText(onlineStatus);
+						} else {
+							Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+							cal.setTimeInMillis(Long.parseLong(onlineStatus));
+							String dateTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
+							txt_online.setText("Log out at: " + dateTime);
+						}
+					}
+
+					try {
+						if(!TextUtils.isEmpty(hisImage)) {
+							Picasso.get().load(hisImage).placeholder(R.drawable.ic_default_img_white).into(img_avatar);
+						}
+					}
+					catch (Exception ex)
+					{
+
+					}
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+	}
+
 	private void addEvent() {
 
 		btn_send.setOnClickListener(new View.OnClickListener() {
@@ -307,92 +393,6 @@ public class ChatActivity extends AppCompatActivity {
 					recycler_chats.setAdapter(chatAdapter);
 				}
 
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
-	}
-
-	private void addControl() {
-		toolbar = findViewById(R.id.toolbar);
-		setSupportActionBar(toolbar);
-		toolbar.setTitle("");
-		recycler_chats = findViewById(R.id.recycler_chats);
-		img_avatar = findViewById(R.id.img_avatar);
-		txt_name = findViewById(R.id.txt_name);
-		txt_online = findViewById(R.id.txt_online);
-		txt_inputmes = findViewById(R.id.txt_inputmes);
-		btn_send = findViewById(R.id.btn_send);
-		btn_send_img = findViewById(R.id.btn_send_img);
-		btn_send_video = findViewById(R.id.btn_send_video);
-		img_chat = findViewById(R.id.img_chat);
-		img_delete = findViewById(R.id.img_delete);
-		img_delete_video = findViewById(R.id.img_delete_video);
-		layout_profile = findViewById(R.id.layout_profile);
-		layout_imgchat = findViewById(R.id.layout_imgchat);
-		layout_videochat = findViewById(R.id.layout_videochat);
-		video_chat = findViewById(R.id.video_chat);
-		listKeyChat = new ArrayList<>();
-		requestQueue = Volley.newRequestQueue(getApplicationContext());
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
-
-
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-		linearLayoutManager.setStackFromEnd(true);
-		recycler_chats.setHasFixedSize(true);
-		linearLayoutManager.setStackFromEnd(true);
-		recycler_chats.setLayoutManager(linearLayoutManager);
-
-
-		firebaseAuth = FirebaseAuth.getInstance();
-		Intent intent = getIntent();
-		uid = intent.getStringExtra("uid");
-		img_avatar.setTransitionName("transition" + uid);
-
-		firebaseDatabase = FirebaseDatabase.getInstance();
-		usersDbRef = firebaseDatabase.getReference("Users");
-
-		Query userQuery = usersDbRef.orderByChild("uid").equalTo(uid);
-		userQuery.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for (DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
-					String name = snapshot.child("name").getValue() + "";
-					hisImage = snapshot.child("image").getValue() + "";
-					String onlineStatus = snapshot.child("onlineStatus").getValue() + "";
-					String typingStatus = snapshot.child("typingTo").getValue() + "";
-
-					txt_name.setText(name);
-					if (typingStatus.equals(myuid))
-					{
-						txt_online.setText("Typing...");
-					}
-					else {
-						if (onlineStatus.equals("online")) {
-							txt_online.setText(onlineStatus);
-						} else {
-							Calendar cal = Calendar.getInstance(Locale.ENGLISH);
-							cal.setTimeInMillis(Long.parseLong(onlineStatus));
-							String dateTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
-							txt_online.setText("Log out at: " + dateTime);
-						}
-					}
-
-					try {
-						if(!TextUtils.isEmpty(hisImage)) {
-							Picasso.get().load(hisImage).placeholder(R.drawable.ic_default_img_white).into(img_avatar);
-						}
-					}
-					catch (Exception ex)
-					{
-
-					}
-				}
 			}
 
 			@Override

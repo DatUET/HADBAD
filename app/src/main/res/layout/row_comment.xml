@@ -6,9 +6,11 @@
     android:layout_height="wrap_content"
     android:layout_margin="1dp"
     app:contentPadding="2dp"
-    app:cardBackgroundColor="@color/colorWhite">
+    app:cardBackgroundColor="#1b1e44"
+    android:elevation="0dp">
 
     <RelativeLayout
+        android:id="@+id/layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -18,7 +20,7 @@
             android:layout_height="40dp"
             android:layout_marginEnd="5dp"
             android:layout_marginRight="5dp"
-            android:src="@drawable/ic_defaut_img"
+            android:src="@drawable/user"
             android:transitionName="transition"/>
 
         <TextView
@@ -26,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_toRightOf="@id/img_avatar"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:textSize="16sp"
             android:textStyle="bold"/>
 
@@ -37,15 +39,22 @@
             android:layout_toRightOf="@id/img_avatar"
             android:layout_toEndOf="@id/img_avatar"
             android:layout_below="@id/txt_name"
-            android:textColor="@color/colorBlack"/>
+            android:textColor="@color/colorWhite"/>
 
         <TextView
             android:id="@+id/txt_time"
+            android:textColor="#C4C4C4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@id/txt_comment"
             android:layout_toEndOf="@id/img_avatar"
             android:layout_toRightOf="@id/img_avatar"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/colorPrimaryDark"
+            android:layout_below="@id/txt_time"/>
 
     </RelativeLayout>
 

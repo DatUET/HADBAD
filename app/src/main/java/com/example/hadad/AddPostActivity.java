@@ -8,7 +8,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -74,6 +76,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * màn hình add post
+ */
 public class AddPostActivity extends AppCompatActivity {
 
 	private static final int CAMERA_REQUEST_CODE = 100;
@@ -96,7 +101,7 @@ public class AddPostActivity extends AppCompatActivity {
 	DatabaseReference reference;
 
 	String name, email, uid, dp;
-	String editTitle, editDescr, editImage, updateKey = "", editPostId = "", editMode = "";
+	String editTitle, editDescr, editImage, updateKey = "", editPostId = "", editMode = "", hostUid = "";
 	RecyclerView recycler_img_add_post;
 	Spinner sp_mode;
 	List<String> modeList;
@@ -119,7 +124,79 @@ public class AddPostActivity extends AppCompatActivity {
 		addControl();
 		addEvent();
 	}
+	private void addControl() {
+		actionBar = getSupportActionBar();
+		actionBar.setTitle("Add Post");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setDisplayShowHomeEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
 
+		txt_inputtitle = findViewById(R.id.txt_inputtitle);
+		txt_description = findViewById(R.id.txt_description);
+		//img_post = findViewById(R.id.img_post);
+		btn_upload = findViewById(R.id.btn_upload);
+		txt_add_img = findViewById(R.id.txt_add_img);
+		frame_img_post = findViewById(R.id.frame_img_post);
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setCanceledOnTouchOutside(false);
+		uriList = new ArrayList<>();
+		modeList = new ArrayList<>();
+		modeList.add("Publish");
+		modeList.add("Private");
+		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+		recycler_img_add_post.setHasFixedSize(true);
+		recycler_img_add_post.setLayoutManager(linearLayoutManager);
+		sp_mode = findViewById(R.id.sp_mode);
+		modeAdapter = new ArrayAdapter<>(AddPostActivity.this, R.layout.spiner_layout, modeList);
+		modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		sp_mode.setAdapter(modeAdapter);
+		requestQueue = Volley.newRequestQueue(getApplicationContext());
+
+		cameraPermission = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+		storagePermisstion = new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+		firebaseAuth = FirebaseAuth.getInstance();
+		checkUserStatus();
+
+		Intent intent = getIntent();
+		updateKey = intent.getStringExtra("key");
+		editPostId = intent.getStringExtra("editPostId");
+
+		if(updateKey.equals("editPost"))
+		{
+			actionBar.setTitle("Edit Post");
+			btn_upload.setText("Update");
+			loadPostData(editPostId);
+		}
+		else
+		{
+			actionBar.setTitle("Add Post");
+			btn_upload.setText("Upload");
+		}
+		actionBar.setSubtitle(email);
+
+		reference = FirebaseDatabase.getInstance().getReference("Users");
+		Query query = reference.orderByChild("email").equalTo(email);
+		query.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				for(DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					name = snapshot.child("name").getValue() + "";
+					email = snapshot.child("email").getValue() + "";
+					dp = snapshot.child("image").getValue() + "";
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+
+	}
+	// xử lý sự kiện
 	private void addEvent() {
 
 		txt_add_img.setOnClickListener(new View.OnClickListener() {
@@ -237,9 +314,11 @@ public class AddPostActivity extends AppCompatActivity {
 						Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
 					}
 				});
-		for (String item : arrCurrentImg) {
-			StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(item);
-			storageReference.delete();
+		if(uid.equals(hostUid)) {
+			for (String item : arrCurrentImg) {
+				StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(item);
+				storageReference.delete();
+			}
 		}
 	}
 
@@ -337,11 +416,14 @@ public class AddPostActivity extends AppCompatActivity {
 								}
 							});
 			}
-		for (String item : arrCurrentImg) {
-			StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(item);
-			ref.delete();
-		}
+			if(uid.equals(hostUid)) {
+				for (String item : arrCurrentImg) {
+					StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(item);
+					ref.delete();
+				}
+			}
 	}
+
 	private void updateWithNowImage(final String title, final String description, final String editPostId) {
 		final String timestamp = String.valueOf(System.currentTimeMillis());
 			n = 0;
@@ -576,79 +658,6 @@ public class AddPostActivity extends AppCompatActivity {
 		});
 	}
 
-
-	private void addControl() {
-		actionBar = getSupportActionBar();
-		actionBar.setTitle("Add Post");
-		actionBar.setDisplayShowHomeEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		txt_inputtitle = findViewById(R.id.txt_inputtitle);
-		txt_description = findViewById(R.id.txt_description);
-		//img_post = findViewById(R.id.img_post);
-		btn_upload = findViewById(R.id.btn_upload);
-		txt_add_img = findViewById(R.id.txt_add_img);
-		frame_img_post = findViewById(R.id.frame_img_post);
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
-		uriList = new ArrayList<>();
-		modeList = new ArrayList<>();
-		modeList.add("Publish");
-		modeList.add("Private");
-		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-		recycler_img_add_post.setHasFixedSize(true);
-		recycler_img_add_post.setLayoutManager(linearLayoutManager);
-		sp_mode = findViewById(R.id.sp_mode);
-		modeAdapter = new ArrayAdapter<>(AddPostActivity.this, android.R.layout.simple_spinner_item, modeList);
-		modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-		sp_mode.setAdapter(modeAdapter);
-		requestQueue = Volley.newRequestQueue(getApplicationContext());
-
-		cameraPermission = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-		storagePermisstion = new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
-
-		firebaseAuth = FirebaseAuth.getInstance();
-		checkUserStatus();
-
-		Intent intent = getIntent();
-		updateKey = intent.getStringExtra("key");
-		editPostId = intent.getStringExtra("editPostId");
-
-		if(updateKey.equals("editPost"))
-		{
-			actionBar.setTitle("Edit Post");
-			btn_upload.setText("Update");
-			loadPostData(editPostId);
-		}
-		else
-		{
-			actionBar.setTitle("Add Post");
-			btn_upload.setText("Upload");
-		}
-		actionBar.setSubtitle(email);
-
-		reference = FirebaseDatabase.getInstance().getReference("Users");
-		Query query = reference.orderByChild("email").equalTo(email);
-		query.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
-					name = snapshot.child("name").getValue() + "";
-					email = snapshot.child("email").getValue() + "";
-					dp = snapshot.child("image").getValue() + "";
-				}
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
-
-	}
-
 	private void loadPostData(final String editPostId) {
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("pId").equalTo(editPostId);
@@ -661,6 +670,7 @@ public class AddPostActivity extends AppCompatActivity {
 					editDescr = snapshot.child("pDescr").getValue() + "";
 					editImage = snapshot.child("pImage").getValue() + "";
 					editMode = snapshot.child("pMode").getValue() + "";
+					hostUid = snapshot.child("hostUid").getValue() + "";
 
 					txt_inputtitle.setText(editTitle);
 					txt_description.setText(editDescr);
@@ -760,6 +770,7 @@ public class AddPostActivity extends AppCompatActivity {
 		boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
 		return result && result1;
 	}
+
 	private void requestCameraPermission()
 	{
 		ActivityCompat.requestPermissions(this,cameraPermission, CAMERA_REQUEST_CODE);

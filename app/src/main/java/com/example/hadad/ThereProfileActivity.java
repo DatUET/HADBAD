@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -72,6 +73,87 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 		addControl();
 		addEvent();
+	}
+
+	private void addControl() {
+
+		recycler_post = findViewById(R.id.recycler_post);
+		firebaseAuth = FirebaseAuth.getInstance();
+
+		actionBar = getSupportActionBar();
+		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
+		actionBar.setTitle("");
+		actionBar.setDisplayShowHomeEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
+
+		img_avatar = findViewById(R.id.img_avatar);
+		img_cover = findViewById(R.id.img_cover);
+		txt_name = findViewById(R.id.txt_name);
+		txt_email = findViewById(R.id.txt_email);
+		txt_phone = findViewById(R.id.txt_phone);
+		layout_profile = findViewById(R.id.layout_profile);
+		btn_chat = findViewById(R.id.btn_chat);
+		btn_call_phone = findViewById(R.id.btn_call_phone);
+		btn_subscribe = findViewById(R.id.btn_subscribe);
+
+		Intent intent = getIntent();
+		uid = intent.getStringExtra("uid");
+		boolean fromUsers = intent.getBooleanExtra("fromUsers", false);
+		if(fromUsers)
+		{
+			img_avatar.setTransitionName("transitionUsers");
+		}
+		else
+		{
+			img_avatar.setTransitionName("transition");
+		}
+		postList = new ArrayList<>();
+
+		Query query = FirebaseDatabase.getInstance().getReference("Users").orderByChild("uid").equalTo(uid);
+
+		query.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				Log.d("user profile", dataSnapshot.toString());
+				for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+					String name = snapshot.child("name").getValue() + "";
+					String email = snapshot.child("email").getValue() + "";
+					String phone = snapshot.child("phone").getValue() + "";
+					imgavarta = snapshot.child("image").getValue() + "";
+					imgcover = snapshot.child("cover").getValue() + "";
+
+
+					txt_name.setText(name);
+					txt_email.setText(email);
+					txt_phone.setText(phone);
+
+					Log.d("user profile", name + " " + email);
+
+					try {
+						Picasso.get().load(imgavarta).into(img_avatar);
+					}
+					catch (Exception ex)
+					{
+						//Picasso.get().load(R.drawable.ic_defaut_avatar).into(img_avatar);
+					}
+					try {
+						Picasso.get().load(imgcover).into(img_cover);
+					}
+					catch (Exception ex)
+					{
+
+					}
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+
+		checkUserStatus();
+		loadHisPost();
 	}
 
 	private void addEvent() {
@@ -258,87 +340,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 		}
 	}
 
-	private void addControl() {
-
-		recycler_post = findViewById(R.id.recycler_post);
-		firebaseAuth = FirebaseAuth.getInstance();
-
-		actionBar = getSupportActionBar();
-		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
-		actionBar.setTitle("Profile");
-		actionBar.setDisplayShowHomeEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		img_avatar = findViewById(R.id.img_avatar);
-		img_cover = findViewById(R.id.img_cover);
-		txt_name = findViewById(R.id.txt_name);
-		txt_email = findViewById(R.id.txt_email);
-		txt_phone = findViewById(R.id.txt_phone);
-		layout_profile = findViewById(R.id.layout_profile);
-		btn_chat = findViewById(R.id.btn_chat);
-		btn_call_phone = findViewById(R.id.btn_call_phone);
-		btn_subscribe = findViewById(R.id.btn_subscribe);
-
-		Intent intent = getIntent();
-		uid = intent.getStringExtra("uid");
-		boolean fromUsers = intent.getBooleanExtra("fromUsers", false);
-		if(fromUsers)
-		{
-			img_avatar.setTransitionName("transitionUsers");
-		}
-		else
-		{
-			img_avatar.setTransitionName("transition");
-		}
-		postList = new ArrayList<>();
-
-		Query query = FirebaseDatabase.getInstance().getReference("Users").orderByChild("uid").equalTo(uid);
-
-		query.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				Log.d("user profile", dataSnapshot.toString());
-				for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
-					String name = snapshot.child("name").getValue() + "";
-					String email = snapshot.child("email").getValue() + "";
-					String phone = snapshot.child("phone").getValue() + "";
-					imgavarta = snapshot.child("image").getValue() + "";
-					imgcover = snapshot.child("cover").getValue() + "";
-
-
-					txt_name.setText(name);
-					txt_email.setText(email);
-					txt_phone.setText(phone);
-
-					Log.d("user profile", name + " " + email);
-
-					try {
-						Picasso.get().load(imgavarta).into(img_avatar);
-					}
-					catch (Exception ex)
-					{
-						//Picasso.get().load(R.drawable.ic_defaut_avatar).into(img_avatar);
-					}
-					try {
-						Picasso.get().load(imgcover).into(img_cover);
-					}
-					catch (Exception ex)
-					{
-
-					}
-				}
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
-
-		checkUserStatus();
-		loadHisPost();
-	}
-
 	private void loadHisPost() {
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ThereProfileActivity.this);
 		linearLayoutManager.setStackFromEnd(true);
@@ -443,7 +444,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 		}
 	}
 
-
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		getMenuInflater().inflate(R.menu.menu_main, menu);
@@ -451,6 +451,8 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
@@ -470,10 +472,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 				if(!TextUtils.isEmpty(s))
 				{
 					searchHisPost(s);
-				}
-				else
-				{
-					loadHisPost();
 				}
 				return false;
 			}

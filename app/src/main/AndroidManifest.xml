@@ -18,10 +18,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".SettingActivity"></activity>
+        <activity android:name=".SettingActivity"
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".VideoViewActivity"
             android:label=""
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Design.NoActionBar" />
         <activity
             android:name=".ListLikedActivity"
@@ -29,16 +31,20 @@
             android:theme="@style/Base.Theme.AppCompat.Dialog" />
         <activity
             android:name=".SplashActivity"
-            android:theme="@style/AppThemeNo" />
-        <activity android:name=".DashBoardActivity">
+            android:theme="@style/AppThemeNo"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".DashBoardActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".RegisterActivity" />
-        <activity android:name=".LoginActivity" />
+        <activity android:name=".RegisterActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".LoginActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".MainActivity"
             android:screenOrientation="portrait"
@@ -46,13 +52,18 @@
         <activity
             android:name=".ImagePostActivity"
             android:label=""
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.Design.NoActionBar" />
-        <activity android:name=".PostDetailActivity" />
-        <activity android:name=".ThereProfileActivity" />
-        <activity android:name=".AddPostActivity" />
+        <activity android:name=".PostDetailActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".ThereProfileActivity"
+            android:screenOrientation="portrait"/>
+        <activity android:name=".AddPostActivity"
+            android:screenOrientation="portrait"/>
         <activity
             android:name=".ChatActivity"
-            android:theme="@style/AppThemeNo" />
+            android:theme="@style/AppThemeNo"
+            android:screenOrientation="portrait"/>
 
         <service
             android:name=".Notification.FirebaseMessaging"

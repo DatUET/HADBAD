@@ -3,18 +3,22 @@
 
     <item android:id="@+id/it_home"
         android:title="Home"
-        android:icon="@drawable/ic_home_black"/>
+        android:icon="@drawable/ic_home_white"
+        android:iconTint="#ADADAD"/>
 
     <item android:id="@+id/it_profile"
         android:title="Profile"
-        android:icon="@drawable/ic_profile_black"/>
+        android:icon="@drawable/ic_profile_white"
+        android:iconTint="#ADADAD"/>
 
     <item android:id="@+id/it_users"
         android:title="Users"
-        android:icon="@drawable/ic_users_black"/>
+        android:icon="@drawable/ic_users_white"
+        android:iconTint="#ADADAD"/>
 
     <item android:id="@+id/it_chat"
         android:title="Chats"
-        android:icon="@drawable/ic_chat"/>
+        android:icon="@drawable/ic_chat_white"
+        android:iconTint="#ADADAD"/>
 
 </menu>

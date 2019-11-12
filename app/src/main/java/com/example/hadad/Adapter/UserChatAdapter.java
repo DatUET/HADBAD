@@ -73,7 +73,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		userChatViewHolder.txt_email.setText(email);
 		userChatViewHolder.img_avatar.setTransitionName("transition" + uid);
 		try {
-			Picasso.get().load(avatar).placeholder(R.drawable.ic_defaut_img).into(userChatViewHolder.img_avatar);
+			Picasso.get().load(avatar).placeholder(R.drawable.user).into(userChatViewHolder.img_avatar);
 		}
 		catch (Exception ex)
 		{
@@ -96,7 +96,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		readLastMsg(uid, userChatViewHolder.txt_last_msg, userChatViewHolder.txt_check_seen, userChatViewHolder.img_dot_new_msg);
 		setOnline(uid, userChatViewHolder.img_online);
 	}
-
+	// check ng dùng có online hay ko
 	private void setOnline(String uid, final ImageView img_online) {
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(uid).child("onlineStatus");
 		databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -120,6 +120,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		});
 	}
 
+	// lấy tin nhắn cuối cùng
 	private void readLastMsg(final String uid, final TextView txt_last_msg, final TextView txt_check_seen, final CircularImageView img_dot_new_msg) {
 		if(reference != null) {
 			reference.addValueEventListener(new ValueEventListener() {
@@ -132,7 +133,17 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 							lastChat = chat;
 						}
 					}
-					txt_last_msg.setText(lastChat.getMessage());
+					if(!lastChat.getImage().equals("noImage"))
+					{
+						txt_last_msg.setText("This is a image");
+					}
+					else if(!lastChat.getVideo().equals("noVideo"))
+					{
+						txt_last_msg.setText("This is a video");
+					}
+					else {
+						txt_last_msg.setText(lastChat.getMessage());
+					}
 					if (lastChat.getSender().equals(myuid) && lastChat.isIsseen()) {
 
 						txt_check_seen.setVisibility(View.VISIBLE);

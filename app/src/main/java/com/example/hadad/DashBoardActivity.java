@@ -3,8 +3,6 @@ package com.example.hadad;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -12,10 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
 
 import com.example.hadad.Notification.Token;
 import com.google.firebase.auth.FirebaseAuth;
@@ -45,6 +40,26 @@ public class DashBoardActivity extends AppCompatActivity {
 
 		addControl();
 		addEvent();
+	}
+
+	private void addControl() {
+		//Actionbar
+		actionBar = getSupportActionBar();
+		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
+
+		navigation =findViewById(R.id.navigation);
+
+		firebaseAuth = FirebaseAuth.getInstance();
+
+		actionBar.setTitle("");
+		HomeFragment homeFragment = new HomeFragment();
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.replace(R.id.content, homeFragment);
+		transaction.commit();
+
+		checkUserStatus();
+
+
 	}
 
 	private void addEvent() {
@@ -95,26 +110,6 @@ public class DashBoardActivity extends AppCompatActivity {
 		});
 	}
 
-	private void addControl() {
-		//Actionbar
-		actionBar = getSupportActionBar();
-		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
-
-		navigation =findViewById(R.id.navigation);
-
-		firebaseAuth = FirebaseAuth.getInstance();
-
-		actionBar.setTitle("");
-		HomeFragment homeFragment = new HomeFragment();
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-		transaction.replace(R.id.content, homeFragment);
-		transaction.commit();
-
-		checkUserStatus();
-
-
-	}
-
 	private void updateToken(String token) {
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Tokens");
 		Token mToken = new Token(token);
@@ -135,7 +130,6 @@ public class DashBoardActivity extends AppCompatActivity {
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 					name = dataSnapshot.getValue(String.class);
 					editor.putString("Current_USER", mUid);
-					editor.putString("Current_USER_Name", name);
 					editor.apply();
 				}
 

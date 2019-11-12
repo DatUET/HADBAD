@@ -1,12 +1,15 @@
 package com.example.hadad;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.widget.CompoundButton;
 
@@ -25,6 +28,7 @@ import java.util.List;
 public class SettingActivity extends AppCompatActivity {
 
 	SwitchCompat sw_post;
+	ActionBar actionBar;
 	RecyclerView recycler_user_post;
 	List<User> userList;
 	UserListPostNotiAdapter userListPostNotiAdapter;
@@ -42,6 +46,28 @@ public class SettingActivity extends AppCompatActivity {
 
 		addControl();
 		addEvent();
+	}
+
+	private void addControl() {
+		actionBar = getSupportActionBar();
+		actionBar.setTitle("Setting");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+
+		//bật chế độ back
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
+		sw_post = findViewById(R.id.sw_post);
+		recycler_user_post = findViewById(R.id.recycler_user_post);
+		preferences = getSharedPreferences("NotiPost", MODE_PRIVATE);
+		enable4NewPost = preferences.getBoolean(TOPIC_POST_NOTI, false);
+		sw_post.setChecked(enable4NewPost);
+		userList = new ArrayList<>();
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+		recycler_user_post.setLayoutManager(linearLayoutManager);
+		if(enable4NewPost)
+		{
+			addListUser();
+		}
 	}
 
 	private void addEvent() {
@@ -110,18 +136,9 @@ public class SettingActivity extends AppCompatActivity {
 		});
 	}
 
-	private void addControl() {
-		sw_post = findViewById(R.id.sw_post);
-		recycler_user_post = findViewById(R.id.recycler_user_post);
-		preferences = getSharedPreferences("NotiPost", MODE_PRIVATE);
-		enable4NewPost = preferences.getBoolean(TOPIC_POST_NOTI, false);
-		sw_post.setChecked(enable4NewPost);
-		userList = new ArrayList<>();
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-		recycler_user_post.setLayoutManager(linearLayoutManager);
-		if(enable4NewPost)
-		{
-			addListUser();
-		}
+	@Override
+	public boolean onSupportNavigateUp() {
+		onBackPressed();
+		return super.onSupportNavigateUp();
 	}
 }

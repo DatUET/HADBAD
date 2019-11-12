@@ -24,13 +24,14 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_collapseMode="parallax">
+            app:layout_collapseMode="parallax"
+            android:background="#1b1e44">
 
             <ImageView
                 android:id="@+id/img_cover"
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
-                android:background="@color/colorPrimaryDark"
+                android:background="#282E74"
                 android:scaleType="fitXY"/>
 
             <FrameLayout
@@ -40,6 +41,7 @@
                 android:layout_marginTop="100dp">
 
                 <LinearLayout
+                    android:id="@+id/layout_profile"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
@@ -74,7 +76,7 @@
                     android:layout_width="120dp"
                     android:layout_height="120dp"
                     android:background="@null"
-                    android:src="@drawable/ic_defaut_img"
+                    android:src="@drawable/user"
                     android:padding="5dp"
                     android:layout_marginStart="20dp"
                     android:transitionName="transition"/>
@@ -89,7 +91,8 @@
         android:id="@+id/recycler_post"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
+        android:background="#1b1e44">
     </androidx.recyclerview.widget.RecyclerView>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton

@@ -18,7 +18,7 @@
             android:layout_width="50dp"
             android:layout_height="50dp"
             app:c_border_color="@null"
-            android:src="@drawable/ic_defaut_img"/>
+            android:src="@drawable/user"/>
 
         <TextView
             android:id="@+id/txt_message"
@@ -35,7 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="12sp"
-            android:textColor="@color/colorBlack"/>
+            android:textColor="#C4C4C4"/>
 
     </LinearLayout>
     <androidx.cardview.widget.CardView

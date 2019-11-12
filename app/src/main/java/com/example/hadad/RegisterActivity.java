@@ -2,6 +2,8 @@ package com.example.hadad;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -48,7 +50,29 @@ public class RegisterActivity extends AppCompatActivity {
 		addControl();
 		addEvent();
 
+	}
 
+	private void addControl() {
+		//Actionbar
+		ActionBar actionBar = getSupportActionBar();
+		actionBar.setTitle("Create Account");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+
+		//bật chế độ back
+		actionBar.setDisplayHomeAsUpEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
+
+		emailEd = findViewById(R.id.emailEd);
+		passwordEd = findViewById(R.id.passwordEd);
+		firstNameEd = findViewById(R.id.firstNameEd);
+		lastNameNameEd = findViewById(R.id.lastNameNameEd);
+		phoneEd = findViewById(R.id.phoneEd);
+		btn_register = findViewById(R.id.btn_register);
+		have_account = findViewById(R.id.have_account);
+		firebaseAuth = FirebaseAuth.getInstance();
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setMessage("Registing User...\nPlease wait");
+		progressDialog.setCanceledOnTouchOutside(false);
 	}
 
 	private void addEvent() {
@@ -135,28 +159,6 @@ public class RegisterActivity extends AppCompatActivity {
 
 			}
 		});
-	}
-
-
-	private void addControl() {
-		//Actionbar
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setTitle("Create Account");
-		//bật chế độ back
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		emailEd = findViewById(R.id.emailEd);
-		passwordEd = findViewById(R.id.passwordEd);
-		firstNameEd = findViewById(R.id.firstNameEd);
-		lastNameNameEd = findViewById(R.id.lastNameNameEd);
-		phoneEd = findViewById(R.id.phoneEd);
-		btn_register = findViewById(R.id.btn_register);
-		have_account = findViewById(R.id.have_account);
-		firebaseAuth = FirebaseAuth.getInstance();
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Registing User...\nPlease wait");
-		progressDialog.setCanceledOnTouchOutside(false);
 	}
 
 	@Override
