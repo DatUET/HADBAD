@@ -2,6 +2,8 @@ package com.example.hadad;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -142,6 +144,8 @@ public class RegisterActivity extends AppCompatActivity {
 		//Actionbar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle("Create Account");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+
 		//bật chế độ back
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);

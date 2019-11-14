@@ -153,7 +153,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		}
 
 		try {
-			Picasso.get().load(uDp).placeholder(R.drawable.ic_defaut_img).into(postViewHolder.img_avatar);
+			Picasso.get().load(uDp).placeholder(R.drawable.user).into(postViewHolder.img_avatar);
 		}
 		catch (Exception ex)
 		{

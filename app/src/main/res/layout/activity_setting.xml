@@ -6,7 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SettingActivity">
+    tools:context=".SettingActivity"
+    android:background="#1b1e44">
 
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/sw_post"
@@ -16,12 +17,13 @@
         android:textSize="17sp"
         android:textStyle="bold"
         android:paddingLeft="10dp"
-        android:textColor="@color/colorBlack"/>
+        android:textColor="@color/colorWhite" />
 
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_user_post"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="#1b1e44"/>
 
 </LinearLayout>

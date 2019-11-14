@@ -6,20 +6,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".AddPostActivity"
-    >
+    android:background="#1b1e44">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:background="#1b1e44">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Tile: "
             android:textSize="18sp"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:paddingLeft="10dp"
             android:paddingBottom="5dp"/>
 
@@ -30,14 +31,15 @@
             android:padding="10dp"
             android:hint="Enter title"
             android:singleLine="true"
-            android:background="@drawable/editextstyle"/>
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/editextchat"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Description: "
             android:textSize="18sp"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:paddingLeft="10dp"
             android:paddingTop="10dp"
             android:paddingBottom="5dp"/>
@@ -51,7 +53,8 @@
             android:inputType="textCapSentences|textMultiLine"
             android:gravity="start"
             android:singleLine="true"
-            android:background="@drawable/editextstyle"/>
+            android:textColor="@color/colorWhite"
+            android:background="@drawable/editextchat"/>
 
         <TextView
             android:id="@+id/txt_add_img"
@@ -61,7 +64,7 @@
             android:text="Add Photo"
             android:layout_marginTop="10dp"
             android:textSize="20sp"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorWhite" />
 
         <LinearLayout
             android:id="@+id/frame_img_post"
@@ -84,7 +87,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
-            android:background="@drawable/editextstyle"
+            android:background="@drawable/editextchat"
             android:padding="5dp" />
 
         <Button

@@ -17,7 +17,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 public class SplashActivity extends AppCompatActivity {
     VideoView video_background;
-    TextView txt_name;
     MediaPlayer mediaPlayer;
     FirebaseUser firebaseUser;
     Animation uptodown;
@@ -42,10 +41,6 @@ public class SplashActivity extends AppCompatActivity {
             uptodown = AnimationUtils.loadAnimation(this, R.anim.uptodown);
             img_logo.setAnimation(uptodown);
             video_background = findViewById(R.id.video_background);
-            txt_name = findViewById(R.id.txt_name);
-            SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
-            String name = sharedPreferences.getString("Current_USER_Name", "None");
-            txt_name.setText(name);
 
             video_background.setVideoPath("android.resource://" + getPackageName() + "/" + R.raw.videoback2);
             video_background.requestFocus();
@@ -64,7 +59,7 @@ public class SplashActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(1200);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }

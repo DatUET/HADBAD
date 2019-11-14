@@ -3,8 +3,6 @@ package com.example.hadad;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
-import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -12,10 +10,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.WindowManager;
 
 import com.example.hadad.Notification.Token;
 import com.google.firebase.auth.FirebaseAuth;
@@ -135,7 +130,6 @@ public class DashBoardActivity extends AppCompatActivity {
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 					name = dataSnapshot.getValue(String.class);
 					editor.putString("Current_USER", mUid);
-					editor.putString("Current_USER_Name", name);
 					editor.apply();
 				}
 

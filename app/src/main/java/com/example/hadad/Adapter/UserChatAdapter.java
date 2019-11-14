@@ -73,7 +73,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		userChatViewHolder.txt_email.setText(email);
 		userChatViewHolder.img_avatar.setTransitionName("transition" + uid);
 		try {
-			Picasso.get().load(avatar).placeholder(R.drawable.ic_defaut_img).into(userChatViewHolder.img_avatar);
+			Picasso.get().load(avatar).placeholder(R.drawable.user).into(userChatViewHolder.img_avatar);
 		}
 		catch (Exception ex)
 		{
@@ -132,7 +132,17 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 							lastChat = chat;
 						}
 					}
-					txt_last_msg.setText(lastChat.getMessage());
+					if(!lastChat.getImage().equals("noImage"))
+					{
+						txt_last_msg.setText("This is a image");
+					}
+					else if(!lastChat.getVideo().equals("noVideo"))
+					{
+						txt_last_msg.setText("This is a video");
+					}
+					else {
+						txt_last_msg.setText(lastChat.getMessage());
+					}
 					if (lastChat.getSender().equals(myuid) && lastChat.isIsseen()) {
 
 						txt_check_seen.setVisibility(View.VISIBLE);

@@ -3,6 +3,9 @@ package com.example.hadad;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -109,6 +112,8 @@ public class LoginActivity extends AppCompatActivity {
 		//Actionbar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle("Login");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+
 		//bật chế độ back
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
@@ -128,6 +133,12 @@ public class LoginActivity extends AppCompatActivity {
 		progressDialog.setCanceledOnTouchOutside(false);
 		btn_googlelogin = findViewById(R.id.btn_googlelogin);
 
+		SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
+		String emailLast = sharedPreferences.getString("EMAIL_LAST", "None");
+		if (!emailLast.equals("None"))
+		{
+			emailEd.setText(emailLast);
+		}
 
 		firebaseAuth = FirebaseAuth.getInstance();
 	}
@@ -147,6 +158,10 @@ public class LoginActivity extends AppCompatActivity {
 					public void onComplete(@NonNull Task<AuthResult> task) {
 						if(task.isSuccessful()) {
 							progressDialog.dismiss();
+							SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
+							final SharedPreferences.Editor editor = sharedPreferences.edit();
+							editor.putString("EMAIL_LAST", emailEd.getText().toString());
+							editor.apply();
 							FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 							Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
 							startActivity(intent);

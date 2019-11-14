@@ -7,7 +7,7 @@
     app:cardUseCompatPadding="true"
     app:cardCornerRadius="2dp"
     app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/colorWhite"
+    app:cardBackgroundColor="@color/colorPrimaryDark"
     app:contentPadding="3dp">
 
 
@@ -21,7 +21,7 @@
             android:id="@+id/img_avatar"
             android:layout_width="70dp"
             android:layout_height="70dp"
-            android:src="@drawable/ic_defaut_img"/>
+            android:src="@drawable/user"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -34,12 +34,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="18sp"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorWhite"/>
 
             <TextView
                 android:id="@+id/txt_email"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                android:textColor="#C4C4C4"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -50,7 +51,7 @@
                     android:id="@+id/txt_last_msg"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorBlack"
+                    android:textColor="@color/colorWhite"
                     android:maxLines="1"
                     android:layout_weight="1"/>
 
@@ -62,7 +63,8 @@
                     android:text="Seen"
                     android:paddingLeft="5dp"
                     android:paddingRight="5dp"
-                    android:visibility="gone"/>
+                    android:visibility="gone"
+                    android:textColor="#C4C4C4"/>
 
                 <com.blogspot.atifsoftwares.circularimageview.CircularImageView
                     android:id="@+id/img_dot_new_msg"

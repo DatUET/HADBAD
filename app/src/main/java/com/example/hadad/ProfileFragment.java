@@ -8,6 +8,7 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -646,6 +647,8 @@ public class ProfileFragment extends Fragment {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {

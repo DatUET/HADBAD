@@ -42,7 +42,7 @@ public class LikedAdapter extends RecyclerView.Adapter<LikedAdapter.LikedListVie
         final User user = userList.get(i);
         likedListViewHolder.txt_name.setText(user.getName());
         try {
-            Picasso.get().load(user.getImage()).placeholder(R.drawable.ic_defaut_img).into(likedListViewHolder.img_avatar);
+            Picasso.get().load(user.getImage()).placeholder(R.drawable.user).into(likedListViewHolder.img_avatar);
         }
         catch (Exception ex)
         {

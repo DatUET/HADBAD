@@ -6,16 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".UsersFragment"
-    android:background="#666D6C6C">
+    android:background="#1b1e44">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#1b1e44">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recycler_users"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
+            android:layout_height="match_parent"
+            android:background="#1b1e44"/>
 
     </androidx.core.widget.NestedScrollView>
 

@@ -4,29 +4,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true"
+    app:cardElevation="0dp"
     android:background="@drawable/recycler_custom"
-    app:cardBackgroundColor="@color/colorWhite">
+    app:cardBackgroundColor="#1b1e44">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginLeft="3dp"
-        android:layout_marginRight="3dp">
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp">
 
             <com.blogspot.atifsoftwares.circularimageview.CircularImageView
                 android:id="@+id/img_avatar"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:scaleType="centerCrop"
-                android:src="@drawable/ic_defaut_img"
+                android:src="@drawable/user"
                 />
 
             <LinearLayout
@@ -40,9 +42,9 @@
                     android:id="@+id/txt_name"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorBlack"
+                    android:textColor="@color/colorWhite"
                     android:textStyle="bold"
-                    android:textSize="18sp"/>
+                    android:textSize="18sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -52,7 +54,8 @@
                     <TextView
                         android:id="@+id/txt_time"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
+                        android:layout_height="wrap_content"
+                        android:textColor="#C4C4C4"/>
 
                     <ImageView
                         android:id="@+id/img_mode"
@@ -78,7 +81,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginLeft="5dp">
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="3dp">
 
             <TextView
                 android:id="@+id/txt_title"
@@ -86,7 +90,8 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:autoLink="all"/>
+                android:autoLink="all"
+                android:textColor="@color/colorWhite"/>
 
             <TextView
                 android:id="@+id/txt_description"
@@ -94,7 +99,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                android:textColor="@color/colorBlack"
+                android:textColor="#C4C4C4"
                 android:autoLink="all"/>
 
             <androidx.viewpager.widget.ViewPager
@@ -103,7 +108,7 @@
                 android:layout_height="350dp"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"
-                android:background="@color/colorWhite"
+                android:background="#1b1e44"
                 android:visibility="gone"/>
 
         </LinearLayout>
@@ -111,6 +116,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
             android:orientation="horizontal">
 
             <TextView
@@ -133,11 +140,13 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#F5F0F0"/>
+            android:background="#1b1e44"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="3dp"
+            android:layout_marginRight="3dp"
             android:orientation="horizontal"
             android:gravity="center">
 
@@ -148,9 +157,10 @@
                 android:layout_weight="1"
                 android:text="Like"
                 android:textAllCaps="false"
-                android:background="@color/colorWhite"
+                android:background="#1b1e44"
                 android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_like_black" />
+                android:drawableStart="@drawable/ic_like_black"
+                android:textColor="@color/colorWhite"/>
 
             <Button
                 android:id="@+id/btn_comment"
@@ -159,9 +169,10 @@
                 android:layout_weight="1"
                 android:text="Comment"
                 android:textAllCaps="false"
-                android:background="@color/colorWhite"
+                android:background="#1b1e44"
                 android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_comment_black"/>
+                android:drawableStart="@drawable/ic_comment_black"
+                android:textColor="@color/colorWhite"/>
 
             <Button
                 android:id="@+id/btn_share"
@@ -170,12 +181,17 @@
                 android:layout_weight="1"
                 android:text="Share"
                 android:textAllCaps="false"
-                android:background="@color/colorWhite"
+                android:background="#1b1e44"
                 android:drawableStart="@drawable/ic_share_black"
-                android:drawablePadding="5dp"/>
+                android:drawablePadding="5dp"
+                android:textColor="@color/colorWhite"/>
 
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:background="@color/colorPrimaryDark" />
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>

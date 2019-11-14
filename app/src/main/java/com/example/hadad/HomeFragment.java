@@ -1,8 +1,10 @@
 package com.example.hadad;
 
 
+import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +23,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -46,7 +49,6 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-	final static int ITEM_LOAD_MORE = 20;
 
 	FirebaseAuth firebaseAuth;
 	RecyclerView recycler_post;
@@ -54,13 +56,7 @@ public class HomeFragment extends Fragment {
 	PostAdapter postAdapter;
 	ProgressBar prg_load;
 	FrameLayout frame_home;
-	SwipeRefreshLayout sr_reload;
-	Query query;
-
-
-	boolean isLoading = false, isMaxData = false;
-	String lastNode = "", lastKey = "";
-
+	ActionBar actionBar;
 
 	public HomeFragment() {
 		// Required empty public constructor
@@ -76,8 +72,6 @@ public class HomeFragment extends Fragment {
 		firebaseAuth = FirebaseAuth.getInstance();
 		prg_load = view.findViewById(R.id.prg_load);
 		frame_home = view.findViewById(R.id.frame_home);
-		sr_reload = view.findViewById(R.id.sr_reload);
-		getLastKeyPost();
 		recycler_post = view.findViewById(R.id.recycler_post);
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 		linearLayoutManager.setStackFromEnd(true);
@@ -87,105 +81,32 @@ public class HomeFragment extends Fragment {
 
 		loadPost();
 
-		sr_reload.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-			@Override
-			public void onRefresh() {
-				isMaxData = false;
-				lastNode = postList.get(postList.size() - 1).getpTime();
-				postList.remove(postList.size() - 1);
-				postAdapter.notifyDataSetChanged();
-				getLastKeyPost();
-				loadPost();
-			}
-		});
-
 		return view;
 	}
 
-	private void getLastKeyPost() {
-		Query getLastKey = FirebaseDatabase.getInstance().getReference()
-				.child("Post")
-				.orderByKey()
-				.limitToLast(1);
-		getLastKey.addValueEventListener(new ValueEventListener() {
+	private void loadPost() {
+		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post");
+		reference.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+				postList.clear();
+				for(DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
 					Post post = snapshot.getValue(Post.class);
-					{
-							lastKey = post.getpTime();
+					if (!post.getpMode().equals("Private")) {
+						postList.add(post);
+						postAdapter = new PostAdapter(getActivity(), postList, "transition");
+						recycler_post.setAdapter(postAdapter);
 					}
 				}
+				prg_load.setVisibility(View.GONE);
 			}
 
 			@Override
 			public void onCancelled(@NonNull DatabaseError databaseError) {
-
+				Toast.makeText(getActivity(),databaseError.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		});
-
-	}
-
-	private void loadPost() {
-		if (!isMaxData) {
-			if (TextUtils.isEmpty(lastNode)) {
-				query = FirebaseDatabase.getInstance().getReference()
-						.child("Post")
-						.orderByKey()
-						.limitToFirst(ITEM_LOAD_MORE);
-			} else {
-				query = FirebaseDatabase.getInstance().getReference()
-						.child("Post")
-						.orderByKey()
-						.startAt(lastNode)
-						.limitToFirst(ITEM_LOAD_MORE);
-			}
-			query.addListenerForSingleValueEvent(new ValueEventListener() {
-				@Override
-				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-					if(dataSnapshot.hasChildren()) {
-						List<Post> morePost = new ArrayList<>();
-						for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-							Post post = snapshot.getValue(Post.class);
-							morePost.add(post);
-						}
-						lastNode = morePost.get(morePost.size() - 1).getpTime();
-						if (!lastNode.equals(lastKey)) {
-							morePost.remove(morePost.size() - 1);
-						}
-						else
-							lastNode = "end";
-						for (Post p : morePost)
-						{
-							if (!p.getpMode().equals("Private"))
-							{
-								postList.add(p);
-							}
-						}
-						morePost.clear();
-						postAdapter = new PostAdapter(getActivity(), postList, "transition");
-						recycler_post.setAdapter(postAdapter);
-						postAdapter.notifyDataSetChanged();
-						isLoading = false;
-						prg_load.setVisibility(View.GONE);
-						frame_home.setBackgroundColor(Color.parseColor("#ECEAEA"));
-					}
-					else
-					{
-						isLoading = false;
-						isMaxData = true;
-					}
-				}
-
-				@Override
-				public void onCancelled(@NonNull DatabaseError databaseError) {
-					isLoading = false;
-					Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
-				}
-			});
-		}
-
-		sr_reload.setRefreshing(false);
 	}
 
 	private void searchPost(final String query)
@@ -244,6 +165,8 @@ public class HomeFragment extends Fragment {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
+		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {

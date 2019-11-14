@@ -5,31 +5,26 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite"
+    android:background="#1b1e44"
     tools:context=".LoginActivity">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:src="@drawable/background"
-            android:layout_gravity="center"/>
-
-    </FrameLayout>
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/icon"
+        android:layout_centerHorizontal="true"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="45dp"
         android:layout_marginBottom="100dp"
         android:layout_above="@+id/emailTIL"
         android:text="Login"
         android:textSize="65sp"
-        android:textColor="@color/colorPrimaryDark"
+        android:textColor="#C4C4C4"
         android:layout_marginTop="30dp"
+        android:gravity="center"
         android:textStyle="bold"/>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -38,15 +33,16 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
-        android:paddingRight="50dp"
-        android:paddingLeft="50dp">
+        android:background="@drawable/editextchat"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp">
         <EditText
             android:id="@+id/emailEd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorWhite" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
@@ -57,15 +53,17 @@
         android:layout_centerVertical="true"
         android:layout_below="@id/emailTIL"
         app:passwordToggleEnabled="true"
-        android:paddingRight="50dp"
-        android:paddingLeft="50dp">
+        android:background="@drawable/editextchat"
+        android:layout_marginLeft="50dp"
+        android:layout_marginRight="50dp"
+        android:layout_marginTop="15dp">
         <EditText
             android:id="@+id/passwordEd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
-            android:textColor="@color/colorBlack"/>
+            android:textColor="@color/colorWhite" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
@@ -105,7 +103,7 @@
             android:layout_height="wrap_content"
             android:text="Or"
             android:textAlignment="center"
-            android:textColor="@color/colorBlack"
+            android:textColor="@color/colorWhite"
             android:layout_marginRight="15dp"
             android:layout_marginLeft="15dp"
             android:layout_weight="3"/>
@@ -167,7 +165,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Not have account?"
-            android:textColor="@color/colorBlack" />
+            android:textColor="@color/colorWhite" />
 
         <TextView
             android:id="@+id/not_have_account"

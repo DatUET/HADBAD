@@ -5,7 +5,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".PostDetailActivity">
+    tools:context=".PostDetailActivity"
+   android:background="#1b1e44">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -16,15 +17,16 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardCornerRadius="3dp"
-            app:cardElevation="3dp"
+            app:cardElevation="0dp"
             app:contentPadding="5dp"
             app:cardUseCompatPadding="true"
-            app:cardBackgroundColor="@color/colorWhite">
+            app:cardBackgroundColor="#1b1e44">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:background="#1b1e44">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -37,7 +39,7 @@
                         android:layout_width="50dp"
                         android:layout_height="50dp"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_defaut_img"
+                        android:src="@drawable/user"
                         android:transitionName="transition"/>
 
                     <LinearLayout
@@ -51,14 +53,15 @@
                             android:id="@+id/txt_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:textColor="@color/colorBlack"
+                            android:textColor="@color/colorWhite"
                             android:textStyle="bold"
                             android:textSize="18sp"/>
 
                         <TextView
                             android:id="@+id/txt_time"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"/>
+                            android:layout_height="wrap_content"
+                            android:textColor="#C4C4C4"/>
 
                     </LinearLayout>
 
@@ -75,6 +78,7 @@
                     android:id="@+id/txt_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/colorWhite"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:autoLink="all"/>
@@ -85,7 +89,7 @@
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/colorBlack"
+                    android:textColor="@color/colorWhite"
                     android:autoLink="all"/>
 
                 <androidx.viewpager.widget.ViewPager
@@ -94,7 +98,7 @@
                     android:layout_height="350dp"
                     android:paddingBottom="8dp"
                     android:paddingTop="8dp"
-                    android:background="@color/colorWhite"
+                    android:background="#1b1e44"
                     android:visibility="gone" />
 
                 <LinearLayout
@@ -119,10 +123,6 @@
                         android:gravity="end"/>
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="#F5F0F0"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -137,9 +137,10 @@
                         android:layout_weight="1"
                         android:text="Like"
                         android:textAllCaps="false"
-                        android:background="@color/colorWhite"
+                        android:background="#1b1e44"
                         android:drawablePadding="5dp"
-                        android:drawableStart="@drawable/ic_like_black"/>
+                        android:drawableStart="@drawable/ic_like_black"
+                        android:textColor="@color/colorWhite"/>
 
                     <Button
                         android:id="@+id/btn_share"
@@ -148,11 +149,17 @@
                         android:layout_weight="1"
                         android:text="Share"
                         android:textAllCaps="false"
-                        android:background="@color/colorWhite"
+                        android:background="#1b1e44"
                         android:drawableStart="@drawable/ic_share_black"
-                        android:drawablePadding="5dp"/>
+                        android:drawablePadding="5dp"
+                        android:textColor="@color/colorWhite"/>
 
                 </LinearLayout>
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="3dp"
+                    android:background="@color/colorPrimaryDark" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -161,12 +168,13 @@
                     android:text="Comments"
                     android:drawablePadding="5dp"
                     android:padding="2dp"
-                    android:textColor="@color/colorBlack"/>
+                    android:textColor="@color/colorWhite"/>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/recycler_comments"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    android:background="#1b1e44"/>
 
             </LinearLayout>
 
@@ -184,7 +192,7 @@
             android:id="@+id/img_avatar_comment"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_defaut_img"/>
+            android:src="@drawable/user"/>
 
         <EditText
             android:id="@+id/txt_inputcomment"
@@ -193,9 +201,11 @@
             android:layout_margin="1dp"
             android:layout_toEndOf="@id/img_avatar_comment"
             android:layout_toStartOf="@id/btn_send"
-            android:background="@color/colorWhite"
+            android:background="@drawable/editextchat"
             android:padding="10dp"
             android:layout_centerVertical="true"
+            android:textColor="@color/colorWhite"
+            android:textColorHint="#C4C4C4"
             android:layout_toRightOf="@id/img_avatar_comment"
             android:layout_toLeftOf="@id/btn_send"
             android:hint="Enter comment..."
@@ -209,7 +219,9 @@
             android:layout_centerVertical="true"
             android:src="@drawable/ic_send"
             android:background="@null"
-            android:layout_alignParentRight="true"/>
+            android:layout_alignParentRight="true"
+            android:paddingLeft="8dp"
+            android:paddingRight="5dp"/>
 
     </RelativeLayout>
 

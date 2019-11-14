@@ -5,33 +5,29 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorWhite"
+    android:background="#1b1e44"
     tools:context=".RegisterActivity">
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:src="@drawable/background"
-                android:layout_gravity="center"/>
-
-        </FrameLayout>
+        <ImageView
+            android:id="@+id/img_logo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/icon"
+            android:layout_marginTop="30dp"
+            android:layout_centerHorizontal="true"/>
 
         <TextView
             android:id="@+id/textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="35dp"
             android:text="Register"
             android:textSize="65sp"
-            android:textColor="@color/colorPrimaryDark"
-            android:layout_marginTop="100dp"
+            android:textColor="#C4C4C4"
+            android:gravity="center"
+            android:layout_marginTop="130dp"
             android:textStyle="bold"/>
 
         <LinearLayout
@@ -48,14 +44,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingLeft="15dp">
+                android:background="@drawable/editextchat"
+                android:textColorHint="#C4C4C4"
+                android:layout_marginLeft="15dp"
+                android:layout_marginRight="8dp">
                 <EditText
                     android:id="@+id/firstNameEd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="First Name"
+                    android:textColorHint="#C4C4C4"
                     android:inputType="textCapSentences"
-                    android:textColor="@color/colorBlack"/>
+                    android:textColor="@color/colorWhite"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -63,14 +63,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:paddingRight="15dp">
+                android:background="@drawable/editextchat"
+                android:textColorHint="#C4C4C4"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="15dp">
                 <EditText
                     android:id="@+id/lastNameNameEd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Last Name"
                     android:inputType="textCapSentences"
-                    android:textColor="@color/colorBlack"/>
+                    android:textColor="@color/colorWhite"/>
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
@@ -81,16 +84,19 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
+            android:background="@drawable/editextchat"
+            android:textColorHint="#C4C4C4"
             android:layout_below="@id/layout_name"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:layout_marginLeft="15dp"
+            android:layout_marginRight="15dp"
+            android:layout_marginTop="15dp">
             <EditText
                 android:id="@+id/phoneEd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Number Phone"
                 android:inputType="phone"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorWhite"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -100,15 +106,17 @@
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true"
             android:layout_below="@id/phoneTIL"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:background="@drawable/editextchat"
+            android:textColorHint="#C4C4C4"
+            android:layout_margin="15dp"
+            >
             <EditText
                 android:id="@+id/emailEd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
                 android:inputType="textEmailAddress"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorWhite"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -119,15 +127,17 @@
             android:layout_centerVertical="true"
             android:layout_below="@id/emailTIL"
             app:passwordToggleEnabled="true"
-            android:paddingLeft="15dp"
-            android:paddingRight="15dp">
+            android:background="@drawable/editextchat"
+            android:textColorHint="#C4C4C4"
+            android:layout_marginRight="15dp"
+            android:layout_marginLeft="15dp">
             <EditText
                 android:id="@+id/passwordEd"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Password"
                 android:inputType="textPassword"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorWhite"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
@@ -156,7 +166,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Already have account?"
-                android:textColor="@color/colorBlack"/>
+                android:textColor="@color/colorWhite"/>
 
             <TextView
                 android:id="@+id/have_account"

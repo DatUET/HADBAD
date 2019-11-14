@@ -3,6 +3,8 @@ package com.example.hadad;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -300,6 +302,7 @@ public class PostDetailActivity extends AppCompatActivity {
 	private void addControl() {
 		actionBar = getSupportActionBar();
 		actionBar.setTitle("Post Detail");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
 		actionBar.setDisplayShowHomeEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 

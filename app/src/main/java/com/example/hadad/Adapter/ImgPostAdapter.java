@@ -11,6 +11,7 @@ import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +60,7 @@ public class ImgPostAdapter extends PagerAdapter
         ImageView imageView = view.findViewById(R.id.img_post);
         TextView txt_count = view.findViewById(R.id.txt_count);
         txt_count.setText(position + 1 + "/" + imgList.size());
+        imageView.setBackgroundColor(Color.parseColor("#1b1e44"));
         Picasso.get().load(imgList.get(position)).into(imageView);
         container.addView(view);
         imageView.setOnClickListener(new View.OnClickListener() {

@@ -78,7 +78,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		commentViewHolder.txt_time.setText(cTime);
 
 		try {
-			Picasso.get().load(uDp).placeholder(R.drawable.ic_defaut_img).into(commentViewHolder.img_avatar);
+			Picasso.get().load(uDp).placeholder(R.drawable.user).into(commentViewHolder.img_avatar);
 		}
 		catch (Exception ex)
 		{
