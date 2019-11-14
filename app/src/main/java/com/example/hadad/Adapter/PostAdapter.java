@@ -92,7 +92,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		refPost = FirebaseDatabase.getInstance().getReference("Post");
 	}
 
-
+	// build file layout
 	@NonNull
 	@Override
 	public PostViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -178,6 +178,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			}
 		});
 
+		// check nếu đã like thì hiện nút like xanh
 		setLike(postViewHolder, pId);
 
 		postViewHolder.btn_like.setOnClickListener(new View.OnClickListener() {
@@ -192,12 +193,14 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						{
 							if(dataSnapshot.child(pId).hasChild(myUid))
 							{
+								// nếu đã like bấm lần nữa bỏ like
 								refPost.child(pId).child("pLikes").setValue((numberLike - 1) + "");
 								refLikes.child(pId).child(myUid).removeValue();
 								isProcessLike = false;
 							}
 							else
 							{
+								// nếu chưa thì add vào danh sách đã like đồng thời gửi thông báo đến chủ post
 								refPost.child(pId).child("pLikes").setValue((numberLike + 1) + "");
 								refLikes.child(pId).child(myUid).setValue("Liked");
 								isProcessLike = false;
@@ -279,6 +282,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 
 	}
 
+	// gửi thông báo đi
 	private void sendNotification(final String pId, final String name, final String uid) {
 		{
 			DatabaseReference allTokens = FirebaseDatabase.getInstance().getReference("Tokens");
@@ -487,7 +491,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		databaseReference.removeValue();
 	}
 
-
+	// xóa post có ảnh
 	private void deleteWithImage(final String pId, List<String> imgList, String hostUid) {
 
 		final ProgressDialog progressDialog = new ProgressDialog(context);
@@ -516,6 +520,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		}
 	}
 
+	// xóa post ko có ảnh
 	private void deleteWithoutImage(String pId) {
 		final ProgressDialog progressDialog = new ProgressDialog(context);
 		progressDialog.setMessage("Deleting...");

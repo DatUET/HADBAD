@@ -22,6 +22,9 @@ import com.example.hadad.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+/**
+ * load ảnh từ uri vào từng item cho phần list ảnh của từng post trong màn hình post details
+ */
 
 public class ImgPostDetailAdapter extends PagerAdapter
 {

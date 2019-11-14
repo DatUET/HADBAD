@@ -1,6 +1,5 @@
 package com.example.hadad.Adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import androidx.annotation.NonNull;
@@ -54,7 +53,6 @@ public class LikedAdapter extends RecyclerView.Adapter<LikedAdapter.LikedListVie
             public void onClick(View v) {
                 Intent intent = new Intent(context, ThereProfileActivity.class);
                 intent.putExtra("uid", user.getUid());
-                intent.putExtra("fromHome", true);
                 context.startActivity(intent);
             }
         });

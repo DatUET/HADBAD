@@ -1,5 +1,8 @@
 package com.example.hadad.Model;
 
+/**
+ * tạo đối tượng post và các thuộc tính của nó
+ */
 public class Post {
 	String pId, pTitle, pDescr,pLikes, pComments, pImage, pTime, uid, uEmail, uDp, uName, hostUid, pMode;
 

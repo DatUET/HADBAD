@@ -42,6 +42,26 @@ public class DashBoardActivity extends AppCompatActivity {
 		addEvent();
 	}
 
+	private void addControl() {
+		//Actionbar
+		actionBar = getSupportActionBar();
+		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
+
+		navigation =findViewById(R.id.navigation);
+
+		firebaseAuth = FirebaseAuth.getInstance();
+
+		actionBar.setTitle("");
+		HomeFragment homeFragment = new HomeFragment();
+		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+		transaction.replace(R.id.content, homeFragment);
+		transaction.commit();
+
+		checkUserStatus();
+
+
+	}
+
 	private void addEvent() {
 		navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 			@Override
@@ -88,26 +108,6 @@ public class DashBoardActivity extends AppCompatActivity {
 				return false;
 			}
 		});
-	}
-
-	private void addControl() {
-		//Actionbar
-		actionBar = getSupportActionBar();
-		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
-
-		navigation =findViewById(R.id.navigation);
-
-		firebaseAuth = FirebaseAuth.getInstance();
-
-		actionBar.setTitle("");
-		HomeFragment homeFragment = new HomeFragment();
-		FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-		transaction.replace(R.id.content, homeFragment);
-		transaction.commit();
-
-		checkUserStatus();
-
-
 	}
 
 	private void updateToken(String token) {

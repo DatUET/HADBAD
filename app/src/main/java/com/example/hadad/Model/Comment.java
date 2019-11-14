@@ -1,5 +1,8 @@
 package com.example.hadad.Model;
 
+/**
+ * tạo đối tượng comment và các thuộc tính
+ */
 public class Comment {
 	String cId, comment, timestamp, uId, uEmail, uDp, uName;
 

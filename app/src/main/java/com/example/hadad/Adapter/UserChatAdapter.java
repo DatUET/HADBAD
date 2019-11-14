@@ -96,7 +96,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		readLastMsg(uid, userChatViewHolder.txt_last_msg, userChatViewHolder.txt_check_seen, userChatViewHolder.img_dot_new_msg);
 		setOnline(uid, userChatViewHolder.img_online);
 	}
-
+	// check ng dùng có online hay ko
 	private void setOnline(String uid, final ImageView img_online) {
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(uid).child("onlineStatus");
 		databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -120,6 +120,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		});
 	}
 
+	// lấy tin nhắn cuối cùng
 	private void readLastMsg(final String uid, final TextView txt_last_msg, final TextView txt_check_seen, final CircularImageView img_dot_new_msg) {
 		if(reference != null) {
 			reference.addValueEventListener(new ValueEventListener() {

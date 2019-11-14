@@ -76,6 +76,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * màn hình add post
+ */
 public class AddPostActivity extends AppCompatActivity {
 
 	private static final int CAMERA_REQUEST_CODE = 100;
@@ -121,7 +124,79 @@ public class AddPostActivity extends AppCompatActivity {
 		addControl();
 		addEvent();
 	}
+	private void addControl() {
+		actionBar = getSupportActionBar();
+		actionBar.setTitle("Add Post");
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setDisplayShowHomeEnabled(true);
+		actionBar.setDisplayShowHomeEnabled(true);
 
+		txt_inputtitle = findViewById(R.id.txt_inputtitle);
+		txt_description = findViewById(R.id.txt_description);
+		//img_post = findViewById(R.id.img_post);
+		btn_upload = findViewById(R.id.btn_upload);
+		txt_add_img = findViewById(R.id.txt_add_img);
+		frame_img_post = findViewById(R.id.frame_img_post);
+		progressDialog = new ProgressDialog(this);
+		progressDialog.setCanceledOnTouchOutside(false);
+		uriList = new ArrayList<>();
+		modeList = new ArrayList<>();
+		modeList.add("Publish");
+		modeList.add("Private");
+		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
+		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+		recycler_img_add_post.setHasFixedSize(true);
+		recycler_img_add_post.setLayoutManager(linearLayoutManager);
+		sp_mode = findViewById(R.id.sp_mode);
+		modeAdapter = new ArrayAdapter<>(AddPostActivity.this, R.layout.spiner_layout, modeList);
+		modeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+		sp_mode.setAdapter(modeAdapter);
+		requestQueue = Volley.newRequestQueue(getApplicationContext());
+
+		cameraPermission = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+		storagePermisstion = new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+
+		firebaseAuth = FirebaseAuth.getInstance();
+		checkUserStatus();
+
+		Intent intent = getIntent();
+		updateKey = intent.getStringExtra("key");
+		editPostId = intent.getStringExtra("editPostId");
+
+		if(updateKey.equals("editPost"))
+		{
+			actionBar.setTitle("Edit Post");
+			btn_upload.setText("Update");
+			loadPostData(editPostId);
+		}
+		else
+		{
+			actionBar.setTitle("Add Post");
+			btn_upload.setText("Upload");
+		}
+		actionBar.setSubtitle(email);
+
+		reference = FirebaseDatabase.getInstance().getReference("Users");
+		Query query = reference.orderByChild("email").equalTo(email);
+		query.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				for(DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					name = snapshot.child("name").getValue() + "";
+					email = snapshot.child("email").getValue() + "";
+					dp = snapshot.child("image").getValue() + "";
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+
+	}
+	// xử lý sự kiện
 	private void addEvent() {
 
 		txt_add_img.setOnClickListener(new View.OnClickListener() {
@@ -348,6 +423,7 @@ public class AddPostActivity extends AppCompatActivity {
 				}
 			}
 	}
+
 	private void updateWithNowImage(final String title, final String description, final String editPostId) {
 		final String timestamp = String.valueOf(System.currentTimeMillis());
 			n = 0;
@@ -582,6 +658,7 @@ public class AddPostActivity extends AppCompatActivity {
 		});
 	}
 
+<<<<<<< HEAD
 
 	private void addControl() {
 		actionBar = getSupportActionBar();
@@ -656,6 +733,8 @@ public class AddPostActivity extends AppCompatActivity {
 
 	}
 
+=======
+>>>>>>> 6c70d8ed964feb082872ba35e70c6ffa52556402
 	private void loadPostData(final String editPostId) {
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("pId").equalTo(editPostId);
@@ -768,6 +847,7 @@ public class AddPostActivity extends AppCompatActivity {
 		boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
 		return result && result1;
 	}
+
 	private void requestCameraPermission()
 	{
 		ActivityCompat.requestPermissions(this,cameraPermission, CAMERA_REQUEST_CODE);

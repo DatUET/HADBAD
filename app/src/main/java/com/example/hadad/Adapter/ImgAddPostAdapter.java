@@ -14,6 +14,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+/**
+ * load ảnh từ uri vào từng item cho phần list ảnh trong màn hình add post
+ */
 public class ImgAddPostAdapter extends RecyclerView.Adapter<ImgAddPostAdapter.ImgAddPostViewHolder> {
 
     Context context;

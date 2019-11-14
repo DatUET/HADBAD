@@ -1,14 +1,9 @@
 package com.example.hadad.Adapter;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.view.ViewCompat;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
 import android.graphics.Color;
@@ -23,6 +18,9 @@ import com.example.hadad.R;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
+/**
+ * load ảnh từ uri vào từng item cho phần list ảnh của từng post
+ */
 
 public class ImgPostAdapter extends PagerAdapter
 {

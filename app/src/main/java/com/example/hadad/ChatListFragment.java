@@ -64,13 +64,8 @@ public class ChatListFragment extends Fragment {
 		View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
 
 		addControl(view);
-		addEvent();
 
 		return view;
-	}
-
-	private void addEvent() {
-
 	}
 
 	private void addControl(View view) {
@@ -147,8 +142,7 @@ public class ChatListFragment extends Fragment {
 		});
 	}
 
-	private void
-	checkUserStatus()
+	private void checkUserStatus()
 	{
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 		if(firebaseUser != null)
@@ -257,6 +251,7 @@ public class ChatListFragment extends Fragment {
 		}
 		return super.onOptionsItemSelected(item);
 	}
+
 	private void checkOnlineStatus(String status)
 	{
 		FirebaseUser user = firebaseAuth.getCurrentUser();

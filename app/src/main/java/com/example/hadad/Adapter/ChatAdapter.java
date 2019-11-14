@@ -45,6 +45,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * thiết kế cho từng item chat
+ */
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
 	private static final int MSG_TYPE_LEFT = 0;
 	private static final int MSG_TYPE_RIGHT = 1;
@@ -61,6 +64,9 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		this.imgUrl = imgUrl;
 	}
 
+	// build giao diện cho item, nếu là i=0 (MSG_TYPE_LEFT) thì build file row_chat_left.xml
+	// nếu i=1 (MSG_TYPE_RIGHT) thì build file row_chat_right.xml
+	// còn i là giá trị trả về của hàm getItemCount()
 	@NonNull
 	@Override
 	public ChatViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
@@ -78,6 +84,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		}
 	}
 
+	// hàm onBindViewHolder đưa dữ liệu vào cho từng item, và xử lý sự kiện cho mỗi thành phần trong item đó
 	@Override
 	public void onBindViewHolder(@NonNull final ChatViewHolder chatViewHolder, final int i) {
 		final Chat chat = chatList.get(i);
@@ -88,17 +95,20 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		cal.setTimeInMillis(Long.parseLong(timeStamp));
 		String dateTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
 
+		// 1 tin nhắn có thể có 3 phần chính: tin nhắn(dạng văn bản), ảnh, video
 		if (!message.equals("")) {
+			// nếu tin nhắt có nội dung văn bản thì hiển thị phần TextView để chứa nội dung lên và đưa nội dung vào đấy
 			chatViewHolder.txt_message.setVisibility(View.VISIBLE);
 			chatViewHolder.txt_message.setText(message);
 		}
 		else
 		{
+			// ngược lại nếu ko có thì ẩn n đi
 			chatViewHolder.txt_message.setVisibility(View.GONE);
 		}
-		chatViewHolder.txt_time.setText(dateTime);
+		chatViewHolder.txt_time.setText(dateTime); // đưa thời gian đã gửi của tin nhắn vào TextView
 		try {
-			Picasso.get().load(imgUrl).into(chatViewHolder.img_avatar);
+			Picasso.get().load(imgUrl).into(chatViewHolder.img_avatar); // tải avater của người gửi vào ImageView
 		}
 		catch (Exception ex)
 		{
@@ -106,6 +116,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		}
 		if (!chat.getImage().equals("noImage"))
 		{
+			// nếu tin nhắn có ảnh thì load ảnh vào ImageView của item tin nhắn đó
 			chatViewHolder.img_chat.setVisibility(View.VISIBLE);
 			try {
 				Picasso.get().load(chat.getImage()).into(chatViewHolder.img_chat);
@@ -117,10 +128,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		}
 		else
 		{
+			// nếu ko có thì ẩn đi
 			chatViewHolder.img_chat.setVisibility(View.GONE);
 		}
 		if (!chat.getVideo().equals("noVideo"))
 		{
+			// tương tự cho video
 			chatViewHolder.video_chat.setVisibility(View.VISIBLE);
 			Uri uri = Uri.parse(chat.getVideo());
 			chatViewHolder.video_chat.setVideoURI(uri);
@@ -138,6 +151,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		{
 			chatViewHolder.video_chat.setVisibility(View.GONE);
 		}
+		// khi người dùng chạm vào phần TextView của tin nhắn thì xuất thông báo muốn xóa tin nhắn đó hay ko?
 		chatViewHolder.layout_message.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -159,13 +173,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 					}
 				});
 				AlertDialog alertDialog = builder.create();
-				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation; // tạo animation cho thông báo chạy từ dưới lên
 				alertDialog.show();
 			}
 		});
 		if(i == chatList.size() -1)
 		{
-			Log.d("is seen", chat.isIsseen() + "");
 			if(chat.isIsseen())
 			{
 				chatViewHolder.txt_seen.setText("Seen");
@@ -179,6 +192,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		{
 			chatViewHolder.txt_seen.setVisibility(View.GONE);
 		}
+		// bấm vào ảnh thì chuyển qua Activity xem ảnh
 		chatViewHolder.img_chat.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -188,6 +202,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 				context.startActivity(intent, activityOptionsCompat.toBundle());
 			}
 		});
+		// bấm vào ảnh thì chuyển qua Activity xem video
 		chatViewHolder.video_chat.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -203,6 +218,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		return chatList.size();
 	}
 
+	// tìm các thành phần bên file layout
 	public class ChatViewHolder extends RecyclerView.ViewHolder {
 		CircularImageView img_avatar;
 		TextView txt_time, txt_message, txt_seen;
@@ -238,7 +254,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
 	private void deleteMessage(int position) {
 
-		final String myuid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+		final String myuid = FirebaseAuth.getInstance().getCurrentUser().getUid(); // lấy Id của người dùng đã được lưu trong app
 		String timestamp = chatList.get(position).getTimestamp();
 		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
 		Query query = reference.orderByChild("timestamp").equalTo(timestamp);
@@ -247,6 +263,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
+					// nếu tk gửi là ng dùng thì mới xóa đc
 					if (snapshot.child("sender").getValue().equals(myuid)) {
 						// cách 1: xóa luôn data
 						//snapshot.getRef().removeValue();
@@ -257,10 +274,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 						hashMap.put("image", "noImage");
 						hashMap.put("video", "noVideo");
 						if (!snapshot.child("image").getValue().toString().equals("noImage")) {
+							// nếu có ảnh thì xóa đi, đỡ chật storage
 							StorageReference picRef = FirebaseStorage.getInstance().getReferenceFromUrl(snapshot.child("image").getValue() + "");
 							picRef.delete();
 						}
 						if (!snapshot.child("video").getValue().toString().equals("noVideo")) {
+							// nếu có video thì xóa đi
 							StorageReference videoRef = FirebaseStorage.getInstance().getReferenceFromUrl(snapshot.child("video").getValue() + "");
 							videoRef.delete();
 						}
