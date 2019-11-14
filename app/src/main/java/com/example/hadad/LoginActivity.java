@@ -142,45 +142,6 @@ public class LoginActivity extends AppCompatActivity {
 		});
 	}
 
-<<<<<<< HEAD
-
-	private void addControl() {
-		//Actionbar
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setTitle("Login");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
-
-		//bật chế độ back
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-				.requestIdToken(LoginActivity.this.getResources().getString(R.string.default_web_client_id))
-				.requestEmail().build();
-
-		mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-		emailEd = findViewById(R.id.emailEd);
-		passwordEd = findViewById(R.id.passwordEd);
-		btn_login = findViewById(R.id.btn_login);
-		not_have_account = findViewById(R.id.not_have_account);
-		recover_pass = findViewById(R.id.recover_pass);
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
-		btn_googlelogin = findViewById(R.id.btn_googlelogin);
-
-		SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
-		String emailLast = sharedPreferences.getString("EMAIL_LAST", "None");
-		if (!emailLast.equals("None"))
-		{
-			emailEd.setText(emailLast);
-		}
-
-		firebaseAuth = FirebaseAuth.getInstance();
-	}
-
-=======
->>>>>>> 6c70d8ed964feb082872ba35e70c6ffa52556402
 	@Override
 	public boolean onSupportNavigateUp() {
 		onBackPressed(); //quay lại acti trước

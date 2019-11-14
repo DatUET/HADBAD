@@ -346,56 +346,6 @@ public class PostDetailActivity extends AppCompatActivity {
 		});
 	}
 
-<<<<<<< HEAD
-	private void addControl() {
-		actionBar = getSupportActionBar();
-		actionBar.setTitle("Post Detail");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
-		actionBar.setDisplayShowHomeEnabled(true);
-		actionBar.setDisplayHomeAsUpEnabled(true);
-
-		img_avatar = findViewById(R.id.img_avatar);
-		txt_name = findViewById(R.id.txt_name);
-		txt_time = findViewById(R.id.txt_time);
-		txt_title = findViewById(R.id.txt_title);
-		txt_description = findViewById(R.id.txt_description);
-		txt_like = findViewById(R.id.txt_like);
-		txt_comment = findViewById(R.id.txt_comment);
-		btn_more = findViewById(R.id.btn_more);
-		btn_like = findViewById(R.id.btn_like);
-		btn_comment = findViewById(R.id.btn_comment);
-		btn_share = findViewById(R.id.btn_share);
-		layout_profile = findViewById(R.id.layout_profile);
-		img_avatar_comment = findViewById(R.id.img_avatar_comment);
-		btn_send = findViewById(R.id.btn_send);
-		txt_inputcomment =findViewById(R.id.txt_inputcomment);
-		arrUserCommented = new ArrayList<>();
-		progressDialog = new ProgressDialog(this);
-
-		requestQueue = Volley.newRequestQueue(getApplicationContext());
-
-		recycler_comments = findViewById(R.id.recycler_comments);
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-		linearLayoutManager.setStackFromEnd(true);
-		recycler_comments.setHasFixedSize(true);
-		recycler_comments.setLayoutManager(linearLayoutManager);
-
-		imgList = new ArrayList<>();
-		vp_img = findViewById(R.id.vp_img);
-
-		//Lấy postId từ postAdapter
-		Intent intent = getIntent();
-		postId = intent.getStringExtra("postId");
-
-		loadPostInfo();
-		loadComments();
-		checkUserStatus();
-		loadUserInfor();
-		setLike();
-	}
-
-=======
->>>>>>> 6c70d8ed964feb082872ba35e70c6ffa52556402
 	private void loadComments() {
 		commentList = new ArrayList<>();
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId).child("Comments");

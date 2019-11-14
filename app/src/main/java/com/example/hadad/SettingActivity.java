@@ -136,35 +136,6 @@ public class SettingActivity extends AppCompatActivity {
 		});
 	}
 
-<<<<<<< HEAD
-	private void addControl() {
-		actionBar = getSupportActionBar();
-		actionBar.setTitle("Setting");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
-
-		//bật chế độ back
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-		sw_post = findViewById(R.id.sw_post);
-		recycler_user_post = findViewById(R.id.recycler_user_post);
-		preferences = getSharedPreferences("NotiPost", MODE_PRIVATE);
-		enable4NewPost = preferences.getBoolean(TOPIC_POST_NOTI, false);
-		sw_post.setChecked(enable4NewPost);
-		userList = new ArrayList<>();
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
-		recycler_user_post.setLayoutManager(linearLayoutManager);
-		if(enable4NewPost)
-		{
-			addListUser();
-		}
-=======
-	@Override
-	public boolean onSupportNavigateUp() {
-		onBackPressed();
-		return super.onSupportNavigateUp();
->>>>>>> 6c70d8ed964feb082872ba35e70c6ffa52556402
-	}
-
 	@Override
 	public boolean onSupportNavigateUp() {
 		onBackPressed();

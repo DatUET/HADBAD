@@ -161,33 +161,6 @@ public class RegisterActivity extends AppCompatActivity {
 		});
 	}
 
-<<<<<<< HEAD
-
-	private void addControl() {
-		//Actionbar
-		ActionBar actionBar = getSupportActionBar();
-		actionBar.setTitle("Create Account");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
-
-		//bật chế độ back
-		actionBar.setDisplayHomeAsUpEnabled(true);
-		actionBar.setDisplayShowHomeEnabled(true);
-
-		emailEd = findViewById(R.id.emailEd);
-		passwordEd = findViewById(R.id.passwordEd);
-		firstNameEd = findViewById(R.id.firstNameEd);
-		lastNameNameEd = findViewById(R.id.lastNameNameEd);
-		phoneEd = findViewById(R.id.phoneEd);
-		btn_register = findViewById(R.id.btn_register);
-		have_account = findViewById(R.id.have_account);
-		firebaseAuth = FirebaseAuth.getInstance();
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setMessage("Registing User...\nPlease wait");
-		progressDialog.setCanceledOnTouchOutside(false);
-	}
-
-=======
->>>>>>> 6c70d8ed964feb082872ba35e70c6ffa52556402
 	@Override
 	public boolean onSupportNavigateUp() {
 		onBackPressed(); //quay lại acti trước
