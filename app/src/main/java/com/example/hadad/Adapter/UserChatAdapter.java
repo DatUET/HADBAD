@@ -39,6 +39,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 	private DatabaseReference reference;
 	String myuid;
 	Chat lastChat;
+	boolean isFindLastMsg;
 
 	public UserChatAdapter(Context context, List<User> userList) {
 		this.context = context;
@@ -48,6 +49,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 			reference = FirebaseDatabase.getInstance().getReference("Chats");
 			lastChat = new Chat();
 		}
+		isFindLastMsg = false;
 	}
 
 	@NonNull
@@ -128,9 +130,10 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 						Chat chat = snapshot.getValue(Chat.class);
-						if ((chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
-								chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) {
+						if (((chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
+								chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) && !isFindLastMsg) {
 							lastChat = chat;
+							isFindLastMsg = true;
 						}
 					}
 					if(!lastChat.getImage().equals("noImage"))

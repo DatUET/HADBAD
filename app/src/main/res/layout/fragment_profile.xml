@@ -19,6 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_scrollFlags="scroll|exitUntilCollapsed"
+        android:fitsSystemWindows="true"
+        app:expandedTitleTextAppearance="@android:color/transparent"
         app:title=" ">
 
         <RelativeLayout
@@ -87,13 +89,20 @@
     </com.google.android.material.appbar.CollapsingToolbarLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_post"
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior"
         android:background="#1b1e44">
-    </androidx.recyclerview.widget.RecyclerView>
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_post"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#1b1e44"
+            app:layout_behavior="com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior">
+        </androidx.recyclerview.widget.RecyclerView>
+    </androidx.core.widget.NestedScrollView>
+
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab"

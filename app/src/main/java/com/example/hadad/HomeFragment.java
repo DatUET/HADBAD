@@ -49,6 +49,7 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
+	private static final int ITEM_LOAD = 3;
 
 	FirebaseAuth firebaseAuth;
 	RecyclerView recycler_post;
@@ -56,7 +57,6 @@ public class HomeFragment extends Fragment {
 	PostAdapter postAdapter;
 	ProgressBar prg_load;
 	FrameLayout frame_home;
-	ActionBar actionBar;
 
 	public HomeFragment() {
 		// Required empty public constructor
@@ -83,6 +83,7 @@ public class HomeFragment extends Fragment {
 
 		return view;
 	}
+
 
 	private void loadPost() {
 		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post");
@@ -120,7 +121,7 @@ public class HomeFragment extends Fragment {
 				{
 					Post post = snapshot.getValue(Post.class);
 					if(post.getpTitle().toLowerCase().contains(query.toLowerCase()) ||
-						post.getpDescr().toLowerCase().contains(query.toLowerCase()))
+							post.getpDescr().toLowerCase().contains(query.toLowerCase()))
 					{
 						postList.add(post);
 					}

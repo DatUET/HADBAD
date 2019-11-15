@@ -86,6 +86,8 @@ public class AddPostActivity extends AppCompatActivity {
 	private static final int IMAGE_PICK_GALLERY_CODE = 300;
 	private static final int IMAGE_PICK_CAMERA_CODE = 400;
 
+	private static final String MAX_TIME = "9999999999999";
+
 	String cameraPermission[];
 	String storagePermisstion[];
 

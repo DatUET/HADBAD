@@ -50,13 +50,19 @@
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_chats"
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/srl_loadmore"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@+id/toolbar"
-        android:layout_above="@+id/chatLayout"
-        android:background="#1b1e44"/>
+        android:layout_above="@+id/chatLayout">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_chats"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#1b1e44"/>
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
 
 
     <LinearLayout

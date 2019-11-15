@@ -91,6 +91,12 @@ public class ChatActivity extends AppCompatActivity {
 	private static final int REQUEST_VIDEO = 600;
 	private static final int REQUEST_STORAGE_VIDEO = 700;
 
+	private static final int ITEM_LOAD = 20;
+	private static final String MAX_TIME = "9999999999999";
+
+	String last_node = "";
+	boolean isLoading = false;
+
 	Toolbar toolbar;
 	RecyclerView recycler_chats;
 	CircularImageView img_avatar;
@@ -101,13 +107,13 @@ public class ChatActivity extends AppCompatActivity {
 	ImageView img_chat, img_delete, img_delete_video;
 	VideoView video_chat;
 	MediaController mediaController;
+	SwipeRefreshLayout srl_loadmore;;
 
 	ValueEventListener seenListener;
 	DatabaseReference userFefForSeen;
 	ProgressDialog progressDialog;
 
 	List<Chat> chatList;
-	List<String>listKeyChat;
 	ChatAdapter chatAdapter;
 
 	FirebaseAuth firebaseAuth;
@@ -148,16 +154,15 @@ public class ChatActivity extends AppCompatActivity {
 		layout_imgchat = findViewById(R.id.layout_imgchat);
 		layout_videochat = findViewById(R.id.layout_videochat);
 		video_chat = findViewById(R.id.video_chat);
-		listKeyChat = new ArrayList<>();
+		srl_loadmore = findViewById(R.id.srl_loadmore);
 		requestQueue = Volley.newRequestQueue(getApplicationContext());
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setCanceledOnTouchOutside(false);
 
-
+		chatList = new ArrayList<>();
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 		linearLayoutManager.setStackFromEnd(true);
 		recycler_chats.setHasFixedSize(true);
-		linearLayoutManager.setStackFromEnd(true);
 		recycler_chats.setLayoutManager(linearLayoutManager);
 
 
@@ -318,9 +323,16 @@ public class ChatActivity extends AppCompatActivity {
 			}
 		});
 
-
 		readMessage();
 		seenMessage();
+
+		srl_loadmore.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				isLoading = false;
+				loadMoreData();
+			}
+		});
 	}
 
 	private void pickVideo() {
@@ -373,26 +385,36 @@ public class ChatActivity extends AppCompatActivity {
 		});
 	}
 
-	private void readMessage() {
-		chatList = new ArrayList<>();
-		DatabaseReference dbref = FirebaseDatabase.getInstance().getReference("Chats");
-		dbref.addValueEventListener(new ValueEventListener() {
+	private void readMessage()
+	{
+		Query query1;
+		if(TextUtils.isEmpty(last_node))
+		{
+			query1 = FirebaseDatabase.getInstance().getReference().child("Chats").orderByKey();
+		}
+		else
+		{
+			query1 = FirebaseDatabase.getInstance().getReference().child("Chats").orderByKey().endAt(last_node);
+
+		}
+		query1.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				chatList.clear();
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				int countItemChat = 0;
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					Chat chat = snapshot.getValue(Chat.class);
-					if( (chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
-							chat.getReciver().equals(uid) && chat.getSender().equals(myuid))
-					{
+					if (((chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
+							chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) && countItemChat < ITEM_LOAD ) {
 						chatList.add(chat);
+						last_node = snapshot.getKey();
+						countItemChat++;
 					}
-					chatAdapter = new ChatAdapter(ChatActivity.this, chatList, hisImage);
-					chatAdapter.notifyDataSetChanged();
-					recycler_chats.setAdapter(chatAdapter);
 				}
-
+				Collections.reverse(chatList);
+				chatAdapter = new ChatAdapter(ChatActivity.this, chatList, hisImage);
+				chatAdapter.notifyDataSetChanged();
+				recycler_chats.setAdapter(chatAdapter);
 			}
 
 			@Override
@@ -400,6 +422,67 @@ public class ChatActivity extends AppCompatActivity {
 
 			}
 		});
+
+		Log.d("Last key", last_node);
+	}
+
+	private void loadMoreData()
+	{
+		if(!isLoading)
+		{
+			Query query;
+			if(TextUtils.isEmpty(last_node))
+			{
+				query = FirebaseDatabase.getInstance().getReference().child("Chats").orderByKey();
+			}
+			else
+			{
+				query = FirebaseDatabase.getInstance().getReference().child("Chats").orderByKey().startAt(last_node);
+
+			}
+			query.addListenerForSingleValueEvent(new ValueEventListener() {
+				@Override
+				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+					Collections.reverse(chatList);
+					int countItemChat = 0;
+					List<Chat> chatListTemp = new ArrayList<>();
+					chatListTemp.clear();
+					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+						Chat chat = snapshot.getValue(Chat.class);
+						if (((chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
+								chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) && countItemChat < ITEM_LOAD && snapshot.hasChildren()) {
+							chatListTemp.add(chat);
+							countItemChat++;
+							last_node = snapshot.getKey();
+							if (countItemChat == ITEM_LOAD) {
+								isLoading = true;
+							}
+							if (!snapshot.hasChildren()) {
+								isLoading = true;
+								last_node = "end";
+							}
+						}
+					}
+					if(!chatListTemp.isEmpty() && !chatList.isEmpty())
+					{
+						chatList.remove(chatList.size() - 1);
+					}
+					chatList.addAll(chatListTemp);
+					Collections.reverse(chatList);
+					chatAdapter = new ChatAdapter(ChatActivity.this, chatList, hisImage);
+					chatAdapter.notifyDataSetChanged();
+					recycler_chats.setAdapter(chatAdapter);
+					recycler_chats.scrollToPosition(chatList.size() - ITEM_LOAD);
+				}
+
+				@Override
+				public void onCancelled(@NonNull DatabaseError databaseError) {
+
+				}
+			});
+		}
+		//Log.d("Last key", last_node);
+		srl_loadmore.setRefreshing(false);
 	}
 
 	private void sendMessage(final String message) {
@@ -416,7 +499,7 @@ public class ChatActivity extends AppCompatActivity {
 		{
 			hashMap.put("image", "noImage");
 			hashMap.put("video", "noVideo");
-			databaseReference.child("Chats").push().setValue(hashMap);
+			databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
 		}
 		else
 		{
