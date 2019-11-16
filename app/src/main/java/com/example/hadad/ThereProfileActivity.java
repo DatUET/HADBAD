@@ -348,7 +348,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("uid").equalTo(uid);
-		query.addListenerForSingleValueEvent(new ValueEventListener() {
+		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
