@@ -120,8 +120,8 @@ public class HomeFragment extends Fragment {
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Post post = snapshot.getValue(Post.class);
-					if(post.getpTitle().toLowerCase().contains(query.toLowerCase()) ||
-							post.getpDescr().toLowerCase().contains(query.toLowerCase()))
+					if( (post.getpTitle().toLowerCase().contains(query.toLowerCase()) ||
+							post.getpDescr().toLowerCase().contains(query.toLowerCase())) && !post.getpMode().equals("Private"))
 					{
 						postList.add(post);
 					}

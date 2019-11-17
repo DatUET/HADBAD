@@ -9,10 +9,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileUtils;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.solver.widgets.Snapshot;
@@ -71,6 +74,10 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -110,7 +117,7 @@ public class AddPostActivity extends AppCompatActivity {
 	ArrayAdapter<String> modeAdapter;
 	RequestQueue requestQueue;
 
-	List<Uri> uriList;
+	List<Uri> uriList, uriListOfOldPost, uriListToShowImgs;
 	ImgAddPostAdapter imgAddPostAdapter;
 	Uri imageUri = null;
 
@@ -142,6 +149,8 @@ public class AddPostActivity extends AppCompatActivity {
 		progressDialog = new ProgressDialog(this);
 		progressDialog.setCanceledOnTouchOutside(false);
 		uriList = new ArrayList<>();
+		uriListOfOldPost = new ArrayList<>();
+		uriListToShowImgs = new ArrayList<>();
 		modeList = new ArrayList<>();
 		modeList.add("Publish");
 		modeList.add("Private");
@@ -270,206 +279,110 @@ public class AddPostActivity extends AppCompatActivity {
 		progressDialog.setMessage("Updating Post....");
 		progressDialog.show();
 
-		if(!editImage.equals("noImage") && !uriList.isEmpty())
+		uodatePost(title, description, editPostId);
+	}
+
+	private void uodatePost(String title, String description, final String editPostId) {
+		final HashMap<String, Object> hashMap = new HashMap<>();
+		hashMap.put("uid", uid);
+		hashMap.put("uName", name);
+		hashMap.put("uEmail", email);
+		hashMap.put("uDp", dp);
+		hashMap.put("pTitle", title);
+		hashMap.put("pDescr", description);
+		hashMap.put("pMode", modeList.get(positionMode));
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+
+		if(uriListToShowImgs.isEmpty())
 		{
-			updateWithImage(title, description, editPostId);
-		}
-		else if(!editImage.equals("noImage") && uriList.isEmpty())
-		{
-			updateDaleteImage(title, description, editImage);
-		}
-		else if(!uriList.isEmpty())
-		{
-			updateWithNowImage(title, description, editPostId);
+			hashMap.put("pImage", "noImage");
+			ref.child(editPostId).updateChildren(hashMap)
+					.addOnSuccessListener(new OnSuccessListener<Void>() {
+						@Override
+						public void onSuccess(Void aVoid) {
+							progressDialog.dismiss();
+							Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
+							finish();
+						}
+					})
+					.addOnFailureListener(new OnFailureListener() {
+						@Override
+						public void onFailure(@NonNull Exception e) {
+							progressDialog.dismiss();
+							Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+						}
+					});
 		}
 		else
 		{
-			updateWithoutImage(title, description);
-		}
-	}
-
-	private void updateDaleteImage(final String title, final String description, String editImage) {
-		HashMap<String, Object> hashMap = new HashMap<>();
-		hashMap.put("uid", uid);
-		hashMap.put("uName", name);
-		hashMap.put("uEmail", email);
-		hashMap.put("uDp", dp);
-		hashMap.put("pTitle", title);
-		hashMap.put("pDescr", description);
-		hashMap.put("pImage", "noImage");
-		hashMap.put("pMode", modeList.get(positionMode));
-
-		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-		ref.child(editPostId).updateChildren(hashMap)
-				.addOnSuccessListener(new OnSuccessListener<Void>() {
-					@Override
-					public void onSuccess(Void aVoid) {
-						progressDialog.dismiss();
-						Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
-						finish();
-					}
-				})
-				.addOnFailureListener(new OnFailureListener() {
-					@Override
-					public void onFailure(@NonNull Exception e) {
-						progressDialog.dismiss();
-						Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-					}
-				});
-		if(uid.equals(hostUid)) {
-			for (String item : arrCurrentImg) {
-				StorageReference storageReference = FirebaseStorage.getInstance().getReferenceFromUrl(item);
-				storageReference.delete();
-			}
-		}
-	}
-
-	private void updateWithoutImage(String title, String description) {
-		HashMap<String, Object> hashMap = new HashMap<>();
-		hashMap.put("uid", uid);
-		hashMap.put("uName", name);
-		hashMap.put("uEmail", email);
-		hashMap.put("uDp", dp);
-		hashMap.put("pTitle", title);
-		hashMap.put("pDescr", description);
-		hashMap.put("pImage", "noImage");
-		hashMap.put("pMode", modeList.get(positionMode));
-
-		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-		ref.child(editPostId).updateChildren(hashMap)
-				.addOnSuccessListener(new OnSuccessListener<Void>() {
-					@Override
-					public void onSuccess(Void aVoid) {
-						progressDialog.dismiss();
-						Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
-						finish();
-					}
-				})
-				.addOnFailureListener(new OnFailureListener() {
-					@Override
-					public void onFailure(@NonNull Exception e) {
-						progressDialog.dismiss();
-						Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-					}
-				});
-	}
-
-	private void updateWithImage(final String title, final String description, final String editPostId) {
-		// cập nhật lại danh sách ảnh
-		// B1: xóa ảnh cũ
-		// B2: Tải ảnh mới lên
-		final String timestamp = String.valueOf(System.currentTimeMillis());
-			n = 0;
-			final HashMap<String, Object> hashMap = new HashMap<>();
-			hashMap.put("uid", uid);
-			hashMap.put("uName", name);
-			hashMap.put("uEmail", email);
-			hashMap.put("uDp", dp);
-			hashMap.put("pTitle", title);
-			hashMap.put("pDescr", description);
-			hashMap.put("pMode", modeList.get(positionMode));
-
-			for (Uri uri : uriList) {
-					ImageView imageView = new ImageView(AddPostActivity.this);
-					Picasso.get().load(uri).into(imageView);
-
-					Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);
-					byte[] bytes = baos.toByteArray();
-					String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
-					n++;
-					StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-					storageReference.putBytes(bytes)
-							.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-								@Override
-								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-									Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-									while (!uriTask.isSuccessful()) ;
-									urlImg += uriTask.getResult().toString() + ",";
-									hashMap.put("pImage", urlImg);
-
-									DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-									ref.child(editPostId).updateChildren(hashMap)
-											.addOnSuccessListener(new OnSuccessListener<Void>() {
-												@Override
-												public void onSuccess(Void aVoid) {
-													progressDialog.dismiss();
-													Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
-													uriList.clear();
-													imageUri = null;
-													finish();
-												}
-											})
-											.addOnFailureListener(new OnFailureListener() {
-												@Override
-												public void onFailure(@NonNull Exception e) {
-													progressDialog.dismiss();
-													Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-												}
-											});
-								}
-							})
-							.addOnFailureListener(new OnFailureListener() {
-								@Override
-								public void onFailure(@NonNull Exception e) {
-									progressDialog.dismiss();
-									Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-								}
-							});
-			}
-			if(uid.equals(hostUid)) {
-				for (String item : arrCurrentImg) {
-					StorageReference ref = FirebaseStorage.getInstance().getReferenceFromUrl(item);
-					ref.delete();
+			urlImg = "";
+			for(Uri uri : uriListOfOldPost)
+			{
+				if(uriListToShowImgs.contains(uri))
+				{
+					urlImg += uri.toString() + ",";
 				}
 			}
-	}
-
-	private void updateWithNowImage(final String title, final String description, final String editPostId) {
-		final String timestamp = String.valueOf(System.currentTimeMillis());
-			n = 0;
-			final HashMap<String, Object> hashMap = new HashMap<>();
-			hashMap.put("uid", uid);
-			hashMap.put("uName", name);
-			hashMap.put("uEmail", email);
-			hashMap.put("uDp", dp);
-			hashMap.put("pTitle", title);
-			hashMap.put("pDescr", description);
-			hashMap.put("pMode", modeList.get(positionMode));
-
-			for (Uri uri : uriList) {
-				String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
-				n++;
-				StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-				storageReference.putFile(uri)
-						.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+			if(!uriList.isEmpty())
+			{
+				final String timestamp = String.valueOf(System.currentTimeMillis());
+				n = 0;
+				for(Uri uri : uriList)
+				{
+					if(uriListToShowImgs.contains(uri))
+					{
+						String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
+						n++;
+						StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
+						storageReference.putFile(uri)
+								.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+									@Override
+									public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+										Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+										while (!uriTask.isSuccessful()) ;
+										urlImg += uriTask.getResult().toString() + ",";
+										hashMap.put("pImage", urlImg);
+										DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+										ref.child(editPostId).updateChildren(hashMap)
+												.addOnSuccessListener(new OnSuccessListener<Void>() {
+													@Override
+													public void onSuccess(Void aVoid) {
+														progressDialog.dismiss();
+														Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
+														uriList.clear();
+														imageUri = null;
+														finish();
+													}
+												})
+												.addOnFailureListener(new OnFailureListener() {
+													@Override
+													public void onFailure(@NonNull Exception e) {
+														progressDialog.dismiss();
+														Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+													}
+												});
+									}
+								})
+								.addOnFailureListener(new OnFailureListener() {
+									@Override
+									public void onFailure(@NonNull Exception e) {
+										progressDialog.dismiss();
+										Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								});
+					}
+				}
+			}
+			else
+			{
+				hashMap.put("pImage", urlImg);
+				ref.child(editPostId).updateChildren(hashMap)
+						.addOnSuccessListener(new OnSuccessListener<Void>() {
 							@Override
-							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-								Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-								while (!uriTask.isSuccessful()) ;
-								urlImg += uriTask.getResult().toString() + ",";
-								hashMap.put("pImage", urlImg);
-
-								DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-								ref.child(editPostId).updateChildren(hashMap)
-										.addOnSuccessListener(new OnSuccessListener<Void>() {
-											@Override
-											public void onSuccess(Void aVoid) {
-												progressDialog.dismiss();
-												Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
-												uriList.clear();
-												imageUri = null;
-												finish();
-											}
-										})
-										.addOnFailureListener(new OnFailureListener() {
-											@Override
-											public void onFailure(@NonNull Exception e) {
-												progressDialog.dismiss();
-												Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-											}
-										});
+							public void onSuccess(Void aVoid) {
+								progressDialog.dismiss();
+								Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
+								finish();
 							}
 						})
 						.addOnFailureListener(new OnFailureListener() {
@@ -480,6 +393,7 @@ public class AddPostActivity extends AppCompatActivity {
 							}
 						});
 			}
+		}
 	}
 
 	private void uploadData(final String title, final String description) {
@@ -690,9 +604,10 @@ public class AddPostActivity extends AppCompatActivity {
 						arrCurrentImg = editImage.split(",");
 						for (String item : arrCurrentImg)
 						{
-							uriList.add(Uri.parse(item));
+							uriListOfOldPost.add(Uri.parse(item));
 						}
-						imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriList);
+						uriListToShowImgs.addAll(uriListOfOldPost);
+						imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 						recycler_img_add_post.setAdapter(imgAddPostAdapter);
 					}
 				}
@@ -817,16 +732,18 @@ public class AddPostActivity extends AppCompatActivity {
 			if(requestCode == IMAGE_PICK_GALLERY_CODE)
 			{
 				uriList.add(data.getData());
+				uriListToShowImgs.add(data.getData());
 
-				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriList);
+				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
 			}
 
 			if(requestCode == IMAGE_PICK_CAMERA_CODE)
 			{
 				uriList.add(imageUri);
+				uriListToShowImgs.add(data.getData());
 
-				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriList);
+				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
 			}
 		}

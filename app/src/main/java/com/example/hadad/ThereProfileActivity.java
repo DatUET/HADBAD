@@ -78,6 +78,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 	private void addControl() {
 
 		recycler_post = findViewById(R.id.recycler_post);
+		recycler_post.setNestedScrollingEnabled(false);
 		firebaseAuth = FirebaseAuth.getInstance();
 
 		actionBar = getSupportActionBar();

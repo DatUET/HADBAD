@@ -478,47 +478,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	}
 
 	private void beginDelete(String pId, List<String> imgList, String hostUid) {
-		if(imgList.contains("noImage") || !myUid.equals(hostUid))
-		{
-			deleteWithoutImage(pId);
-		}
-		else
-		{
-			deleteWithImage(pId, imgList, hostUid);
-		}
-
+		deleteWithoutImage(pId);
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Likes").child(pId);
 		databaseReference.removeValue();
 	}
 
 	// xóa post có ảnh
-	private void deleteWithImage(final String pId, List<String> imgList, String hostUid) {
-
-		final ProgressDialog progressDialog = new ProgressDialog(context);
-		progressDialog.setMessage("Deleting...");
-		progressDialog.show();
-		if(myUid.equals(hostUid)) {
-		    for(String pImage : imgList) {
-                StorageReference picRef = FirebaseStorage.getInstance().getReferenceFromUrl(pImage);
-                picRef.delete()
-                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
-                            	progressDialog.dismiss();
-                            }
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull final Exception e) {
-                                progressDialog.dismiss();
-                                Toast.makeText(context, e.getMessage(), Toast.LENGTH_LONG).show();
-                            }
-                        });
-            }
-
-            deleteWithoutImage(pId);
-		}
-	}
 
 	// xóa post ko có ảnh
 	private void deleteWithoutImage(String pId) {

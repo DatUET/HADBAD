@@ -122,6 +122,7 @@ public class ProfileFragment extends Fragment {
 		txt_phone = view.findViewById(R.id.txt_phone);
 		fab = view.findViewById(R.id.fab);
 		recycler_post = view.findViewById(R.id.recycler_post);
+		recycler_post.setNestedScrollingEnabled(false);
 		postList = new ArrayList<>();
 		progressDialog = new ProgressDialog(getActivity());
 		progressDialog.setCanceledOnTouchOutside(false);

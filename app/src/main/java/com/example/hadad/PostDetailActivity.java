@@ -284,42 +284,11 @@ public class PostDetailActivity extends AppCompatActivity {
 	}
 
 	private void beginDelete() {
-		if(imgList.contains("noImage"))
-		{
-			deleteWithoutImage();
-		}
-		else
-		{
-			deleteWithImage();
-		}
+		deleteWithoutImage();
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Likes").child(postId);
 		databaseReference.removeValue();
 	}
 
-	private void deleteWithImage() {
-		final ProgressDialog progressDialog = new ProgressDialog(PostDetailActivity.this);
-		progressDialog.setMessage("Deleting...");
-		progressDialog.show();
-		for(String itemImg : imgList) {
-			StorageReference picRef = FirebaseStorage.getInstance().getReferenceFromUrl(itemImg);
-			picRef.delete()
-					.addOnSuccessListener(new OnSuccessListener<Void>() {
-						@Override
-						public void onSuccess(Void aVoid) {
-
-						}
-					})
-					.addOnFailureListener(new OnFailureListener() {
-						@Override
-						public void onFailure(@NonNull final Exception e) {
-							progressDialog.dismiss();
-							Toast.makeText(PostDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-						}
-					});
-		}
-		progressDialog.dismiss();
-		deleteWithoutImage();
-	}
 
 	private void deleteWithoutImage() {
 		final ProgressDialog progressDialog = new ProgressDialog(PostDetailActivity.this);
