@@ -488,7 +488,7 @@ public class ChatActivity extends AppCompatActivity {
 	private void sendMessage(final String message) {
 		final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
 
-		String timeStamp = String.valueOf(System.currentTimeMillis());
+		final String timeStamp = String.valueOf(System.currentTimeMillis());
 		final HashMap<String, Object> hashMap = new HashMap<>();
 		hashMap.put("sender", myuid);
 		hashMap.put("reciver", uid);
@@ -518,7 +518,7 @@ public class ChatActivity extends AppCompatActivity {
 								if (uriTask.isSuccessful()) {
 									hashMap.put("image", "noImage");
 									hashMap.put("video", downloadUri);
-									databaseReference.child("Chats").push().setValue(hashMap);
+									databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
 									progressDialog.dismiss();
 								}
 							}
@@ -550,7 +550,7 @@ public class ChatActivity extends AppCompatActivity {
 									{
 										hashMap.put("image", downloadUri);
 										hashMap.put("video", "noVideo");
-										databaseReference.child("Chats").push().setValue(hashMap);
+										databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
 										progressDialog.dismiss();
 									}
 								}
