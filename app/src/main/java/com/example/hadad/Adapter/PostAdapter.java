@@ -143,7 +143,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			postViewHolder.btn_share.setVisibility(View.VISIBLE);
 		}
 
-		if (pMode.equals("Publish"))
+		if (pMode.equals("Public"))
 		{
 			postViewHolder.img_mode.setImageResource(R.drawable.ic_publish_post);
 		}
@@ -365,7 +365,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						hashMap.put("pImage", pImage);
 						hashMap.put("pTime", timeID);
 						hashMap.put("hostUid", hostUid);
-						hashMap.put("pMode", "Publish");
+						hashMap.put("pMode", "Public");
 
 						DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 						ref.child(timeID).setValue(hashMap)

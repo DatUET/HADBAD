@@ -316,7 +316,7 @@ public class ProfileFragment extends Fragment {
 
 	private void showNamePhoneUpdateDialog(final String key) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("Update" + key);
+		builder.setTitle("Update " + key);
 
 		LinearLayout linearLayout = new LinearLayout(getActivity());
 		linearLayout.setOrientation(LinearLayout.VERTICAL);

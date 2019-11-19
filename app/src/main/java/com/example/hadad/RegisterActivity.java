@@ -33,7 +33,7 @@ import java.util.HashMap;
 
 public class RegisterActivity extends AppCompatActivity {
 
-	EditText emailEd, passwordEd, firstNameEd, lastNameNameEd, phoneEd;
+	EditText emailEd, passwordEd, firstNameEd, lastNameEd, phoneEd;
 	Button btn_register;
 	ProgressDialog progressDialog;
 	TextView have_account;
@@ -65,7 +65,7 @@ public class RegisterActivity extends AppCompatActivity {
 		emailEd = findViewById(R.id.emailEd);
 		passwordEd = findViewById(R.id.passwordEd);
 		firstNameEd = findViewById(R.id.firstNameEd);
-		lastNameNameEd = findViewById(R.id.lastNameNameEd);
+		lastNameEd = findViewById(R.id.lastNameEd);
 		phoneEd = findViewById(R.id.phoneEd);
 		btn_register = findViewById(R.id.btn_register);
 		have_account = findViewById(R.id.have_account);
@@ -93,7 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
 				String email = emailEd.getText().toString();
 				String pass = passwordEd.getText().toString();
 				firstName = firstNameEd.getText().toString();
-				lastName = lastNameNameEd.getText().toString();
+				lastName = lastNameEd.getText().toString();
 				phone = phoneEd.getText().toString();
 
 				if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
@@ -116,8 +116,8 @@ public class RegisterActivity extends AppCompatActivity {
 				}
 				if(TextUtils.isEmpty(lastName))
 				{
-					firstNameEd.setError("Last name is empty");
-					firstNameEd.setFocusable(true);
+					lastNameEd.setError("Last name is empty");
+					lastNameEd.setFocusable(true);
 					isInvalid = false;
 				}
 				if(isInvalid)

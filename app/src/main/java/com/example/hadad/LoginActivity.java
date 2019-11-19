@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.hadad.Model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -35,8 +36,11 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 
@@ -123,6 +127,24 @@ public class LoginActivity extends AppCompatActivity {
 			}
 		});
 
+
+		emailEd.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+			@Override
+			public void onFocusChange(View v, boolean hasFocus) {
+				final String email = emailEd.getText().toString();
+				if(!hasFocus) {
+					if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
+					{
+						emailEd.setError("Invalid email");
+						emailEd.setFocusable(true);
+					}
+					else {
+						checkEmail(v, email.trim());
+					}
+				}
+			}
+		});
+
 		recover_pass.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
@@ -169,7 +191,10 @@ public class LoginActivity extends AppCompatActivity {
 						else
 						{
 							progressDialog.dismiss();
-							Toast.makeText(LoginActivity.this, "Email or password is failed", Toast.LENGTH_LONG).show();
+							AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+							builder.setTitle("ERROR");
+							builder.setMessage("Email or password is failed");
+							builder.create().show();
 						}
 					}
 				})
@@ -177,7 +202,11 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onFailure(@NonNull Exception e) {
 				progressDialog.dismiss();
-				Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+				progressDialog.dismiss();
+				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
+				builder.setTitle("ERROR");
+				builder.setMessage(e.getMessage());
+				builder.create().show();
 			}
 		});
 	}
@@ -240,6 +269,34 @@ public class LoginActivity extends AppCompatActivity {
 						Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
 					}
 				});
+	}
+
+	private void checkEmail(View v, final String email) {
+		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+		reference.addListenerForSingleValueEvent(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				boolean isRegisted = false;
+				for(DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					User user = snapshot.getValue(User.class);
+					if(user.getEmail().equals(email))
+					{
+						isRegisted = true;
+					}
+				}
+				if(!isRegisted)
+				{
+					emailEd.setError("This email has not been registered");
+				}
+
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
 	}
 
 	@Override

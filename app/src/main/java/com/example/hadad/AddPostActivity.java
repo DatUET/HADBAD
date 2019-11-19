@@ -152,7 +152,7 @@ public class AddPostActivity extends AppCompatActivity {
 		uriListOfOldPost = new ArrayList<>();
 		uriListToShowImgs = new ArrayList<>();
 		modeList = new ArrayList<>();
-		modeList.add("Publish");
+		modeList.add("Public");
 		modeList.add("Private");
 		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
@@ -255,12 +255,13 @@ public class AddPostActivity extends AppCompatActivity {
 
 				if(TextUtils.isEmpty(title))
 				{
-					Toast.makeText(AddPostActivity.this, "Enter title...", Toast.LENGTH_LONG).show();
+					txt_inputtitle.setError("Title is empty");
+					txt_inputtitle.setFocusable(true);
 					return;
 				}
 				if(TextUtils.isEmpty(description))
 				{
-					Toast.makeText(AddPostActivity.this, "Enter description...", Toast.LENGTH_LONG).show();
+					txt_description.setError("Description is empty");
 					return;
 				}
 				if(updateKey.equals("editPost"))
