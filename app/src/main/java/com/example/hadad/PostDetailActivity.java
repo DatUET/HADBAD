@@ -317,7 +317,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
 	private void loadComments() {
 		commentList = new ArrayList<>();
-		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId).child("Comments");
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
 		ref.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -364,12 +364,12 @@ public class PostDetailActivity extends AppCompatActivity {
 	}
 
 	private void postComment() {
-		progressDialog.setMessage("Adding Comment...");
-		progressDialog.show();
 		String comment = txt_inputcomment.getText().toString().trim();
 		if(!TextUtils.isEmpty(comment))
 		{
-			DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId).child("Comments");
+			progressDialog.setMessage("Adding Comment...");
+			progressDialog.show();
+			DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
 			String timestam = String.valueOf(System.currentTimeMillis());
 
 			HashMap<String, Object> hashMap = new HashMap<>();
@@ -388,7 +388,7 @@ public class PostDetailActivity extends AppCompatActivity {
 							progressDialog.dismiss();
 							Toast.makeText(PostDetailActivity.this, "Comment Added", Toast.LENGTH_LONG).show();
 							txt_inputcomment.setText("");
-							DatabaseReference refsendNoti = FirebaseDatabase.getInstance().getReference("Post").child(postId).child("Comments");
+							DatabaseReference refsendNoti = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
 							refsendNoti.addListenerForSingleValueEvent(new ValueEventListener() {
 								@Override
 								public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

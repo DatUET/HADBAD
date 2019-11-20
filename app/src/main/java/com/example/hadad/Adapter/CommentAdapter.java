@@ -127,8 +127,8 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 	}
 
 	private void deleteComment(String cId) {
-		final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post").child(postId);
-		reference.child("Comments").child(cId).removeValue();
+		final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
+		reference.child(cId).removeValue();
 
 		// sau khi xóa cập nhật lại số lượng đã cmt
 		reference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -136,7 +136,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				String comments = dataSnapshot.child("pComments").getValue() + "";
 				int newCommentCount = Integer.parseInt(comments) - 1;
-				reference.child("pComments").setValue(newCommentCount + "");
+				FirebaseDatabase.getInstance().getReference("Post").child(postId).child("pComments").setValue(newCommentCount + "");
 			}
 
 			@Override
