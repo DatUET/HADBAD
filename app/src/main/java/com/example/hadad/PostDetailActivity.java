@@ -87,7 +87,7 @@ public class PostDetailActivity extends AppCompatActivity {
 	RequestQueue requestQueue;
 
 	String myUid, myEmail, myName, myDp,
-	postId, pLikes, hisDp, hisName, hisUid, pImage, hostUid;
+	postId, hisDp, hisName, hisUid, pImage, hostUid;
 	List<String> arrUserCommented, imgList;
 
 	boolean isProcessComment = false, isProcessLike = false;
@@ -209,8 +209,6 @@ public class PostDetailActivity extends AppCompatActivity {
 						hashMap.put("uName", user.getName());
 						hashMap.put("uEmail", user.getEmail());
 						hashMap.put("uDp", user.getImage());
-						hashMap.put("pLikes", "0");
-						hashMap.put("pComments", "0");
 						hashMap.put("pId", timeID);
 						hashMap.put("pTitle", pTitle);
 						hashMap.put("pDescr", pDescr);
@@ -408,7 +406,7 @@ public class PostDetailActivity extends AppCompatActivity {
 
 								}
 							});
-							updateCommentCount();
+							//updateCommentCount();
 						}
 					})
 					.addOnFailureListener(new OnFailureListener() {
@@ -484,14 +482,12 @@ public class PostDetailActivity extends AppCompatActivity {
 				{
 					if(dataSnapshot.child(postId).hasChild(myUid))
 					{
-						refPost.child(postId).child("pLikes").setValue((Integer.parseInt(pLikes) - 1) + "");
 						refLikes.child(postId).child(myUid).removeValue();
 						isProcessLike = false;
 
 					}
 					else
 					{
-						refPost.child(postId).child("pLikes").setValue((Integer.parseInt(pLikes) + 1) + "");
 						refLikes.child(postId).child(myUid).setValue("Liked");
 						isProcessLike = false;
 						if (!myUid.equals(hisUid))
@@ -522,29 +518,10 @@ public class PostDetailActivity extends AppCompatActivity {
 		});
 	}
 
-	private void updateCommentCount() {
-		isProcessComment = true;
-		arrUserCommented.clear();
-		arrUserCommented.add(myUid);
-		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId);
-		ref.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				if(isProcessComment)
-				{
-					String commnets = dataSnapshot.child("pComments").getValue() + "";
-					int newCommentVal = Integer.parseInt(commnets) + 1;
-					ref.child("pComments").setValue(newCommentVal + "");
-					isProcessComment = false;
-				}
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
-	}
+//	private void updateCommentCount() {
+//		arrUserCommented.clear();
+//		arrUserCommented.add(myUid);
+//	}
 
 	private void loadUserInfor() {
 		Query myRef = FirebaseDatabase.getInstance().getReference("Users");
@@ -583,14 +560,12 @@ public class PostDetailActivity extends AppCompatActivity {
 					imgList.clear();
 					String pTitle = snapshot.child("pTitle").getValue() + "";
 					String pDescr = snapshot.child("pDescr").getValue() + "";
-					pLikes = snapshot.child("pLikes").getValue() + "";
 					String pTimeStamp = snapshot.child("pTime").getValue() + "";
 					pImage = snapshot.child("pImage").getValue() + "";
 					hisDp = snapshot.child("uDp").getValue() + "";
 					hisUid = snapshot.child("uid").getValue() + "";
 					String uEmail = snapshot.child("uEmail").getValue() + "";
 					hisName = snapshot.child("uName").getValue() + "";
-					String commentCount = snapshot.child("pComments").getValue() + "";
 					hostUid = snapshot.child("hostUid").getValue() + "";
 					String uidOfPost = snapshot.child("uid").getValue() + "";
 
@@ -601,8 +576,31 @@ public class PostDetailActivity extends AppCompatActivity {
 					txt_title.setText(pTitle);
 					txt_time.setText(pTime);
 					txt_description.setText(pDescr);
-					txt_like.setText(pLikes + " Likes");
-					txt_comment.setText(commentCount + " Comment");
+					DatabaseReference refLike = FirebaseDatabase.getInstance().getReference("Likes").child(postId);
+					DatabaseReference refComment = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
+					refLike.addValueEventListener(new ValueEventListener() {
+						@Override
+						public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+							txt_like.setText(dataSnapshot.getChildrenCount() + " Likes");
+						}
+
+						@Override
+						public void onCancelled(@NonNull DatabaseError databaseError) {
+
+						}
+					});
+					refComment.addValueEventListener(new ValueEventListener() {
+						@Override
+						public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+							txt_comment.setText(dataSnapshot.getChildrenCount() + " Comment");
+						}
+
+						@Override
+						public void onCancelled(@NonNull DatabaseError databaseError) {
+
+						}
+					});
+
 					txt_name.setText(hisName);
 					if (myUid.equals(uidOfPost))
 					{

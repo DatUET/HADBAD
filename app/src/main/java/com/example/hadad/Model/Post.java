@@ -4,7 +4,7 @@ package com.example.hadad.Model;
  * tạo đối tượng post và các thuộc tính của nó
  */
 public class Post {
-	String pId, pTitle, pDescr,pLikes, pComments, pImage, pTime, uid, uEmail, uDp, uName, hostUid, pMode;
+	String pId, pTitle, pDescr, pImage, pTime, uid, uEmail, uDp, uName, hostUid, pMode;
 
 	public Post() {
 	}
@@ -13,8 +13,6 @@ public class Post {
 		this.pId = pId;
 		this.pTitle = pTitle;
 		this.pDescr = pDescr;
-		this.pLikes = pLikes;
-		this.pComments = pComments;
 		this.pImage = pImage;
 		this.pTime = pTime;
 		this.uid = uid;
@@ -47,22 +45,6 @@ public class Post {
 
 	public void setpDescr(String pDescr) {
 		this.pDescr = pDescr;
-	}
-
-	public String getpLikes() {
-		return pLikes;
-	}
-
-	public void setpLikes(String pLikes) {
-		this.pLikes = pLikes;
-	}
-
-	public String getpComments() {
-		return pComments;
-	}
-
-	public void setpComments(String pComments) {
-		this.pComments = pComments;
 	}
 
 	public String getpImage() {

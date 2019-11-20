@@ -78,7 +78,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	String nameTran;
 
 	String myUid;
-	private DatabaseReference refLikes, refPost;
+	private DatabaseReference refLikes, refPost, refComment;
 	boolean isProcessLike = false;
 	User user = new User();
 	RequestQueue requestQueue;
@@ -90,6 +90,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 		refLikes = FirebaseDatabase.getInstance().getReference("Likes");
 		refPost = FirebaseDatabase.getInstance().getReference("Post");
+		refComment = FirebaseDatabase.getInstance().getReference("Comments");
 	}
 
 	// build file layout
@@ -106,7 +107,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	@Override
 	public void onBindViewHolder(@NonNull final PostViewHolder postViewHolder, final int i) {
 		Post post = postList.get(i);
-		final String pId, pTitle, pDescr, pImage, pTimestamp, uid, uEmail, uDp, uName, pLikes, pComments, hostUid, pMode;
+		final String pId, pTitle, pDescr, pImage, pTimestamp, uid, uEmail, uDp, uName, hostUid, pMode;
 		pId = post.getpId();
 		pTitle = post.getpTitle();
 		pDescr = post.getpDescr();
@@ -116,8 +117,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		uEmail = post.getuEmail();
 		uDp = post.getuDp();
 		uName = post.getuName();
-		pLikes = post.getpLikes();
-		pComments = post.getpComments();
 		hostUid = post.getHostUid();
 		pMode = post.getpMode();
 		final List<String> imgList = new ArrayList<>();
@@ -132,8 +131,29 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		postViewHolder.txt_time.setText(pTime);
 		postViewHolder.txt_title.setText(pTitle);
 		postViewHolder.txt_description.setText(pDescr);
-		postViewHolder.txt_like.setText(pLikes + " Likes");
-		postViewHolder.txt_comment.setText(pComments + " Comments");
+		refLikes.child(pId).addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				postViewHolder.txt_like.setText(dataSnapshot.getChildrenCount() + " Likes");
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+		refComment.child(pId).addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				postViewHolder.txt_comment.setText(dataSnapshot.getChildrenCount() + " Comments");
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+
 
 		if(uid.equals(myUid))
 		{
@@ -184,7 +204,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		postViewHolder.btn_like.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				final int numberLike = Integer.parseInt(pLikes);
 				isProcessLike = true;
 				refLikes.addValueEventListener(new ValueEventListener() {
 					@Override
@@ -194,14 +213,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 							if(dataSnapshot.child(pId).hasChild(myUid))
 							{
 								// nếu đã like bấm lần nữa bỏ like
-								refPost.child(pId).child("pLikes").setValue((numberLike - 1) + "");
 								refLikes.child(pId).child(myUid).removeValue();
 								isProcessLike = false;
 							}
 							else
 							{
 								// nếu chưa thì add vào danh sách đã like đồng thời gửi thông báo đến chủ post
-								refPost.child(pId).child("pLikes").setValue((numberLike + 1) + "");
 								refLikes.child(pId).child(myUid).setValue("Liked");
 								isProcessLike = false;
 								if (!myUid.equals(uid))
@@ -357,8 +374,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						hashMap.put("uName", user.getName());
 						hashMap.put("uEmail", user.getEmail());
 						hashMap.put("uDp", user.getImage());
-						hashMap.put("pLikes", "0");
-						hashMap.put("pComments", "0");
 						hashMap.put("pId", timeID);
 						hashMap.put("pTitle", pTitle);
 						hashMap.put("pDescr", pDescr);
