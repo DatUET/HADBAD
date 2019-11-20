@@ -134,9 +134,21 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		reference.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				String comments = dataSnapshot.child("pComments").getValue() + "";
-				int newCommentCount = Integer.parseInt(comments) - 1;
-				FirebaseDatabase.getInstance().getReference("Post").child(postId).child("pComments").setValue(newCommentCount + "");
+				final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId);
+				ref.addListenerForSingleValueEvent(new ValueEventListener() {
+					@Override
+					public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+						String comments = dataSnapshot.child("pComments").getValue() + "";
+						int newCommentCount = Integer.parseInt(comments) - 1;
+						ref.child("pComments").setValue(newCommentCount + "");
+					}
+
+					@Override
+					public void onCancelled(@NonNull DatabaseError databaseError) {
+
+					}
+				});
+
 			}
 
 			@Override

@@ -326,17 +326,17 @@ public class PostDetailActivity extends AppCompatActivity {
 					Comment comment = snapshot.getValue(Comment.class);
 
 					commentList.add(comment);
-					commentAdapter = new CommentAdapter(PostDetailActivity.this, commentList, myUid, postId);
-					recycler_comments.setAdapter(commentAdapter);
-					commentAdapter.notifyDataSetChanged();
 				}
+				commentAdapter = new CommentAdapter(PostDetailActivity.this, commentList, myUid, postId);
+				recycler_comments.setAdapter(commentAdapter);
+				commentAdapter.notifyDataSetChanged();
 			}
 
 			@Override
 			public void onCancelled(@NonNull DatabaseError databaseError) {
-
 			}
 		});
+
 	}
 
 	private void setLike() {
