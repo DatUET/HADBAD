@@ -82,6 +82,7 @@ public class UsersFragment extends Fragment {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				userList.clear();
+				Log.d("data", dataSnapshot.toString());
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					User user = snapshot.getValue(User.class);
@@ -157,10 +158,6 @@ public class UsersFragment extends Fragment {
 				if(!TextUtils.isEmpty(s.trim()))
 				{
 					searchUsers(s);
-				}
-				else
-				{
-					getAllUsser();
 				}
 				return false;
 			}

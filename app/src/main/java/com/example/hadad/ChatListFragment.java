@@ -127,9 +127,9 @@ public class ChatListFragment extends Fragment {
 					User user = snapshot.getValue(User.class);
 					if(userIDList.contains(user.getUid()) && !userList.contains(user)) {
 						userList.add(user);
-						userChatAdapter = new UserChatAdapter(getActivity(), userList);
-						recycler_chat_list.setAdapter(userChatAdapter);
 					}
+					userChatAdapter = new UserChatAdapter(getActivity(), userList);
+					recycler_chat_list.setAdapter(userChatAdapter);
 					progressBar.setVisibility(View.GONE);
 					frame_chatlist.setBackgroundColor(Color.parseColor("#ECEAEA"));
 				}

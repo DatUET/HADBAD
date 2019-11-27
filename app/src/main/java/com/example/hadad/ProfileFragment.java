@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -49,6 +51,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -68,6 +72,8 @@ public class ProfileFragment extends Fragment {
 	private static final int STORAGE_REQUEST_CODE = 200;
 	private static final int IMAGE_PICK_GALLERY_CODE = 300;
 	private static final int IMAGE_PICK_CAMERA_CODE = 400;
+
+	private static final int ITEM_LOAD = 5;
 
 	String cameraPermission[];
 	String storagePermisstion[];
@@ -91,9 +97,12 @@ public class ProfileFragment extends Fragment {
 	String profileOrCoverPhoto;
 
 	List<Post> postList;
+	List<String> postKeyList;
 	PostAdapter postAdapter;
 	String uid, imgavarta, imgcover;
 
+	Boolean isScrolling = false;
+	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
 
 	public ProfileFragment() {
 		// Required empty public constructor
@@ -121,9 +130,11 @@ public class ProfileFragment extends Fragment {
 		txt_email = view.findViewById(R.id.txt_email);
 		txt_phone = view.findViewById(R.id.txt_phone);
 		fab = view.findViewById(R.id.fab);
+		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 		recycler_post = view.findViewById(R.id.recycler_post);
-		recycler_post.setNestedScrollingEnabled(false);
+		recycler_post.setLayoutManager(linearLayoutManager);
 		postList = new ArrayList<>();
+		postKeyList = new ArrayList<>();
 		progressDialog = new ProgressDialog(getActivity());
 		progressDialog.setCanceledOnTouchOutside(false);
 
@@ -190,20 +201,88 @@ public class ProfileFragment extends Fragment {
 		});
 
 		checkUserStatus();
+		getListKey();
 		loadMyPost();
+
+		recycler_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+				{
+					isScrolling = true;
+				}
+			}
+
+			@Override
+			public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+				super.onScrolled(recyclerView, dx, dy);
+
+				currentItem = linearLayoutManager.getChildCount();
+				totalItem = linearLayoutManager.getItemCount();
+				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
+				if(isScrolling && (currentItem + scrollOutItem == totalItem))
+				{
+					isScrolling = false;
+					loadmoreData();
+				}
+			}
+		});
 
 		return view;
 	}
 
-	private void loadMyPost() {
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-		linearLayoutManager.setStackFromEnd(true);
-		linearLayoutManager.setReverseLayout(true);
-		recycler_post.setLayoutManager(linearLayoutManager);
+	private void loadmoreData() {
+		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Post");
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				for(int i = indexLastKey; i < indexLastKey + ITEM_LOAD; i++) {
+					if (i < postKeyList.size()) {
+						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
+							@Override
+							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+								postList.add(dataSnapshot.getValue(Post.class));
+								postAdapter.notifyDataSetChanged();
+							}
 
+							@Override
+							public void onCancelled(@NonNull DatabaseError databaseError) {
+
+							}
+						});
+					}
+				}
+				indexLastKey += ITEM_LOAD;
+			}
+		}, 1500);
+	}
+
+	private void getListKey()
+	{
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("uid").equalTo(uid);
-		query.addValueEventListener(new ValueEventListener() {
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				postKeyList.clear();
+				for(DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					postKeyList.add(snapshot.getKey());
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+	}
+
+	private void loadMyPost() {
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+		Query query = ref.orderByChild("uid").equalTo(uid).limitToFirst(ITEM_LOAD);
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
@@ -211,10 +290,9 @@ public class ProfileFragment extends Fragment {
 				{
 					Post post = snapshot.getValue(Post.class);
 					postList.add(post);
-
-					postAdapter = new PostAdapter(getActivity(), postList, "");
-					recycler_post.setAdapter(postAdapter);
 				}
+				postAdapter = new PostAdapter(getActivity(), postList, "");
+				recycler_post.setAdapter(postAdapter);
 			}
 
 			@Override
@@ -222,13 +300,11 @@ public class ProfileFragment extends Fragment {
 				Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		});
+		indexLastKey += ITEM_LOAD;
 	}
 
 	private void searchMyPost(final String querySearch) {
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-		linearLayoutManager.setStackFromEnd(true);
-		linearLayoutManager.setReverseLayout(true);
-		recycler_post.setLayoutManager(linearLayoutManager);
+
 
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("uid").equalTo(uid);
@@ -670,10 +746,6 @@ public class ProfileFragment extends Fragment {
 				{
 					searchMyPost(s);
 				}
-				else
-				{
-					loadMyPost();
-				}
 				return false;
 			}
 		});
@@ -712,4 +784,5 @@ public class ProfileFragment extends Fragment {
 		hashMap.put("onlineStatus", status);
 		dbRef.updateChildren(hashMap);
 	}
+
 }

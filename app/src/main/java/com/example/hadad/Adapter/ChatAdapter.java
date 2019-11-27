@@ -38,6 +38,8 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
@@ -108,7 +110,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		}
 		chatViewHolder.txt_time.setText(dateTime); // đưa thời gian đã gửi của tin nhắn vào TextView
 		try {
-			Picasso.get().load(imgUrl).into(chatViewHolder.img_avatar); // tải avater của người gửi vào ImageView
+			Picasso.get().load(imgUrl).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(chatViewHolder.img_avatar); // tải avater của người gửi vào ImageView
 		}
 		catch (Exception ex)
 		{
@@ -119,7 +121,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 			// nếu tin nhắn có ảnh thì load ảnh vào ImageView của item tin nhắn đó
 			chatViewHolder.img_chat.setVisibility(View.VISIBLE);
 			try {
-				Picasso.get().load(chat.getImage()).into(chatViewHolder.img_chat);
+				Picasso.get().load(chat.getImage()).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(chatViewHolder.img_chat);
 			}
 			catch (Exception ex)
 			{

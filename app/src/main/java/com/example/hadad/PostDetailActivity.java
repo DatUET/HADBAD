@@ -53,9 +53,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
@@ -395,7 +395,7 @@ public class PostDetailActivity extends AppCompatActivity {
 										String uid = snapshot.child("uId").getValue() + "";
 										if(!arrUserCommented.contains(uid))
 										{
-											sendNotification(postId, uid, "New Comment", myName + " commented on your post");
+											sendNotification(postId, uid, "New Comment", myName + " commented a post");
 											arrUserCommented.add(uid);
 										}
 									}
@@ -450,7 +450,7 @@ public class PostDetailActivity extends AppCompatActivity {
 							public Map<String, String> getHeaders() throws AuthFailureError {
 								Map<String, String> headers = new HashMap<>();
 								headers.put("Content-Type", "application/json");
-								headers.put("Authorization", "key=AAAAYhgK_pk:APA91bG6syUF2aAKH7gMaROZ8NpZKoH2Fh9oyFvA1ArSwbJJneP0kzCilQbh-WYBYXAAnChRZhhb-qEqR3Plk5V14v1SDX2Tu6_G66he1asQi5pzlfqZaFnNYgP0YkPE1U-lRwWJwQWx");
+								headers.put("Authorization", "key=AAAAO8U71X8:APA91bFTogEvmtD6vTfETtuEOyh9CloLCGczfPEp6RUT01euNT7RaYnSymNDIqCRkUoPVYZC2K9EXj36Sg7T9pRXwuacsm-IiLS1_xgwSuUO9F1yNBbd0cJacT4qBeZdMVrDZl9MKcc9");
 								return headers;
 							}
 						};
@@ -534,7 +534,7 @@ public class PostDetailActivity extends AppCompatActivity {
 					myDp = snapshot.child("image").getValue() + "";
 				}
 				try {
-					Picasso.get().load(myDp).placeholder(R.drawable.ic_defaut_img).into(img_avatar_comment);
+					Picasso.get().load(myDp).placeholder(R.drawable.ic_defaut_img).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar_comment);
 				}
 				catch (Exception ex)
 				{
@@ -621,7 +621,7 @@ public class PostDetailActivity extends AppCompatActivity {
 					}
 
 					try {
-						Picasso.get().load(hisDp).placeholder(R.drawable.ic_defaut_img).into(img_avatar);
+						Picasso.get().load(hisDp).placeholder(R.drawable.ic_defaut_img).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
 					}
 					catch (Exception ex)
 					{

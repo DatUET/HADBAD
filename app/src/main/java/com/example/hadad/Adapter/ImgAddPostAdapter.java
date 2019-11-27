@@ -10,6 +10,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.hadad.R;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -39,7 +41,7 @@ public class ImgAddPostAdapter extends RecyclerView.Adapter<ImgAddPostAdapter.Im
 
     @Override
     public void onBindViewHolder(@NonNull ImgAddPostViewHolder imgAddPostViewHolder, final int i) {
-        Picasso.get().load(uriList.get(i)).into(imgAddPostViewHolder.img_post);
+        Picasso.get().load(uriList.get(i)).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imgAddPostViewHolder.img_post);
         imgAddPostViewHolder.img_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -58,6 +58,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.gson.Gson;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
@@ -82,6 +84,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	boolean isProcessLike = false;
 	User user = new User();
 	RequestQueue requestQueue;
+
+	private static final String MAX_TIME = "9999999999999";
 
 	public PostAdapter(Context context, List<Post> postList, String nameTran) {
 		this.context = context;
@@ -177,7 +181,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		}
 		catch (Exception ex)
 		{
-
+			Picasso.get().load(R.drawable.user).into(postViewHolder.img_avatar);
 		}
 
 		if (!pImage.equals("noImage"))
@@ -332,7 +336,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 								public Map<String, String> getHeaders() throws AuthFailureError {
 									Map<String, String> headers = new HashMap<>();
 									headers.put("Content-Type", "application/json");
-									headers.put("Authorization", "key=AAAAYhgK_pk:APA91bG6syUF2aAKH7gMaROZ8NpZKoH2Fh9oyFvA1ArSwbJJneP0kzCilQbh-WYBYXAAnChRZhhb-qEqR3Plk5V14v1SDX2Tu6_G66he1asQi5pzlfqZaFnNYgP0YkPE1U-lRwWJwQWx");
+									headers.put("Authorization", "key=AAAAO8U71X8:APA91bFTogEvmtD6vTfETtuEOyh9CloLCGczfPEp6RUT01euNT7RaYnSymNDIqCRkUoPVYZC2K9EXj36Sg7T9pRXwuacsm-IiLS1_xgwSuUO9F1yNBbd0cJacT4qBeZdMVrDZl9MKcc9");
 									return headers;
 								}
 							};
@@ -374,7 +378,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						hashMap.put("uName", user.getName());
 						hashMap.put("uEmail", user.getEmail());
 						hashMap.put("uDp", user.getImage());
-						hashMap.put("pId", timeID);
+						hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timeID) + "");
 						hashMap.put("pTitle", pTitle);
 						hashMap.put("pDescr", pDescr);
 						hashMap.put("pImage", pImage);
@@ -383,7 +387,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						hashMap.put("pMode", "Public");
 
 						DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-						ref.child(timeID).setValue(hashMap)
+						ref.child(Long.parseLong(MAX_TIME) - Long.parseLong(timeID) + "").setValue(hashMap)
 								.addOnSuccessListener(new OnSuccessListener<Void>() {
 									@Override
 									public void onSuccess(Void aVoid) {

@@ -18,11 +18,14 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -31,8 +34,6 @@ import android.widget.Toast;
 
 import com.example.hadad.Adapter.PostAdapter;
 import com.example.hadad.Model.Post;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,17 +42,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
 public class ThereProfileActivity extends AppCompatActivity {
 
 	private static final int REQUEST_CALL = 200;
+	private static final int ITEM_LOAD = 5;
 
 	ImageView img_avatar, img_cover;
 	TextView txt_name, txt_email, txt_phone;
@@ -59,12 +61,19 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 	RecyclerView recycler_post;
 	List<Post> postList;
+	List<String> postKeyList;
 	PostAdapter postAdapter;
 	String uid, imgavarta, imgcover;
 	LinearLayout layout_profile;
 	ImageButton btn_call_phone, btn_chat, btn_subscribe;
+	LinearLayoutManager linearLayoutManager;
 
 	FirebaseAuth firebaseAuth;
+	String myUid;
+	boolean isFollowing = false;
+
+	boolean isScrolling = false;
+	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -78,8 +87,8 @@ public class ThereProfileActivity extends AppCompatActivity {
 	private void addControl() {
 
 		recycler_post = findViewById(R.id.recycler_post);
-		recycler_post.setNestedScrollingEnabled(false);
 		firebaseAuth = FirebaseAuth.getInstance();
+		linearLayoutManager = new LinearLayoutManager(ThereProfileActivity.this);
 
 		actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
@@ -100,23 +109,20 @@ public class ThereProfileActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 		uid = intent.getStringExtra("uid");
 		boolean fromUsers = intent.getBooleanExtra("fromUsers", false);
-		if(fromUsers)
-		{
+		if (fromUsers) {
 			img_avatar.setTransitionName("transitionUsers");
-		}
-		else
-		{
+		} else {
 			img_avatar.setTransitionName("transition");
 		}
 		postList = new ArrayList<>();
+		postKeyList = new ArrayList<>();
 
 		Query query = FirebaseDatabase.getInstance().getReference("Users").orderByChild("uid").equalTo(uid);
 
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				Log.d("user profile", dataSnapshot.toString());
-				for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					String name = snapshot.child("name").getValue() + "";
 					String email = snapshot.child("email").getValue() + "";
 					String phone = snapshot.child("phone").getValue() + "";
@@ -131,17 +137,13 @@ public class ThereProfileActivity extends AppCompatActivity {
 					Log.d("user profile", name + " " + email);
 
 					try {
-						Picasso.get().load(imgavarta).into(img_avatar);
-					}
-					catch (Exception ex)
-					{
+						Picasso.get().load(imgavarta).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
+					} catch (Exception ex) {
 						//Picasso.get().load(R.drawable.ic_defaut_avatar).into(img_avatar);
 					}
 					try {
 						Picasso.get().load(imgcover).into(img_cover);
-					}
-					catch (Exception ex)
-					{
+					} catch (Exception ex) {
 
 					}
 				}
@@ -152,14 +154,38 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 			}
 		});
-
+		getListKey();
 		checkUserStatus();
+		checkFollowing();
 		loadHisPost();
+		recycler_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+				{
+					isScrolling = true;
+				}
+			}
+
+			@Override
+			public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+				super.onScrolled(recyclerView, dx, dy);
+
+				currentItem = linearLayoutManager.getChildCount();
+				totalItem = linearLayoutManager.getItemCount();
+				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
+				if(isScrolling && (currentItem + scrollOutItem == totalItem))
+				{
+					isScrolling = false;
+					loadmoreData();
+				}
+			}
+		});
 	}
 
 	private void addEvent() {
-		if (uid.equals(firebaseAuth.getCurrentUser().getUid()))
-		{
+		if (uid.equals(myUid)) {
 			btn_chat.setVisibility(View.GONE);
 			btn_call_phone.setVisibility(View.GONE);
 		}
@@ -209,56 +235,22 @@ public class ThereProfileActivity extends AppCompatActivity {
 				showDialogAddSubcribe();
 			}
 		});
+
 	}
 
-	private void showDialogAddSubcribe() {
-		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("subscribers");
-		ref.addListenerForSingleValueEvent(new ValueEventListener() {
+	private void getListKey() {
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+		Query query = ref.orderByChild("uid").equalTo(uid);
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				String listUser = dataSnapshot.getValue() + "";
-				if(listUser.contains(uid))
-				{
-					AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
-					builder.setTitle("Subcribe");
-					builder.setMessage("Do you unsubscribe " + txt_name.getText().toString());
-					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							unSubscribe();
-						}
-					})
-							.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
-								}
-							});
-					AlertDialog alertDialog = builder.create();
-					alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-					alertDialog.show();
-				}
-				else
-				{
-					AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
-					builder.setTitle("Subcribe");
-					builder.setMessage("Do you subscribe " + txt_name.getText().toString());
-					builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							addSubscribe();
-						}
-					})
-							.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
-								}
-							});
-					AlertDialog alertDialog = builder.create();
-					alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-					alertDialog.show();
+				postKeyList.clear();
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+					Post post = snapshot.getValue(Post.class);
+					if (!post.getpMode().equals("Private") || post.getUid().equals(myUid)) {
+						postKeyList.add(snapshot.getKey());
+					}
+					Log.d("size key", postKeyList.size() + "");
 				}
 			}
 
@@ -268,57 +260,115 @@ public class ThereProfileActivity extends AppCompatActivity {
 			}
 		});
 
+		Log.d("size key 1", postKeyList.size() + "");
+	}
 
+	private void loadmoreData() {
+		Log.d("size key load more", postKeyList.size() + "");
+		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Post");
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				for (int i = indexLastKey; i < indexLastKey + ITEM_LOAD; i++) {
+					if (i < postKeyList.size()) {
+						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
+							@Override
+							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+								postList.add(dataSnapshot.getValue(Post.class));
+								postAdapter.notifyDataSetChanged();
+							}
+
+							@Override
+							public void onCancelled(@NonNull DatabaseError databaseError) {
+
+							}
+						});
+					}
+				}
+				indexLastKey += ITEM_LOAD;
+			}
+		}, 1500);
+	}
+
+	private void loadHisPost() {
+		recycler_post.setLayoutManager(linearLayoutManager);
+
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+		Query query = ref.orderByChild("uid").equalTo(uid).limitToFirst(ITEM_LOAD);
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				postList.clear();
+				for (DataSnapshot snapshot : dataSnapshot.getChildren())
+				{
+					Post post = snapshot.getValue(Post.class);
+					if (!post.getpMode().equals("Private") || post.getUid().equals(myUid)) {
+						postList.add(post);
+					}
+				}
+				postAdapter = new PostAdapter(ThereProfileActivity.this, postList, "");
+				recycler_post.setAdapter(postAdapter);
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+				Toast.makeText(ThereProfileActivity.this, databaseError.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
+		indexLastKey += ITEM_LOAD;
+	}
+
+
+	private void showDialogAddSubcribe() {
+		if (isFollowing) {
+			AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
+			builder.setTitle("Subcribe");
+			builder.setMessage("Do you unsubscribe " + txt_name.getText().toString());
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					unSubscribe();
+				}
+			})
+					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+			alertDialog.show();
+		} else {
+			AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
+			builder.setTitle("Subcribe");
+			builder.setMessage("Do you subscribe " + txt_name.getText().toString());
+			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					addSubscribe();
+				}
+			})
+					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							dialog.dismiss();
+						}
+					});
+			AlertDialog alertDialog = builder.create();
+			alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+			alertDialog.show();
+		}
 	}
 
 	private void unSubscribe() {
-		String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(myUid).child("subscribers");
-		ref.addListenerForSingleValueEvent(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				List<String> listSubscribe = new ArrayList<>();
-				listSubscribe.addAll(Arrays.asList(dataSnapshot.getValue().toString().split(",")));
-				listSubscribe.remove(uid);
-				String afterUnsubcribe = "";
-				for(String item : listSubscribe)
-				{
-					afterUnsubcribe = item +",";
-				}
-				HashMap<String, Object> hashMap = new HashMap<>();
-				hashMap.put("subscribers", afterUnsubcribe);
-				ref.getParent().updateChildren(hashMap)
-				.addOnCompleteListener(new OnCompleteListener<Void>() {
-					                       @Override
-					                       public void onComplete(@NonNull Task<Void> task) {
-						                       btn_subscribe.setImageResource(R.drawable.ic_subscribe_post);
-					                       }
-				                       }
-				);
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-			}
-		});
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Follows").child(myUid).child(uid);
+		ref.removeValue();
 	}
 
 	private void addSubscribe() {
-		String myUid = firebaseAuth.getCurrentUser().getUid();
-		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(myUid).child("subscribers");
-		ref.addListenerForSingleValueEvent(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				String listUser = dataSnapshot.getValue() + uid + ",";
-				HashMap<String, Object> hashMap = new HashMap<>();
-				hashMap.put("subscribers", listUser);
-				ref.getParent().updateChildren(hashMap);
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-			}
-		});
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Follows").child(myUid).child(uid);
+		ref.setValue("followed");
 
 	}
 
@@ -341,45 +391,9 @@ public class ThereProfileActivity extends AppCompatActivity {
 		}
 	}
 
-	private void loadHisPost() {
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ThereProfileActivity.this);
-		linearLayoutManager.setStackFromEnd(true);
-		linearLayoutManager.setReverseLayout(true);
-		recycler_post.setLayoutManager(linearLayoutManager);
-
-		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-		Query query = ref.orderByChild("uid").equalTo(uid);
-		query.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				postList.clear();
-				for (DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
-
-					Post post = snapshot.getValue(Post.class);
-					if ((!post.getpMode().equals("Private") && !uid.equals(firebaseAuth.getCurrentUser().getUid())) || uid.equals(firebaseAuth.getCurrentUser().getUid())) {
-						postList.add(post);
-					}
-
-					postAdapter = new PostAdapter(ThereProfileActivity.this, postList, "");
-					recycler_post.setAdapter(postAdapter);
-				}
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-				Toast.makeText(ThereProfileActivity.this, databaseError.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		});
-	}
 
 	private void searchHisPost(final String querySearch)
 	{
-		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(ThereProfileActivity.this);
-		linearLayoutManager.setStackFromEnd(true);
-		linearLayoutManager.setReverseLayout(true);
-		recycler_post.setLayoutManager(linearLayoutManager);
-
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("uid").equalTo(uid);
 		query.addValueEventListener(new ValueEventListener() {
@@ -406,35 +420,42 @@ public class ThereProfileActivity extends AppCompatActivity {
 		});
 	}
 
+	private void checkFollowing()
+	{
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Follows").child(myUid).child(uid);
+		ref.addValueEventListener(new ValueEventListener() {
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				if(dataSnapshot.exists())
+				{
+					isFollowing = true;
+					btn_subscribe.setImageResource(R.drawable.ic_subscribed_post);
+				}
+				else
+				{
+					isFollowing = false;
+					btn_subscribe.setImageResource(R.drawable.ic_subscribe_post);
+				}
+			}
+
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+
+			}
+		});
+	}
+
 	private void checkUserStatus()
 	{
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
 		if(firebaseUser != null)
 		{
-			if(uid.equals(firebaseUser.getUid()))
+			myUid = firebaseUser.getUid();
+			if(uid.equals(myUid))
 			{
 				btn_chat.setVisibility(View.GONE);
 				btn_call_phone.setVisibility(View.GONE);
 				btn_subscribe.setVisibility(View.GONE);
-			}
-			else
-			{
-				DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid()).child("subscribers");
-				ref.addValueEventListener(new ValueEventListener() {
-					@Override
-					public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-						String listUser = dataSnapshot.getValue() + "";
-						if(listUser.contains(uid))
-						{
-							btn_subscribe.setImageResource(R.drawable.ic_subscribed_post);
-						}
-					}
-
-					@Override
-					public void onCancelled(@NonNull DatabaseError databaseError) {
-
-					}
-				});
 			}
 		}
 		else
@@ -522,8 +543,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 	private void checkOnlineStatus(String status)
 	{
-		FirebaseUser user = firebaseAuth.getCurrentUser();
-		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
 		HashMap<String, Object> hashMap = new HashMap<>();
 		hashMap.put("onlineStatus", status);
 		dbRef.updateChildren(hashMap);

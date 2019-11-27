@@ -25,6 +25,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.Calendar;
@@ -81,7 +83,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 		commentViewHolder.txt_time.setText(cTime);
 
 		try {
-			Picasso.get().load(uDp).placeholder(R.drawable.user).into(commentViewHolder.img_avatar); // tải ảnh của người cmt vào ImageView
+			Picasso.get().load(uDp).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(commentViewHolder.img_avatar); // tải ảnh của người cmt vào ImageView
 		}
 		catch (Exception ex)
 		{

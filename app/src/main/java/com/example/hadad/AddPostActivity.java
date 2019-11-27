@@ -7,7 +7,9 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
@@ -26,6 +28,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -68,16 +72,13 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Paths;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -330,47 +331,65 @@ public class AddPostActivity extends AppCompatActivity {
 				n = 0;
 				for(Uri uri : uriList)
 				{
-					if(uriListToShowImgs.contains(uri))
-					{
-						String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
-						n++;
-						StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-						storageReference.putFile(uri)
-								.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-									@Override
-									public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-										Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-										while (!uriTask.isSuccessful()) ;
-										urlImg += uriTask.getResult().toString() + ",";
-										hashMap.put("pImage", urlImg);
-										DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-										ref.child(editPostId).updateChildren(hashMap)
-												.addOnSuccessListener(new OnSuccessListener<Void>() {
-													@Override
-													public void onSuccess(Void aVoid) {
-														progressDialog.dismiss();
-														Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
-														uriList.clear();
-														imageUri = null;
-														finish();
-													}
-												})
-												.addOnFailureListener(new OnFailureListener() {
-													@Override
-													public void onFailure(@NonNull Exception e) {
-														progressDialog.dismiss();
-														Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-													}
-												});
-									}
-								})
-								.addOnFailureListener(new OnFailureListener() {
-									@Override
-									public void onFailure(@NonNull Exception e) {
-										progressDialog.dismiss();
-										Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-									}
-								});
+					if(uriListToShowImgs.contains(uri)) {
+						int quality = 100;
+						Cursor cursor = this.getContentResolver().query(uri,
+								null, null, null, null);
+						cursor.moveToFirst();
+						double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
+						try {
+							Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+							ByteArrayOutputStream baos = new ByteArrayOutputStream();
+							if(file_size > 1024)
+								quality = (int) (1536.0/file_size * 100.0);
+							bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+							Log.d("quality", quality + "");
+							byte[] data = baos.toByteArray();
+							String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
+							n++;
+							StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
+							storageReference.putBytes(data)
+									.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+										@Override
+										public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+											Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+											while (!uriTask.isSuccessful()) ;
+											urlImg += uriTask.getResult().toString() + ",";
+											hashMap.put("pImage", urlImg);
+											DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+											ref.child(editPostId).updateChildren(hashMap)
+													.addOnSuccessListener(new OnSuccessListener<Void>() {
+														@Override
+														public void onSuccess(Void aVoid) {
+															progressDialog.dismiss();
+															Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
+															uriList.clear();
+															imageUri = null;
+															finish();
+														}
+													})
+													.addOnFailureListener(new OnFailureListener() {
+														@Override
+														public void onFailure(@NonNull Exception e) {
+															progressDialog.dismiss();
+															Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+														}
+													});
+										}
+									})
+									.addOnFailureListener(new OnFailureListener() {
+										@Override
+										public void onFailure(@NonNull Exception e) {
+											progressDialog.dismiss();
+											Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+										}
+									});
+							cursor.close();
+						}
+						catch (Exception ex)
+						{
+							ex.printStackTrace();
+						}
 					}
 				}
 			}
@@ -411,55 +430,74 @@ public class AddPostActivity extends AppCompatActivity {
 			hashMap.put("uName", name);
 			hashMap.put("uEmail", email);
 			hashMap.put("uDp", dp);
-			hashMap.put("pId", timestamp);
+			hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "");
 			hashMap.put("pTitle", title);
 			hashMap.put("pDescr", description);
 			hashMap.put("pTime", timestamp);
 			hashMap.put("pMode", modeList.get(positionMode));
 
-			for (Uri uri : uriList) {
-				String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
-				n++;
-				StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-				storageReference.putFile(uri)
-						.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-							@Override
-							public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-								Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-								while (!uriTask.isSuccessful()) ;
-								urlImg += uriTask.getResult().toString() + ",";
-								hashMap.put("pImage", urlImg);
-								DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-								ref.child(timestamp).setValue(hashMap)
-										.addOnSuccessListener(new OnSuccessListener<Void>() {
-											@Override
-											public void onSuccess(Void aVoid) {
-												progressDialog.dismiss();
-												uriList.clear();
-												imageUri = null;
-												finish();
-											}
-										})
-										.addOnFailureListener(new OnFailureListener() {
-											@Override
-											public void onFailure(@NonNull Exception e) {
-												progressDialog.dismiss();
-												Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-											}
-										});
-							}
-						})
-						.addOnFailureListener(new OnFailureListener() {
-							@Override
-							public void onFailure(@NonNull Exception e) {
-								progressDialog.dismiss();
-								Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-							}
-						});
-			}
+			for (Uri uri : uriListToShowImgs) {
+				int quality = 100;
+				Cursor cursor = this.getContentResolver().query(uri,
+						null, null, null, null);
+				cursor.moveToFirst();
+				double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
+				Log.d("file size", file_size + "-" + quality);
+				try {
+					Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					if(file_size > 1024)
+						quality = (int) (1536.0/file_size * 100.0);
+					bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+					Log.d("quality", quality + "");
+					byte[] data = baos.toByteArray();
+					String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
+					n++;
+					StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
+					storageReference.putBytes(data)
+							.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+								@Override
+								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+									Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+									while (!uriTask.isSuccessful()) ;
+									urlImg += uriTask.getResult().toString() + ",";
+									hashMap.put("pImage", urlImg);
+									DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+									ref.child(Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "").setValue(hashMap)
+											.addOnSuccessListener(new OnSuccessListener<Void>() {
+												@Override
+												public void onSuccess(Void aVoid) {
+												}
+											})
+											.addOnFailureListener(new OnFailureListener() {
+												@Override
+												public void onFailure(@NonNull Exception e) {
+													progressDialog.dismiss();
+													Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+												}
+											});
+								}
+							})
+							.addOnFailureListener(new OnFailureListener() {
+								@Override
+								public void onFailure(@NonNull Exception e) {
+									progressDialog.dismiss();
+									Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+								}
+							});
 
-			if (n == uriList.size() - 1)
-				Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
+					if (n == uriListToShowImgs.size()) {
+						Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
+						progressDialog.dismiss();
+						uriList.clear();
+						imageUri = null;
+						finish();
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+				cursor.close();
+			}
 		}
 		else
 		{
@@ -469,7 +507,7 @@ public class AddPostActivity extends AppCompatActivity {
 			hashMap.put("uName", name);
 			hashMap.put("uEmail", email);
 			hashMap.put("uDp", dp);
-			hashMap.put("pId", timestamp);
+			hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "");
 			hashMap.put("pTitle", title);
 			hashMap.put("pDescr", description);
 			hashMap.put("pImage", "noImage");
@@ -477,7 +515,7 @@ public class AddPostActivity extends AppCompatActivity {
 			hashMap.put("pMode", modeList.get(positionMode));
 
 			DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-			ref.child(timestamp).setValue(hashMap)
+			ref.child(Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "").setValue(hashMap)
 					.addOnSuccessListener(new OnSuccessListener<Void>() {
 						@Override
 						public void onSuccess(Void aVoid) {
@@ -499,14 +537,13 @@ public class AddPostActivity extends AppCompatActivity {
 					});
 		}
 		if (positionMode == 0 ) {
-			final String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-			DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
+			DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Follows");
 			reference.addListenerForSingleValueEvent(new ValueEventListener() {
 				@Override
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-						if (snapshot.getValue(User.class).getSubscribers().contains(myUid)) {
-							sendPostNotification(timestamp, snapshot.getValue(User.class).getUid(), name + " added new post", title);
+						if (snapshot.hasChild(uid)) {
+							sendPostNotification(timestamp, snapshot.getKey(), name + " added new post", title);
 						}
 					}
 				}
@@ -551,7 +588,7 @@ public class AddPostActivity extends AppCompatActivity {
 							public Map<String, String> getHeaders() throws AuthFailureError {
 								Map<String, String> headers = new HashMap<>();
 								headers.put("Content-Type", "application/json");
-								headers.put("Authorization", "key=AAAAYhgK_pk:APA91bG6syUF2aAKH7gMaROZ8NpZKoH2Fh9oyFvA1ArSwbJJneP0kzCilQbh-WYBYXAAnChRZhhb-qEqR3Plk5V14v1SDX2Tu6_G66he1asQi5pzlfqZaFnNYgP0YkPE1U-lRwWJwQWx");
+								headers.put("Authorization", "key=AAAAO8U71X8:APA91bFTogEvmtD6vTfETtuEOyh9CloLCGczfPEp6RUT01euNT7RaYnSymNDIqCRkUoPVYZC2K9EXj36Sg7T9pRXwuacsm-IiLS1_xgwSuUO9F1yNBbd0cJacT4qBeZdMVrDZl9MKcc9");
 								return headers;
 							}
 						};
@@ -738,7 +775,7 @@ public class AddPostActivity extends AppCompatActivity {
 			if(requestCode == IMAGE_PICK_CAMERA_CODE)
 			{
 				uriList.add(imageUri);
-				uriListToShowImgs.add(data.getData());
+				uriListToShowImgs.add(imageUri);
 
 				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
@@ -812,4 +849,5 @@ public class AddPostActivity extends AppCompatActivity {
 		super.onResume();
 		checkUserStatus();
 	}
+
 }

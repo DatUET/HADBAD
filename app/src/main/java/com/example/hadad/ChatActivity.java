@@ -5,6 +5,8 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -20,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
@@ -68,10 +72,13 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -203,7 +210,7 @@ public class ChatActivity extends AppCompatActivity {
 
 					try {
 						if(!TextUtils.isEmpty(hisImage)) {
-							Picasso.get().load(hisImage).placeholder(R.drawable.ic_default_img_white).into(img_avatar);
+							Picasso.get().load(hisImage).placeholder(R.drawable.ic_default_img_white).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
 						}
 					}
 					catch (Exception ex)
@@ -532,35 +539,51 @@ public class ChatActivity extends AppCompatActivity {
 			}
 			else
 			{
-				if(imgUri != null)
-				{
+				if(imgUri != null) {
 					progressDialog.setMessage("Sending image. Please wait...");
 					progressDialog.show();
 					String filepathAndName = "ChatsImg/" + "chat_" + timeStamp;
-					StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-					storageReference.putFile(imgUri)
-							.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-								@Override
-								public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-									Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
-									while (!uriTask.isSuccessful());
+					int quality = 100;
+					Cursor cursor = this.getContentResolver().query(imgUri,
+							null, null, null, null);
+					cursor.moveToFirst();
+					double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
+					try {
+						Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
+						ByteArrayOutputStream baos = new ByteArrayOutputStream();
+						if (file_size > 1024)
+							quality = (int) (1536.0 / file_size * 100.0);
+						bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+						Log.d("quality", quality + "");
+						byte[] data = baos.toByteArray();
+						StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
+						storageReference.putFile(imgUri)
+								.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+									@Override
+									public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+										Task<Uri> uriTask = taskSnapshot.getStorage().getDownloadUrl();
+										while (!uriTask.isSuccessful()) ;
 
-									String downloadUri = uriTask.getResult().toString();
-									if(uriTask.isSuccessful())
-									{
-										hashMap.put("image", downloadUri);
-										hashMap.put("video", "noVideo");
-										databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
-										progressDialog.dismiss();
+										String downloadUri = uriTask.getResult().toString();
+										if (uriTask.isSuccessful()) {
+											hashMap.put("image", downloadUri);
+											hashMap.put("video", "noVideo");
+											databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
+											progressDialog.dismiss();
+										}
 									}
-								}
-							})
-							.addOnFailureListener(new OnFailureListener() {
-								@Override
-								public void onFailure(@NonNull Exception e) {
-									Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-								}
-							});
+								})
+								.addOnFailureListener(new OnFailureListener() {
+									@Override
+									public void onFailure(@NonNull Exception e) {
+										Toast.makeText(ChatActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								});
+					}
+					catch (Exception ex)
+					{
+						ex.printStackTrace();
+					}
 				}
 			}
 		}
@@ -627,7 +650,7 @@ public class ChatActivity extends AppCompatActivity {
 							public Map<String, String> getHeaders() throws AuthFailureError {
 								Map<String, String> headers = new HashMap<>();
 								headers.put("Content-Type", "application/json");
-								headers.put("Authorization", "key=AAAAYhgK_pk:APA91bG6syUF2aAKH7gMaROZ8NpZKoH2Fh9oyFvA1ArSwbJJneP0kzCilQbh-WYBYXAAnChRZhhb-qEqR3Plk5V14v1SDX2Tu6_G66he1asQi5pzlfqZaFnNYgP0YkPE1U-lRwWJwQWx");
+								headers.put("Authorization", "key=AAAAO8U71X8:APA91bFTogEvmtD6vTfETtuEOyh9CloLCGczfPEp6RUT01euNT7RaYnSymNDIqCRkUoPVYZC2K9EXj36Sg7T9pRXwuacsm-IiLS1_xgwSuUO9F1yNBbd0cJacT4qBeZdMVrDZl9MKcc9");
 								return headers;
 							}
 						};
@@ -836,13 +859,4 @@ public class ChatActivity extends AppCompatActivity {
 		super.onPause();
 	}
 
-	@Override
-	protected void onRestart() {
-		super.onRestart();
-	}
-
-	@Override
-	protected void onResume() {
-		super.onResume();
-	}
 }

@@ -20,6 +20,8 @@ import com.example.hadad.Model.User;
 
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -57,7 +59,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 		userViewHolder.txt_name.setText(name);
 		userViewHolder.txt_email.setText(email);
 		try {
-			Picasso.get().load(avatar).placeholder(R.drawable.user).into(userViewHolder.img_avatar);
+			Picasso.get().load(avatar).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(userViewHolder.img_avatar);
 		}
 		 catch (Exception ex)
 		 {

@@ -7,14 +7,18 @@ import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 
 import com.example.hadad.Adapter.UserListPostNotiAdapter;
 import com.example.hadad.Model.User;
+import com.example.hadad.Notification.Data;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -32,6 +36,7 @@ public class SettingActivity extends AppCompatActivity {
 	RecyclerView recycler_user_post;
 	List<User> userList;
 	UserListPostNotiAdapter userListPostNotiAdapter;
+	LinearLayout layout_change_pass;
 
 	SharedPreferences preferences;
 	SharedPreferences.Editor editor;
@@ -58,6 +63,7 @@ public class SettingActivity extends AppCompatActivity {
 		actionBar.setDisplayShowHomeEnabled(true);
 		sw_post = findViewById(R.id.sw_post);
 		recycler_user_post = findViewById(R.id.recycler_user_post);
+		layout_change_pass = findViewById(R.id.layout_change_pass);
 		preferences = getSharedPreferences("NotiPost", MODE_PRIVATE);
 		enable4NewPost = preferences.getBoolean(TOPIC_POST_NOTI, false);
 		sw_post.setChecked(enable4NewPost);
@@ -91,20 +97,27 @@ public class SettingActivity extends AppCompatActivity {
 				}
 			}
 		});
+
+		layout_change_pass.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				Intent intent = new Intent(SettingActivity.this, ChangePassActivity.class);
+				startActivity(intent);
+			}
+		});
 	}
 
 	private void addListUser() {
 		String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(myUid).child("subscribers");
+		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Follows").child(myUid);
 		ref.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				String[] listUser = dataSnapshot.getValue().toString().split(",");
 				userList.clear();
-				for(String item : listUser)
-				{
-					if (!item.equals("")) {
-						DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(item);
+				if (dataSnapshot.getChildrenCount() > 0) {
+					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+						String idUserFollow = snapshot.getKey();
+						DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(idUserFollow);
 						reference.addValueEventListener(new ValueEventListener() {
 							@Override
 							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -120,13 +133,12 @@ public class SettingActivity extends AppCompatActivity {
 							}
 						});
 					}
-					else
-					{
-						userListPostNotiAdapter = new UserListPostNotiAdapter(userList, SettingActivity.this);
-						recycler_user_post.setAdapter(userListPostNotiAdapter);
-					}
-				}
 
+				}
+				else {
+					userListPostNotiAdapter = new UserListPostNotiAdapter(userList, SettingActivity.this);
+					recycler_user_post.setAdapter(userListPostNotiAdapter);
+				}
 			}
 
 			@Override

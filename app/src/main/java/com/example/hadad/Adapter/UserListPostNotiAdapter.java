@@ -17,17 +17,12 @@ import com.blogspot.atifsoftwares.circularimageview.CircularImageView;
 import com.example.hadad.Model.User;
 import com.example.hadad.R;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
-import java.lang.reflect.Array;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 public class UserListPostNotiAdapter extends RecyclerView.Adapter<UserListPostNotiAdapter.UserListPostNotiViewHolder> {
@@ -54,7 +49,7 @@ public class UserListPostNotiAdapter extends RecyclerView.Adapter<UserListPostNo
 	public void onBindViewHolder(@NonNull UserListPostNotiViewHolder holder, int position) {
 		final User user = userList.get(position);
 		if (!user.getImage().equals("")) {
-			Picasso.get().load(user.getImage()).into(holder.img_avatar);
+			Picasso.get().load(user.getImage()).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(holder.img_avatar);
 		}
 		holder.txt_name.setText(user.getName());
 		holder.btn_delete.setOnClickListener(new View.OnClickListener() {
@@ -84,27 +79,8 @@ public class UserListPostNotiAdapter extends RecyclerView.Adapter<UserListPostNo
 
 	private void unSubscribe(final String uid) {
 		String myUid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Users").child(myUid).child("subscribers");
-		ref.addValueEventListener(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				List<String> listSubscribe = new ArrayList<>();
-				listSubscribe.addAll(Arrays.asList(dataSnapshot.getValue().toString().split(",")));
-				listSubscribe.remove(uid);
-				String afterUnsubcribe = "";
-				for(String item : listSubscribe)
-				{
-					afterUnsubcribe = item +",";
-				}
-				HashMap<String, Object> hashMap = new HashMap<>();
-				hashMap.put("subscribers", afterUnsubcribe);
-				ref.getParent().updateChildren(hashMap);
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-			}
-		});
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Follows").child(myUid).child(uid);
+		ref.removeValue();
 		notifyDataSetChanged();
 	}
 

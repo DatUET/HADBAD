@@ -19,6 +19,8 @@ import android.widget.TextView;
 import com.example.hadad.ImagePostActivity;
 import com.example.hadad.PostDetailActivity;
 import com.example.hadad.R;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -61,7 +63,8 @@ public class ImgPostDetailAdapter extends PagerAdapter
         TextView txt_count = view.findViewById(R.id.txt_count);
         txt_count.setText(position + 1 + "/" + imgList.size());
         imageView.setBackgroundColor(Color.parseColor("#1b1e44"));
-        Picasso.get().load(imgList.get(position)).into(imageView);
+        Picasso.get().load(imgList.get(position)).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imageView);
+        //Picasso.get().load(imgList.get(position)).into(imageView);
         container.addView(view);
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override

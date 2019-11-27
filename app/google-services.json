@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "421310168729",
-    "firebase_url": "https://hadad-social-network.firebaseio.com",
-    "project_id": "hadad-social-network",
-    "storage_bucket": "hadad-social-network.appspot.com"
+    "project_number": "256712103295",
+    "firebase_url": "https://hadad-4b9b1.firebaseio.com",
+    "project_id": "hadad-4b9b1",
+    "storage_bucket": "hadad-4b9b1.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:421310168729:android:6dd2ff30cf57426ede0208",
+        "mobilesdk_app_id": "1:256712103295:android:d14bd923a1558cd1dcb64a",
         "android_client_info": {
           "package_name": "com.example.hadad"
         }
       },
       "oauth_client": [
         {
-          "client_id": "421310168729-dov4liff24734hidv4eg0q8vf0lct68i.apps.googleusercontent.com",
+          "client_id": "256712103295-endt119j1aqmld68uh1otv9nb7gqr8sm.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.hadad",
@@ -23,28 +23,20 @@
           }
         },
         {
-          "client_id": "421310168729-7n0gbk83fkpinls7lle55v1ju1ta0cc7.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.example.hadad",
-            "certificate_hash": "73def20a09bd35673244386f07eba207b0e95706"
-          }
-        },
-        {
-          "client_id": "421310168729-hq0vodtu3iiai30d5tn70kialturhti9.apps.googleusercontent.com",
+          "client_id": "256712103295-5knngm21nacn9rva7rhls1sm6mb5idhc.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDB12oo9nVfoQWVmTKRjw-bRbeNMOLMP6M"
+          "current_key": "AIzaSyDugv0BtLZYf4FNouh-ZB9mq-suI5LOroM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "421310168729-hq0vodtu3iiai30d5tn70kialturhti9.apps.googleusercontent.com",
+              "client_id": "256712103295-5knngm21nacn9rva7rhls1sm6mb5idhc.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

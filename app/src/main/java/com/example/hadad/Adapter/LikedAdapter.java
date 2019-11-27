@@ -13,6 +13,8 @@ import com.blogspot.atifsoftwares.circularimageview.CircularImageView;
 import com.example.hadad.Model.User;
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -41,7 +43,7 @@ public class LikedAdapter extends RecyclerView.Adapter<LikedAdapter.LikedListVie
         final User user = userList.get(i);
         likedListViewHolder.txt_name.setText(user.getName());
         try {
-            Picasso.get().load(user.getImage()).placeholder(R.drawable.user).into(likedListViewHolder.img_avatar);
+            Picasso.get().load(user.getImage()).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(likedListViewHolder.img_avatar);
         }
         catch (Exception ex)
         {

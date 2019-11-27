@@ -9,6 +9,57 @@
     tools:context=".SettingActivity"
     android:background="#1b1e44">
 
+    <LinearLayout
+        android:id="@+id/layout_change_pass"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="10dp">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_key"
+            android:layout_weight="3"
+            android:layout_gravity="center"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Change Your Password"
+                android:textColor="@color/colorWhite"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="   You should change your password every 3 months to ensure the security"
+                android:textColor="#C4C4C4"
+                android:textSize="15sp"
+                android:layout_marginLeft="10dp"/>
+
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_next"
+            android:layout_weight="3"
+            android:layout_gravity="center"/>
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#C4C4C4"/>
+
     <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/sw_post"
         android:layout_width="match_parent"
@@ -17,6 +68,7 @@
         android:textSize="17sp"
         android:textStyle="bold"
         android:paddingLeft="10dp"
+        android:layout_marginTop="10dp"
         android:textColor="@color/colorWhite" />
 
 

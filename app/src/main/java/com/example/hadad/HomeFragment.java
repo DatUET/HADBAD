@@ -1,10 +1,8 @@
 package com.example.hadad;
 
 
-import android.app.ActionBar;
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,8 +11,8 @@ import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,7 +21,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
+import android.widget.AbsListView;
 import android.widget.FrameLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -49,14 +47,19 @@ import java.util.List;
  */
 public class HomeFragment extends Fragment {
 
-	private static final int ITEM_LOAD = 3;
+	private static final int ITEM_LOAD = 5;
 
 	FirebaseAuth firebaseAuth;
 	RecyclerView recycler_post;
 	List<Post> postList;
+	static List<String> postKeyList;
 	PostAdapter postAdapter;
-	ProgressBar prg_load;
+	ProgressBar prg_load, prg_loadmore;
 	FrameLayout frame_home;
+
+	Boolean isScrolling = false;
+	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
+	DatabaseReference ref;
 
 	public HomeFragment() {
 		// Required empty public constructor
@@ -71,49 +74,124 @@ public class HomeFragment extends Fragment {
 
 		firebaseAuth = FirebaseAuth.getInstance();
 		prg_load = view.findViewById(R.id.prg_load);
+		prg_loadmore = view.findViewById(R.id.prg_loadmore);
 		frame_home = view.findViewById(R.id.frame_home);
 		recycler_post = view.findViewById(R.id.recycler_post);
+		postKeyList = new ArrayList<>();
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
-		linearLayoutManager.setStackFromEnd(true);
-		linearLayoutManager.setReverseLayout(true);
+//		linearLayoutManager.setStackFromEnd(true);
+//		linearLayoutManager.setReverseLayout(true);
 		recycler_post.setLayoutManager(linearLayoutManager);
 		postList = new ArrayList<>();
+		ref = FirebaseDatabase.getInstance().getReference("Post");
 
+		getListKey();
 		loadPost();
+
+		recycler_post.addOnScrollListener(new RecyclerView.OnScrollListener() {
+			@Override
+			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+				super.onScrollStateChanged(recyclerView, newState);
+				if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
+				{
+					isScrolling = true;
+				}
+			}
+
+			@Override
+			public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+				super.onScrolled(recyclerView, dx, dy);
+
+				currentItem = linearLayoutManager.getChildCount();
+				totalItem = linearLayoutManager.getItemCount();
+				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
+				if(isScrolling && (currentItem + scrollOutItem == totalItem - 1))
+				{
+					isScrolling = false;
+					loadmoreData();
+				}
+			}
+		});
 
 		return view;
 	}
 
-
-	private void loadPost() {
-		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post");
-		reference.addValueEventListener(new ValueEventListener() {
+	private void getListKey()
+	{
+		Query query = ref.orderByChild("pMode").equalTo("Public");
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				postList.clear();
+				postKeyList.clear();
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
-					Post post = snapshot.getValue(Post.class);
-					if (!post.getpMode().equals("Private")) {
-						postList.add(post);
-						postAdapter = new PostAdapter(getActivity(), postList, "transition");
-						recycler_post.setAdapter(postAdapter);
-					}
+					postKeyList.add(snapshot.getKey());
 				}
-				prg_load.setVisibility(View.GONE);
 			}
 
 			@Override
 			public void onCancelled(@NonNull DatabaseError databaseError) {
-				Toast.makeText(getActivity(),databaseError.getMessage(), Toast.LENGTH_LONG).show();
+				Log.d("err", databaseError.getMessage());
 			}
 		});
+
+	}
+
+	private void loadmoreData() {
+		prg_loadmore.setVisibility(View.VISIBLE);
+		new Handler().postDelayed(new Runnable() {
+			@Override
+			public void run() {
+				for(int i = indexLastKey;i < indexLastKey + ITEM_LOAD; i++) {
+					if (i < postKeyList.size()) {
+						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
+							@Override
+							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+								postList.add(dataSnapshot.getValue(Post.class));
+								postAdapter.notifyDataSetChanged();
+							}
+
+							@Override
+							public void onCancelled(@NonNull DatabaseError databaseError) {
+
+							}
+						});
+					}
+				}
+				prg_loadmore.setVisibility(View.GONE);
+				indexLastKey += ITEM_LOAD;
+			}
+		}, 1500);
+	}
+
+
+	private void loadPost() {
+
+		Query query = ref.orderByChild("pMode").equalTo("Public").limitToFirst(ITEM_LOAD);
+		query.addListenerForSingleValueEvent(new ValueEventListener() {
+				@Override
+				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+					postList.clear();
+					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+						postList.add(snapshot.getValue(Post.class));
+					}
+					postAdapter = new PostAdapter(getActivity(), postList, "transition");
+					recycler_post.setAdapter(postAdapter);
+					prg_load.setVisibility(View.GONE);
+					postAdapter.notifyDataSetChanged();
+				}
+
+				@Override
+				public void onCancelled(@NonNull DatabaseError databaseError) {
+					Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
+				}
+			});
+		indexLastKey += ITEM_LOAD;
 	}
 
 	private void searchPost(final String query)
 	{
-		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Post");
-		reference.addValueEventListener(new ValueEventListener() {
+		ref.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
@@ -178,7 +256,6 @@ public class HomeFragment extends Fragment {
 				else
 				{
 					loadPost();
-					Toast.makeText(getActivity(), "loadpost textsubmit", Toast.LENGTH_LONG).show();
 				}
 				return false;
 			}
@@ -229,9 +306,11 @@ public class HomeFragment extends Fragment {
 		dbRef.updateChildren(hashMap);
 	}
 
-//	@Override
-//	public void onPause() {
-//		super.onPause();
-//		postList.clear();
-//	}
+	@Override
+	public void onResume() {
+		super.onResume();
+		indexLastKey = 0;
+		getListKey();
+		loadPost();
+	}
 }

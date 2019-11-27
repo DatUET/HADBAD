@@ -27,6 +27,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -75,7 +77,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		userChatViewHolder.txt_email.setText(email);
 		userChatViewHolder.img_avatar.setTransitionName("transition" + uid);
 		try {
-			Picasso.get().load(avatar).placeholder(R.drawable.user).into(userChatViewHolder.img_avatar);
+			Picasso.get().load(avatar).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(userChatViewHolder.img_avatar);
 		}
 		catch (Exception ex)
 		{
