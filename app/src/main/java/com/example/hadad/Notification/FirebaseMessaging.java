@@ -23,6 +23,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Random;
+
 public class FirebaseMessaging extends FirebaseMessagingService {
 
 	boolean enable4NewPost;
@@ -126,15 +128,14 @@ public class FirebaseMessaging extends FirebaseMessagingService {
 			Notification.Builder builder = oreoAboveNotification.getONotification(title, body, pendingIntent, defSoundUri, icon);
 
 			int j = 0;
-			if(i>0)
-			{
+			if(i>0) {
 				j = i;
 			}
 			oreoAboveNotification.getManager().notify(j, builder.build());
 		}
-		else if(key.equals("comment"))
-		{
-			int i = Integer.parseInt((System.currentTimeMillis() - Long.parseLong(user)) + "");
+		else if(key.equals("comment")) {
+			Random rd = new Random();
+			int i = rd.nextInt();
 			Intent intent = new Intent(this, PostDetailActivity.class);
 			Bundle bundle = new Bundle();
 			bundle.putString("postId", user);
@@ -147,15 +148,14 @@ public class FirebaseMessaging extends FirebaseMessagingService {
 			Notification.Builder builder = oreoAboveNotification.getONotification(title, body, pendingIntent, defSoundUri, icon);
 
 			int j = 0;
-			if(i>0)
-			{
+			if (i > 0) {
 				j = i;
 			}
 			oreoAboveNotification.getManager().notify(j, builder.build());
 		}
-		else if(key.equals("newpost") && enable4NewPost)
-		{
-			int i = Integer.parseInt((System.currentTimeMillis() - Long.parseLong(user)) + "");
+		else if(key.equals("newpost") && enable4NewPost) {
+			Random rd = new Random();
+			int i = rd.nextInt(3000);
 			Intent intent = new Intent(this, PostDetailActivity.class);
 			Bundle bundle = new Bundle();
 			bundle.putString("postId", user);
@@ -168,13 +168,11 @@ public class FirebaseMessaging extends FirebaseMessagingService {
 			Notification.Builder builder = oreoAboveNotification.getONotification(title, body, pendingIntent, defSoundUri, icon);
 
 			int j = 0;
-			if(i>0)
-			{
+			if (i > 0) {
 				j = i;
 			}
 			oreoAboveNotification.getManager().notify(j, builder.build());
 		}
-
 	}
 
 	@Override

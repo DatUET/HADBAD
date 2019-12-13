@@ -72,6 +72,9 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
+import com.hitomi.cmlibrary.CircleMenu;
+import com.hitomi.cmlibrary.OnMenuSelectedListener;
+import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 
 import org.json.JSONObject;
 
@@ -83,6 +86,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * màn hình add post
@@ -100,10 +105,10 @@ public class AddPostActivity extends AppCompatActivity {
 	String storagePermisstion[];
 
 	ActionBar actionBar;
-	EditText txt_inputtitle, txt_description;
+	EditText txt_description;
 	//ImageView img_post;
 	Button btn_upload;
-	ProgressDialog progressDialog;
+	SweetAlertDialog sweetAlertDialog;
 	TextView txt_add_img;
 	LinearLayout frame_img_post;
 
@@ -111,12 +116,13 @@ public class AddPostActivity extends AppCompatActivity {
 	DatabaseReference reference;
 
 	String name, email, uid, dp;
-	String editTitle, editDescr, editImage, updateKey = "", editPostId = "", editMode = "", hostUid = "";
+	String editDescr, editImage, updateKey = "", editPostId = "", editMode = "", hostUid = "";
 	RecyclerView recycler_img_add_post;
 	Spinner sp_mode;
 	List<String> modeList;
 	ArrayAdapter<String> modeAdapter;
 	RequestQueue requestQueue;
+	CircleMenu circle_menu;
 
 	List<Uri> uriList, uriListOfOldPost, uriListToShowImgs;
 	ImgAddPostAdapter imgAddPostAdapter;
@@ -134,6 +140,7 @@ public class AddPostActivity extends AppCompatActivity {
 		addControl();
 		addEvent();
 	}
+
 	private void addControl() {
 		actionBar = getSupportActionBar();
 		actionBar.setTitle("Add Post");
@@ -141,20 +148,23 @@ public class AddPostActivity extends AppCompatActivity {
 		actionBar.setDisplayShowHomeEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
 
-		txt_inputtitle = findViewById(R.id.txt_inputtitle);
 		txt_description = findViewById(R.id.txt_description);
 		//img_post = findViewById(R.id.img_post);
 		btn_upload = findViewById(R.id.btn_upload);
 		txt_add_img = findViewById(R.id.txt_add_img);
 		frame_img_post = findViewById(R.id.frame_img_post);
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
+		sweetAlertDialog = new SweetAlertDialog(this);
+		sweetAlertDialog.setCanceledOnTouchOutside(false);
 		uriList = new ArrayList<>();
 		uriListOfOldPost = new ArrayList<>();
 		uriListToShowImgs = new ArrayList<>();
 		modeList = new ArrayList<>();
 		modeList.add("Public");
 		modeList.add("Private");
+		circle_menu = findViewById(R.id.circle_menu);
+		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
+				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_camera)
+				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_gallery);
 		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 		recycler_img_add_post.setHasFixedSize(true);
@@ -165,8 +175,8 @@ public class AddPostActivity extends AppCompatActivity {
 		sp_mode.setAdapter(modeAdapter);
 		requestQueue = Volley.newRequestQueue(getApplicationContext());
 
-		cameraPermission = new String[] {Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-		storagePermisstion = new String[] {Manifest.permission.WRITE_EXTERNAL_STORAGE};
+		cameraPermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+		storagePermisstion = new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
 		firebaseAuth = FirebaseAuth.getInstance();
 		checkUserStatus();
@@ -175,14 +185,11 @@ public class AddPostActivity extends AppCompatActivity {
 		updateKey = intent.getStringExtra("key");
 		editPostId = intent.getStringExtra("editPostId");
 
-		if(updateKey.equals("editPost"))
-		{
+		if (updateKey.equals("editPost")) {
 			actionBar.setTitle("Edit Post");
 			btn_upload.setText("Update");
 			loadPostData(editPostId);
-		}
-		else
-		{
+		} else {
 			actionBar.setTitle("Add Post");
 			btn_upload.setText("Upload");
 		}
@@ -193,8 +200,7 @@ public class AddPostActivity extends AppCompatActivity {
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					name = snapshot.child("name").getValue() + "";
 					email = snapshot.child("email").getValue() + "";
 					dp = snapshot.child("image").getValue() + "";
@@ -208,6 +214,7 @@ public class AddPostActivity extends AppCompatActivity {
 		});
 
 	}
+
 	// xử lý sự kiện
 	private void addEvent() {
 
@@ -219,24 +226,24 @@ public class AddPostActivity extends AppCompatActivity {
 			}
 		});
 
-        recycler_img_add_post.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
-            @Override
-            public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
-                return false;
-            }
+		recycler_img_add_post.addOnItemTouchListener(new RecyclerView.OnItemTouchListener() {
+			@Override
+			public boolean onInterceptTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
+				return false;
+			}
 
-            @Override
-            public void onTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
+			@Override
+			public void onTouchEvent(@NonNull RecyclerView recyclerView, @NonNull MotionEvent motionEvent) {
 
-            }
+			}
 
-            @Override
-            public void onRequestDisallowInterceptTouchEvent(boolean b) {
+			@Override
+			public void onRequestDisallowInterceptTouchEvent(boolean b) {
 
-            }
-        });
+			}
+		});
 
-        sp_mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+		sp_mode.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 			@Override
 			public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
 				positionMode = position;
@@ -251,87 +258,81 @@ public class AddPostActivity extends AppCompatActivity {
 		btn_upload.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String title = txt_inputtitle.getText().toString();
 				String description = txt_description.getText().toString();
 
-				if(TextUtils.isEmpty(title))
-				{
-					txt_inputtitle.setError("Title is empty");
-					txt_inputtitle.setFocusable(true);
-					return;
-				}
-				if(TextUtils.isEmpty(description))
-				{
+				if (TextUtils.isEmpty(description)) {
 					txt_description.setError("Description is empty");
 					return;
 				}
-				if(updateKey.equals("editPost"))
-				{
-					beginUpdate(title, description, editPostId);
-				}
-				else
-				{
-					uploadData(title, description);
+				if (updateKey.equals("editPost")) {
+					beginUpdate(description, editPostId);
+				} else {
+					uploadData(description);
 				}
 			}
 		});
 	}
 
-	private void beginUpdate(String title, String description, String editPostId) {
-		progressDialog.setMessage("Updating Post....");
-		progressDialog.show();
+	private void beginUpdate(String description, String editPostId) {
+		sweetAlertDialog.setTitleText("Updating Post!");
+		sweetAlertDialog.setContentText("Please wait...");
+		sweetAlertDialog.show();
 
-		uodatePost(title, description, editPostId);
+		uodatePost(description, editPostId);
 	}
 
-	private void uodatePost(String title, String description, final String editPostId) {
+	private void uodatePost(String description, final String editPostId) {
 		final HashMap<String, Object> hashMap = new HashMap<>();
 		hashMap.put("uid", uid);
 		hashMap.put("uName", name);
 		hashMap.put("uEmail", email);
 		hashMap.put("uDp", dp);
-		hashMap.put("pTitle", title);
 		hashMap.put("pDescr", description);
 		hashMap.put("pMode", modeList.get(positionMode));
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 
-		if(uriListToShowImgs.isEmpty())
-		{
+		if (uriListToShowImgs.isEmpty()) {
 			hashMap.put("pImage", "noImage");
 			ref.child(editPostId).updateChildren(hashMap)
 					.addOnSuccessListener(new OnSuccessListener<Void>() {
 						@Override
 						public void onSuccess(Void aVoid) {
-							progressDialog.dismiss();
-							Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
-							finish();
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+									.setTitleText("SUCCESS!")
+									.setContentText("Post updated")
+									.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+										@Override
+										public void onClick(SweetAlertDialog sweetAlertDialog) {
+											sweetAlertDialog.dismiss();
+											finish();
+										}
+									})
+									.show();
 						}
 					})
 					.addOnFailureListener(new OnFailureListener() {
 						@Override
 						public void onFailure(@NonNull Exception e) {
-							progressDialog.dismiss();
-							Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+									.setTitleText("SORRY!")
+									.setContentText("Error! An error occurred. Please try again later")
+									.show();
 						}
 					});
-		}
-		else
-		{
+		} else {
 			urlImg = "";
-			for(Uri uri : uriListOfOldPost)
-			{
-				if(uriListToShowImgs.contains(uri))
-				{
+			for (Uri uri : uriListOfOldPost) {
+				if (uriListToShowImgs.contains(uri)) {
 					urlImg += uri.toString() + ",";
 				}
 			}
-			if(!uriList.isEmpty())
-			{
+			if (!uriList.isEmpty()) {
 				final String timestamp = String.valueOf(System.currentTimeMillis());
 				n = 0;
-				for(Uri uri : uriList)
-				{
-					if(uriListToShowImgs.contains(uri)) {
+				for (Uri uri : uriList) {
+					if (uriListToShowImgs.contains(uri)) {
 						int quality = 100;
 						Cursor cursor = this.getContentResolver().query(uri,
 								null, null, null, null);
@@ -340,8 +341,8 @@ public class AddPostActivity extends AppCompatActivity {
 						try {
 							Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							if(file_size > 1024)
-								quality = (int) (1536.0/file_size * 100.0);
+							if (file_size > 1024)
+								quality = (int) (1536.0 / file_size * 100.0);
 							bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
 							Log.d("quality", quality + "");
 							byte[] data = baos.toByteArray();
@@ -361,18 +362,31 @@ public class AddPostActivity extends AppCompatActivity {
 													.addOnSuccessListener(new OnSuccessListener<Void>() {
 														@Override
 														public void onSuccess(Void aVoid) {
-															progressDialog.dismiss();
-															Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
+															sweetAlertDialog.dismiss();
 															uriList.clear();
 															imageUri = null;
-															finish();
+															SweetAlertDialog sweetAlertDialog1 = new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.SUCCESS_TYPE);
+															sweetAlertDialog1.setCanceledOnTouchOutside(false);
+															sweetAlertDialog1.setTitleText("SUCCESS!")
+																	.setContentText("Post publised")
+																	.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+																		@Override
+																		public void onClick(SweetAlertDialog sweetAlertDialog) {
+																			sweetAlertDialog.dismiss();
+																			finish();
+																		}
+																	}).show();
+
 														}
 													})
 													.addOnFailureListener(new OnFailureListener() {
 														@Override
 														public void onFailure(@NonNull Exception e) {
-															progressDialog.dismiss();
-															Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+															sweetAlertDialog.dismiss();
+															new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+																	.setTitleText("SORRY!")
+																	.setContentText("Error! An error occurred. Please try again later")
+																	.show();
 														}
 													});
 										}
@@ -380,48 +394,60 @@ public class AddPostActivity extends AppCompatActivity {
 									.addOnFailureListener(new OnFailureListener() {
 										@Override
 										public void onFailure(@NonNull Exception e) {
-											progressDialog.dismiss();
-											Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+											sweetAlertDialog.dismiss();
+											new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+													.setTitleText("SORRY!")
+													.setContentText("Error! An error occurred. Please try again later")
+													.show();
 										}
 									});
 							cursor.close();
-						}
-						catch (Exception ex)
-						{
+						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
 					}
 				}
-			}
-			else
-			{
+			} else {
 				hashMap.put("pImage", urlImg);
 				ref.child(editPostId).updateChildren(hashMap)
 						.addOnSuccessListener(new OnSuccessListener<Void>() {
 							@Override
 							public void onSuccess(Void aVoid) {
-								progressDialog.dismiss();
-								Toast.makeText(AddPostActivity.this, "Updated", Toast.LENGTH_LONG).show();
-								finish();
+								sweetAlertDialog.dismiss();
+								new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+										.setTitleText("SUCCESS!")
+										.setContentText("Post updated")
+										.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+											@Override
+											public void onClick(SweetAlertDialog sweetAlertDialog) {
+												sweetAlertDialog.dismiss();
+												finish();
+											}
+										})
+										.show();
 							}
 						})
 						.addOnFailureListener(new OnFailureListener() {
 							@Override
 							public void onFailure(@NonNull Exception e) {
-								progressDialog.dismiss();
-								Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+								sweetAlertDialog.dismiss();
+								new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+										.setTitleText("SORRY!")
+										.setContentText("Error! An error occurred. Please try again later")
+										.show();
 							}
 						});
 			}
 		}
 	}
 
-	private void uploadData(final String title, final String description) {
-		progressDialog.setMessage("Publishing Post");
-		progressDialog.show();
+	private void uploadData(final String description) {
+		sweetAlertDialog.setTitleText("Publishing Post!");
+		sweetAlertDialog.setContentText("Please wait");
+		sweetAlertDialog.show();
 
 		final String timestamp = String.valueOf(System.currentTimeMillis());
-		if(!uriList.isEmpty()) {
+		if (!uriList.isEmpty()) {
 
 			n = 0;
 			final HashMap<String, Object> hashMap = new HashMap<>();
@@ -431,7 +457,6 @@ public class AddPostActivity extends AppCompatActivity {
 			hashMap.put("uEmail", email);
 			hashMap.put("uDp", dp);
 			hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "");
-			hashMap.put("pTitle", title);
 			hashMap.put("pDescr", description);
 			hashMap.put("pTime", timestamp);
 			hashMap.put("pMode", modeList.get(positionMode));
@@ -446,8 +471,8 @@ public class AddPostActivity extends AppCompatActivity {
 				try {
 					Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					if(file_size > 1024)
-						quality = (int) (1536.0/file_size * 100.0);
+					if (file_size > 1024)
+						quality = (int) (1536.0 / file_size * 100.0);
 					bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
 					Log.d("quality", quality + "");
 					byte[] data = baos.toByteArray();
@@ -472,8 +497,11 @@ public class AddPostActivity extends AppCompatActivity {
 											.addOnFailureListener(new OnFailureListener() {
 												@Override
 												public void onFailure(@NonNull Exception e) {
-													progressDialog.dismiss();
-													Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+													sweetAlertDialog.dismiss();
+													new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+															.setTitleText("SORRY!")
+															.setContentText("Error! An error occurred. Please try again later")
+															.show();
 												}
 											});
 								}
@@ -481,26 +509,36 @@ public class AddPostActivity extends AppCompatActivity {
 							.addOnFailureListener(new OnFailureListener() {
 								@Override
 								public void onFailure(@NonNull Exception e) {
-									progressDialog.dismiss();
-									Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+									sweetAlertDialog.dismiss();
+									new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+											.setTitleText("SORRY!")
+											.setContentText("Error! An error occurred. Please try again later")
+											.show();
 								}
 							});
 
 					if (n == uriListToShowImgs.size()) {
-						Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
-						progressDialog.dismiss();
+						sweetAlertDialog.dismiss();
 						uriList.clear();
 						imageUri = null;
-						finish();
+						new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+								.setTitleText("SUCCESS!")
+								.setContentText("Post publised")
+								.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+									@Override
+									public void onClick(SweetAlertDialog sweetAlertDialog) {
+										sweetAlertDialog.dismiss();
+										finish();
+									}
+								})
+								.show();
 					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
 				cursor.close();
 			}
-		}
-		else
-		{
+		} else {
 			HashMap<String, Object> hashMap = new HashMap<>();
 			hashMap.put("uid", uid);
 			hashMap.put("hostUid", uid);
@@ -508,7 +546,6 @@ public class AddPostActivity extends AppCompatActivity {
 			hashMap.put("uEmail", email);
 			hashMap.put("uDp", dp);
 			hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timestamp) + "");
-			hashMap.put("pTitle", title);
 			hashMap.put("pDescr", description);
 			hashMap.put("pImage", "noImage");
 			hashMap.put("pTime", timestamp);
@@ -519,31 +556,42 @@ public class AddPostActivity extends AppCompatActivity {
 					.addOnSuccessListener(new OnSuccessListener<Void>() {
 						@Override
 						public void onSuccess(Void aVoid) {
-							progressDialog.dismiss();
-							Toast.makeText(AddPostActivity.this, "Post publised", Toast.LENGTH_LONG).show();
-							txt_inputtitle.setText("");
+							sweetAlertDialog.dismiss();
 							txt_description.setText("");
 							uriList.clear();
 							imageUri = null;
-							finish();
+							new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+									.setTitleText("SUCCESS!")
+									.setContentText("Post publised")
+									.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+										@Override
+										public void onClick(SweetAlertDialog sweetAlertDialog) {
+											sweetAlertDialog.dismiss();
+											finish();
+										}
+									})
+									.show();
 						}
 					})
 					.addOnFailureListener(new OnFailureListener() {
 						@Override
 						public void onFailure(@NonNull Exception e) {
-							progressDialog.dismiss();
-							Toast.makeText(AddPostActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(AddPostActivity.this, SweetAlertDialog.ERROR_TYPE)
+									.setTitleText("SORRY!")
+									.setContentText("Error! An error occurred. Please try again later")
+									.show();
 						}
 					});
 		}
-		if (positionMode == 0 ) {
+		if (positionMode == 0) {
 			DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Follows");
 			reference.addListenerForSingleValueEvent(new ValueEventListener() {
 				@Override
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 						if (snapshot.hasChild(uid)) {
-							sendPostNotification(timestamp, snapshot.getKey(), name + " added new post", title);
+							sendPostNotification(timestamp, snapshot.getKey(), name + " added new post", description);
 						}
 					}
 				}
@@ -563,10 +611,9 @@ public class AddPostActivity extends AppCompatActivity {
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					Token token = snapshot.getValue(Token.class);
-					Data data = new Data(timestamp, body,s, uid, "newpost", R.drawable.ic_defaut_img);
+					Data data = new Data(timestamp, body, s, uid, "newpost", R.drawable.user);
 					Sender sender = new Sender(data, token.getToken());
 					try {
 
@@ -582,8 +629,7 @@ public class AddPostActivity extends AppCompatActivity {
 							public void onErrorResponse(VolleyError error) {
 
 							}
-						})
-						{
+						}) {
 							@Override
 							public Map<String, String> getHeaders() throws AuthFailureError {
 								Map<String, String> headers = new HashMap<>();
@@ -593,9 +639,7 @@ public class AddPostActivity extends AppCompatActivity {
 							}
 						};
 						requestQueue.add(jsonObjectRequest);
-					}
-					catch (Exception ex)
-					{
+					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
 				}
@@ -609,35 +653,28 @@ public class AddPostActivity extends AppCompatActivity {
 	}
 
 	private void loadPostData(final String editPostId) {
+		uriListToShowImgs.clear();
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
 		Query query = ref.orderByChild("pId").equalTo(editPostId);
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
-					editTitle = snapshot.child("pTitle").getValue() + "";
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					editDescr = snapshot.child("pDescr").getValue() + "";
 					editImage = snapshot.child("pImage").getValue() + "";
 					editMode = snapshot.child("pMode").getValue() + "";
 					hostUid = snapshot.child("hostUid").getValue() + "";
 
-					txt_inputtitle.setText(editTitle);
 					txt_description.setText(editDescr);
-					if (editMode.equals("Private"))
-					{
+					if (editMode.equals("Private")) {
 						sp_mode.setSelection(1);
-					}
-					else
-					{
+					} else {
 						sp_mode.setSelection(0);
 					}
 
-					if(!editImage.equals("noImage"))
-					{
+					if (!editImage.equals("noImage")) {
 						arrCurrentImg = editImage.split(",");
-						for (String item : arrCurrentImg)
-						{
+						for (String item : arrCurrentImg) {
 							uriListOfOldPost.add(Uri.parse(item));
 						}
 						uriListToShowImgs.addAll(uriListOfOldPost);
@@ -655,35 +692,61 @@ public class AddPostActivity extends AppCompatActivity {
 	}
 
 	private void showImagePickDialog() {
-		String[] option = {"Camera", "Gallery"};
-
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setItems(option, new DialogInterface.OnClickListener() {
+		circle_menu.setVisibility(View.VISIBLE);
+		circle_menu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				if(which == 0)
-				{
+			public void onMenuSelected(int index) {
+				if (index == 0) {
 					// show camera
-					if(!checkCameraPermission())
+					if (!checkCameraPermission())
 						requestCameraPermission();
 					else
 						pickFromCamera();
-				}
-
-				else if(which == 1)
-				{
+				} else if (index == 1) {
 					//show gallery
-					if(!checkStoragePermission())
+					if (!checkStoragePermission())
 						requestStoragePermission();
 					else
 						pickFromGallery();
 				}
 			}
-		});
+		})
+				.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
+					@Override
+					public void onMenuOpened() {
 
-		AlertDialog alertDialog = builder.create();
-		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-		alertDialog.show();
+					}
+
+					@Override
+					public void onMenuClosed() {
+						circle_menu.setVisibility(View.GONE);
+					}
+				});
+//		String[] option = {"Camera", "Gallery"};
+//
+//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//		builder.setItems(option, new DialogInterface.OnClickListener() {
+//			@Override
+//			public void onClick(DialogInterface dialog, int which) {
+//				if (which == 0) {
+//					// show camera
+//					if (!checkCameraPermission())
+//						requestCameraPermission();
+//					else
+//						pickFromCamera();
+//				} else if (which == 1) {
+//					//show gallery
+//					if (!checkStoragePermission())
+//						requestStoragePermission();
+//					else
+//						pickFromGallery();
+//				}
+//			}
+//		});
+//
+//		AlertDialog alertDialog = builder.create();
+//		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+//		alertDialog.show();
 	}
 
 	private void pickFromGallery() {
@@ -703,35 +766,30 @@ public class AddPostActivity extends AppCompatActivity {
 		startActivityForResult(cameraIntent, IMAGE_PICK_CAMERA_CODE);
 	}
 
-	private boolean checkStoragePermission()
-	{
+	private boolean checkStoragePermission() {
 		boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
 		return result;
 	}
 
-	private void requestStoragePermission()
-	{
+	private void requestStoragePermission() {
 		ActivityCompat.requestPermissions(this, storagePermisstion, STORAGE_REQUEST_CODE);
 	}
 
-	private boolean checkCameraPermission()
-	{
+	private boolean checkCameraPermission() {
 		boolean result = ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) == (PackageManager.PERMISSION_GRANTED);
 
 		boolean result1 = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == (PackageManager.PERMISSION_GRANTED);
 		return result && result1;
 	}
 
-	private void requestCameraPermission()
-	{
-		ActivityCompat.requestPermissions(this,cameraPermission, CAMERA_REQUEST_CODE);
+	private void requestCameraPermission() {
+		ActivityCompat.requestPermissions(this, cameraPermission, CAMERA_REQUEST_CODE);
 	}
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-		switch (requestCode)
-		{
+		switch (requestCode) {
 			case CAMERA_REQUEST_CODE: {
 				if (grantResults.length > 0) {
 					boolean cameraAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
@@ -742,13 +800,10 @@ public class AddPostActivity extends AppCompatActivity {
 				}
 			}
 			break;
-			case STORAGE_REQUEST_CODE:
-			{
-				if(grantResults.length > 0)
-				{
+			case STORAGE_REQUEST_CODE: {
+				if (grantResults.length > 0) {
 					boolean writeStogareAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
-					if(writeStogareAccepted)
-					{
+					if (writeStogareAccepted) {
 						pickFromGallery();
 					}
 				}
@@ -761,10 +816,9 @@ public class AddPostActivity extends AppCompatActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if(resultCode == RESULT_OK)
-		{
-			if(requestCode == IMAGE_PICK_GALLERY_CODE)
-			{
+		circle_menu.setVisibility(View.GONE);
+		if (resultCode == RESULT_OK) {
+			if (requestCode == IMAGE_PICK_GALLERY_CODE) {
 				uriList.add(data.getData());
 				uriListToShowImgs.add(data.getData());
 
@@ -772,8 +826,7 @@ public class AddPostActivity extends AppCompatActivity {
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
 			}
 
-			if(requestCode == IMAGE_PICK_CAMERA_CODE)
-			{
+			if (requestCode == IMAGE_PICK_CAMERA_CODE) {
 				uriList.add(imageUri);
 				uriListToShowImgs.add(imageUri);
 
@@ -803,8 +856,7 @@ public class AddPostActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if(id == R.id.it_logout)
-		{
+		if (id == R.id.it_logout) {
 			String timestamp = String.valueOf(System.currentTimeMillis());
 			checkOnlineStatus(timestamp);
 			firebaseAuth.signOut();
@@ -813,24 +865,19 @@ public class AddPostActivity extends AppCompatActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void checkUserStatus()
-	{
+	private void checkUserStatus() {
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null)
-		{
+		if (firebaseUser != null) {
 			email = firebaseUser.getEmail();
 			uid = firebaseUser.getUid();
-		}
-		else
-		{
+		} else {
 			Intent intent = new Intent(AddPostActivity.this, MainActivity.class);
 			startActivity(intent);
 			finish();
 		}
 	}
 
-	private void checkOnlineStatus(String status)
-	{
+	private void checkOnlineStatus(String status) {
 		FirebaseUser user = firebaseAuth.getCurrentUser();
 		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
 		HashMap<String, Object> hashMap = new HashMap<>();

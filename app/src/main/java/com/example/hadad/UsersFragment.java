@@ -91,7 +91,7 @@ public class UsersFragment extends Fragment {
 						userList.add(user);
 					}
 				}
-				userAdapter = new UserAdapter(getActivity(), userList);
+				userAdapter = new UserAdapter(getActivity(), userList, frame_users);
 				recycler_users.setAdapter(userAdapter);
 
 				prg_load.setVisibility(View.GONE);
@@ -140,7 +140,6 @@ public class UsersFragment extends Fragment {
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
-				Log.d("empty search", TextUtils.isEmpty(s.trim()) + "");
 				if(!TextUtils.isEmpty(s.trim()))
 				{
 					searchUsers(s);
@@ -183,7 +182,7 @@ public class UsersFragment extends Fragment {
 						}
 					}
 				}
-				userAdapter = new UserAdapter(getActivity(), userList);
+				userAdapter = new UserAdapter(getActivity(), userList, frame_users);
 				userAdapter.notifyDataSetChanged();
 				recycler_users.setAdapter(userAdapter);
 			}

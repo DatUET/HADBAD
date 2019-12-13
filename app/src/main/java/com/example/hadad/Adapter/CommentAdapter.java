@@ -20,6 +20,9 @@ import com.blogspot.atifsoftwares.circularimageview.CircularImageView;
 import com.example.hadad.Model.Comment;
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,6 +35,8 @@ import com.squareup.picasso.Picasso;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentViewHolder> {
 
@@ -105,24 +110,24 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 			@Override
 			public void onClick(View v) {
 				if(uid.equals(myUid)) {
-					AlertDialog.Builder builder = new AlertDialog.Builder(context);
-					builder.setTitle("Delte Comment");
-					builder.setMessage("Are you sure to delete this comment?");
-					builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							deleteComment(cId);
-						}
-					})
-							.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+					new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+							.setTitleText("Are you sure?")
+							.setContentText("You won't be able to recover this message!")
+							.setConfirmButton("Delete", new SweetAlertDialog.OnSweetClickListener() {
 								@Override
-								public void onClick(DialogInterface dialog, int which) {
-									dialog.dismiss();
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									deleteComment(cId);
+									sweetAlertDialog.dismiss();
 								}
-							});
-					AlertDialog alertDialog = builder.create();
-					alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-					alertDialog.show();
+							})
+							.setCancelButton("No", new SweetAlertDialog.OnSweetClickListener() {
+								@Override
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									sweetAlertDialog.dismiss();
+								}
+							})
+							.show();
+
 				}
 			}
 		});
@@ -130,34 +135,51 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 
 	private void deleteComment(String cId) {
 		final DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
-		reference.child(cId).removeValue();
-
-		// sau khi xóa cập nhật lại số lượng đã cmt
-		reference.addListenerForSingleValueEvent(new ValueEventListener() {
-			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId);
-				ref.addListenerForSingleValueEvent(new ValueEventListener() {
+		reference.child(cId).removeValue()
+				.addOnCompleteListener(new OnCompleteListener<Void>() {
 					@Override
-					public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-						String comments = dataSnapshot.child("pComments").getValue() + "";
-						int newCommentCount = Integer.parseInt(comments) - 1;
-						ref.child("pComments").setValue(newCommentCount + "");
+					public void onComplete(@NonNull Task<Void> task) {
+						new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE)
+								.setTitleText("Deleted!")
+								.show();
 					}
-
+				})
+				.addOnFailureListener(new OnFailureListener() {
 					@Override
-					public void onCancelled(@NonNull DatabaseError databaseError) {
-
+					public void onFailure(@NonNull Exception e) {
+						new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE)
+								.setTitleText("Sorry!")
+								.setContentText(e.getMessage())
+								.show();
 					}
 				});
 
-			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
+		// sau khi xóa cập nhật lại số lượng đã cmt
+//		reference.addListenerForSingleValueEvent(new ValueEventListener() {
+//			@Override
+//			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//				final DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(postId);
+//				ref.addListenerForSingleValueEvent(new ValueEventListener() {
+//					@Override
+//					public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//						String comments = dataSnapshot.child("pComments").getValue() + "";
+//						int newCommentCount = Integer.parseInt(comments) - 1;
+//						ref.child("pComments").setValue(newCommentCount + "");
+//					}
+//
+//					@Override
+//					public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//					}
+//				});
+//
+//			}
+//
+//			@Override
+//			public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//			}
+//		});
 	}
 
 	@Override

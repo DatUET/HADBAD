@@ -1,6 +1,7 @@
 package com.example.hadad;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SwitchCompat;
@@ -14,12 +15,23 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.CompoundButton;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.example.hadad.Adapter.UserListPostNotiAdapter;
 import com.example.hadad.Model.User;
 import com.example.hadad.Notification.Data;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -28,6 +40,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class SettingActivity extends AppCompatActivity {
 
@@ -66,14 +80,17 @@ public class SettingActivity extends AppCompatActivity {
 		layout_change_pass = findViewById(R.id.layout_change_pass);
 		preferences = getSharedPreferences("NotiPost", MODE_PRIVATE);
 		enable4NewPost = preferences.getBoolean(TOPIC_POST_NOTI, false);
+
 		sw_post.setChecked(enable4NewPost);
 		userList = new ArrayList<>();
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 		recycler_user_post.setLayoutManager(linearLayoutManager);
+
 		if(enable4NewPost)
 		{
 			addListUser();
 		}
+
 	}
 
 	private void addEvent() {
@@ -105,6 +122,7 @@ public class SettingActivity extends AppCompatActivity {
 				startActivity(intent);
 			}
 		});
+
 	}
 
 	private void addListUser() {

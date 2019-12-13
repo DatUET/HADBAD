@@ -9,16 +9,14 @@ public class User {
 	private String phone;
 	private String image; //URL của ảnh đại diện người dùng
 	private String cover; //URL của ảnh bìa
-	private String subscribers; // danh sách người dùng khác đang được theo dõi
 
-	public User(String email, String name, String uid, String phone, String image, String cover, String subscribers) {
+	public User(String email, String name, String uid, String phone, String image, String cover) {
 		this.email = email;
 		this.name = name;
 		this.uid = uid;
 		this.phone = phone;
 		this.image = image;
 		this.cover = cover;
-		this.subscribers = subscribers;
 	}
 
 	public User() {
@@ -70,13 +68,5 @@ public class User {
 
 	public void setCover(String cover) {
 		this.cover = cover;
-	}
-
-	public String getSubscribers() {
-		return subscribers;
-	}
-
-	public void setSubscribers(String subscribers) {
-		this.subscribers = subscribers;
 	}
 }

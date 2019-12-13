@@ -1,50 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1b1e44"
+    android:background="@drawable/backgroundlogin"
     tools:context=".LoginActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC1B1E44">
+
     <ImageView
+        android:id="@+id/icon"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_marginTop="30dp"
-        android:src="@drawable/icon"
+        android:src="@drawable/iconshadow"
+        android:scaleX="1.5"
+        android:scaleY="1.5"
         android:layout_centerHorizontal="true"/>
 
     <TextView
+        android:id="@+id/txt_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="100dp"
-        android:layout_above="@+id/emailTIL"
         android:text="Login"
         android:textSize="65sp"
         android:textColor="#C4C4C4"
-        android:layout_marginTop="30dp"
         android:gravity="center"
-        android:textStyle="bold"/>
+        android:textStyle="bold"
+        android:layout_below="@id/icon"
+        android:layout_marginTop="20dp"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/emailTIL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:background="@drawable/editextchat"
+        android:layout_below="@id/txt_login"
         android:textColorHint="#C4C4C4"
         android:layout_marginLeft="50dp"
-        android:layout_marginRight="50dp">
+        android:layout_marginRight="50dp"
+        android:layout_centerHorizontal="true"
+        android:background="@drawable/bg_inputtest"
+        android:layout_marginTop="20dp">
         <EditText
             android:id="@+id/emailEd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginRight="28dp"
+            android:layout_marginLeft="28dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:textColor="@color/colorWhite" />
+            android:textColor="@color/colorWhite"/>
     </com.google.android.material.textfield.TextInputLayout>
+
+
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordTIL"
@@ -54,32 +67,34 @@
         android:layout_centerVertical="true"
         android:layout_below="@id/emailTIL"
         app:passwordToggleEnabled="true"
-        android:background="@drawable/editextchat"
         android:textColorHint="#C4C4C4"
+        android:background="@drawable/bg_inputtest"
         android:layout_marginLeft="50dp"
         android:layout_marginRight="50dp"
-        android:layout_marginTop="15dp">
+        android:layout_marginTop="40dp">
         <EditText
             android:id="@+id/passwordEd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Password"
+            android:layout_marginLeft="28dp"
+            android:layout_marginRight="28dp"
             android:inputType="textPassword"
-            android:textColor="@color/colorWhite" />
+            android:textColor="@color/colorWhite"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <Button
         android:id="@+id/btn_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/colorWhite"
+        android:textColor="@color/colorPrimary"
         android:text="Login"
         android:layout_below="@id/layout_recover_pass"
         android:layout_centerHorizontal="true"
-        android:background="@drawable/button_custom"
-        android:drawablePadding="5dp"
+        android:background="@drawable/bg_buttonlogin"
+        android:textSize="20sp"
         android:layout_marginTop="20dp"
-        android:drawableLeft="@drawable/ic_login_white_24dp"/>
+        android:shadowColor="#CC000000"/>
 
     <LinearLayout
         android:id="@+id/layout_or"
@@ -96,7 +111,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/colorGrey"
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:layout_gravity="center"/>
 
         <TextView
@@ -104,17 +119,18 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Or"
+            android:textSize="15sp"
             android:textAlignment="center"
             android:textColor="@color/colorWhite"
             android:layout_marginRight="15dp"
             android:layout_marginLeft="15dp"
-            android:layout_weight="3"/>
+            android:layout_weight="5"/>
 
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/colorGrey"
-            android:layout_weight="3"
+            android:layout_weight="4"
             android:layout_gravity="center"/>
 
 
@@ -125,14 +141,14 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_below="@id/layout_or"/>
+        android:layout_below="@id/layout_or"
+        android:layout_marginTop="10dp"/>
 
     <LinearLayout
         android:id="@+id/layout_recover_pass"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/passwordTIL"
-        android:paddingTop="10dp">
+        android:layout_below="@id/passwordTIL">
         <TextView
             android:id="@+id/recover_pass"
             android:layout_width="match_parent"
@@ -179,6 +195,6 @@
 
     </LinearLayout>
 
+    </RelativeLayout>
 
-
-</RelativeLayout>
+</FrameLayout>

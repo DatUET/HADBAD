@@ -14,7 +14,8 @@
         android:layout_height="350dp"
         android:background="@color/colorWhite"
         android:transitionName="transitionimg"
-        android:layout_centerHorizontal="true"/>
+        android:layout_centerHorizontal="true"
+        android:scaleType="centerCrop"/>
 
     <TextView
         android:id="@+id/txt_count"

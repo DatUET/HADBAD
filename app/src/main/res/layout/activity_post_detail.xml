@@ -18,7 +18,6 @@
             android:layout_height="wrap_content"
             app:cardCornerRadius="3dp"
             app:cardElevation="0dp"
-            app:contentPadding="5dp"
             app:cardUseCompatPadding="true"
             app:cardBackgroundColor="#1b1e44">
 
@@ -32,7 +31,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:gravity="center_vertical">
+                    android:gravity="center_vertical"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="3dp">
 
                     <com.blogspot.atifsoftwares.circularimageview.CircularImageView
                         android:id="@+id/img_avatar"
@@ -47,6 +48,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
+                        android:layout_marginLeft="5dp"
                         android:layout_weight="1">
 
                         <TextView
@@ -75,20 +77,13 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/txt_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textColor="@color/colorWhite"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:autoLink="all"/>
-
-                <TextView
                     android:id="@+id/txt_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textSize="16sp"
                     android:textStyle="bold"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="10dp"
                     android:textColor="@color/colorWhite"
                     android:autoLink="all"/>
 
@@ -104,6 +99,8 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="15dp"
+                    android:layout_marginRight="15dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -130,29 +127,55 @@
                     android:orientation="horizontal"
                     android:gravity="center">
 
-                    <Button
+                    <LinearLayout
                         android:id="@+id/btn_like"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="Like"
-                        android:textAllCaps="false"
-                        android:background="#1b1e44"
-                        android:drawablePadding="5dp"
-                        android:drawableStart="@drawable/ic_like_black"
-                        android:textColor="@color/colorWhite"/>
+                        android:orientation="horizontal"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:gravity="center">
+                        <ImageView
+                            android:id="@+id/img_btnlike"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_like_black"
+                            android:layout_gravity="center"/>
+                        <TextView
+                            android:id="@+id/txt_btnlike"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Like"
+                            android:textColor="@color/colorWhite"
+                            android:layout_marginLeft="10dp"
+                            android:textSize="18sp"/>
+                    </LinearLayout>
 
-                    <Button
+                    <LinearLayout
                         android:id="@+id/btn_share"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:text="Share"
-                        android:textAllCaps="false"
-                        android:background="#1b1e44"
-                        android:drawableStart="@drawable/ic_share_black"
-                        android:drawablePadding="5dp"
-                        android:textColor="@color/colorWhite"/>
+                        android:orientation="horizontal"
+                        android:paddingTop="16dp"
+                        android:paddingBottom="16dp"
+                        android:gravity="center">
+                        <ImageView
+                            android:id="@+id/img_btnshare"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:src="@drawable/ic_share_black"
+                            android:layout_gravity="center"/>
+                        <TextView
+                            android:id="@+id/txt_btnshare"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Share"
+                            android:textColor="@color/colorWhite"
+                            android:layout_marginLeft="10dp"
+                            android:textSize="18sp"/>
+                    </LinearLayout>
 
                 </LinearLayout>
 
@@ -192,6 +215,7 @@
             android:id="@+id/img_avatar_comment"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_marginLeft="8dp"
             android:src="@drawable/user"/>
 
         <EditText

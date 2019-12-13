@@ -10,7 +10,7 @@
         android:id="@+id/img_avatar"
         android:layout_width="35dp"
         android:layout_height="35dp"
-        android:src="@drawable/ic_defaut_img"/>
+        android:src="@drawable/user"/>
 
     <TextView
         android:id="@+id/txt_name"

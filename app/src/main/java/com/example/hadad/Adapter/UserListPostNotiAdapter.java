@@ -25,6 +25,8 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class UserListPostNotiAdapter extends RecyclerView.Adapter<UserListPostNotiAdapter.UserListPostNotiViewHolder> {
 
 	List<User> userList;
@@ -55,24 +57,21 @@ public class UserListPostNotiAdapter extends RecyclerView.Adapter<UserListPostNo
 		holder.btn_delete.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle("Unsubscribe");
-				builder.setMessage("Do you want to unsubcribe " + user.getName());
-				builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						unSubscribe(user.getUid());
-					}
-				})
-						.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+				new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+						.setTitleText("Unsubscribe")
+						.setContentText("Do you want to unsubcribe " + user.getName())
+						.setCancelButton("Yes", new SweetAlertDialog.OnSweetClickListener() {
 							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								dialog.dismiss();
+							public void onClick(SweetAlertDialog sweetAlertDialog) {
+								unSubscribe(user.getUid());
 							}
-						});
-				AlertDialog alertDialog = builder.create();
-				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-				alertDialog.show();
+						})
+						.setConfirmButton("No", new SweetAlertDialog.OnSweetClickListener() {
+							@Override
+							public void onClick(SweetAlertDialog sweetAlertDialog) {
+								sweetAlertDialog.dismiss();
+							}
+						}).show();
 			}
 		});
 	}

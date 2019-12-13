@@ -15,13 +15,18 @@ import android.os.Handler;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import com.github.clans.fab.FloatingActionButton;
+import com.github.clans.fab.FloatingActionMenu;
+
 import androidx.fragment.app.Fragment;
 import androidx.core.content.ContextCompat;
 import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -51,13 +56,19 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.hitomi.cmlibrary.CircleMenu;
+import com.hitomi.cmlibrary.OnMenuSelectedListener;
+import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 import static android.app.Activity.RESULT_OK;
 import static com.google.firebase.storage.FirebaseStorage.getInstance;
@@ -88,10 +99,14 @@ public class ProfileFragment extends Fragment {
 
 	ImageView img_avatar, img_cover;
 	TextView txt_name, txt_email, txt_phone;
-	FloatingActionButton fab;
+	FloatingActionMenu fab;
+	FloatingActionButton fab_avatar, fab_cover, fab_phone, fab_name;
 	RecyclerView recycler_post;
+	SwipeRefreshLayout srl_post;
 
-	ProgressDialog progressDialog;
+	CircleMenu circle_menu;
+
+	SweetAlertDialog sweetAlertDialog;
 	Uri imageUri;
 
 	String profileOrCoverPhoto;
@@ -129,14 +144,23 @@ public class ProfileFragment extends Fragment {
 		txt_name = view.findViewById(R.id.txt_name);
 		txt_email = view.findViewById(R.id.txt_email);
 		txt_phone = view.findViewById(R.id.txt_phone);
+		srl_post = view.findViewById(R.id.srl_post);
 		fab = view.findViewById(R.id.fab);
+		fab_avatar = view.findViewById(R.id.fab_avatar);
+		fab_cover = view.findViewById(R.id.fab_cover);
+		fab_name = view.findViewById(R.id.fab_name);
+		fab_phone = view.findViewById(R.id.fab_phone);
+		circle_menu = view.findViewById(R.id.circle_menu);
+		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
+				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_camera)
+				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_gallery);
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 		recycler_post = view.findViewById(R.id.recycler_post);
 		recycler_post.setLayoutManager(linearLayoutManager);
 		postList = new ArrayList<>();
 		postKeyList = new ArrayList<>();
-		progressDialog = new ProgressDialog(getActivity());
-		progressDialog.setCanceledOnTouchOutside(false);
+		sweetAlertDialog = new SweetAlertDialog(getActivity(), SweetAlertDialog.NORMAL_TYPE);
+		sweetAlertDialog.setCanceledOnTouchOutside(false);
 
 		Query query = reference.orderByChild("email").equalTo(firebaseUser.getEmail());
 
@@ -177,10 +201,33 @@ public class ProfileFragment extends Fragment {
 			}
 		});
 
-		fab.setOnClickListener(new View.OnClickListener() {
+		fab_avatar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				showEditProfileDialog();
+				profileOrCoverPhoto = "image";
+				showImagePicDialog();
+			}
+		});
+
+		fab_cover.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				profileOrCoverPhoto = "cover";
+				showImagePicDialog();
+			}
+		});
+
+		fab_phone.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showNamePhoneUpdateDialog("phone");
+			}
+		});
+
+		fab_name.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				showNamePhoneUpdateDialog("name");
 			}
 		});
 		img_avatar.setOnClickListener(new View.OnClickListener() {
@@ -226,6 +273,15 @@ public class ProfileFragment extends Fragment {
 					isScrolling = false;
 					loadmoreData();
 				}
+			}
+		});
+
+		srl_post.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				indexLastKey = 0;
+				getListKey();
+				loadMyPost();
 			}
 		});
 
@@ -301,6 +357,7 @@ public class ProfileFragment extends Fragment {
 			}
 		});
 		indexLastKey += ITEM_LOAD;
+		srl_post.setRefreshing(false);
 	}
 
 	private void searchMyPost(final String querySearch) {
@@ -315,8 +372,7 @@ public class ProfileFragment extends Fragment {
 				for (DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Post post = snapshot.getValue(Post.class);
-					if(post.getpTitle().toLowerCase().contains(querySearch.toLowerCase()) ||
-						post.getpDescr().toLowerCase().contains(querySearch.toLowerCase())) {
+					if(post.getpDescr().toLowerCase().contains(querySearch.toLowerCase())) {
 						postList.add(post);
 					}
 
@@ -354,181 +410,132 @@ public class ProfileFragment extends Fragment {
 		requestPermissions(cameraPermission, CAMERA_REQUEST_CODE);
 	}
 
-	private void showEditProfileDialog() {
-		String options[] = {"Edit Profile Picture", "Edit Cover Photo", "Edit name", "Edit Phone"};
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("Choose Action");
-		builder.setItems(options, new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which)
-				{
-					case 0:
-						progressDialog.setMessage("Updating Profile Picture");
-						profileOrCoverPhoto = "image";
-						showImagePicDialog();
-						break;
-					case 1:
-						progressDialog.setMessage("Updating Cover Photo");
-						profileOrCoverPhoto = "cover";
-						showImagePicDialog();
-						break;
-					case 2:
-						progressDialog.setMessage("Updating Name");
-						showNamePhoneUpdateDialog("name");
-						break;
-					case 3:
-						progressDialog.setMessage("Updating Phone");
-						showNamePhoneUpdateDialog("phone");
-						break;
-				}
-			}
-		});
-
-		AlertDialog alertDialog = builder.create();
-		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-		alertDialog.show();
-	}
-
 	private void showNamePhoneUpdateDialog(final String key) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("Update " + key);
+		new LovelyTextInputDialog(getActivity())
+				.setTopColor(Color.parseColor("#40C4FF"))
+				.setTitle("Update " + key)
+				.setMessage("Please enter your new " + key)
+				.setInputFilter("Your new " + key + " is empty", new LovelyTextInputDialog.TextFilter() {
+					@Override
+					public boolean check(String text) {
+						return !TextUtils.isEmpty(text.trim());
+					}
+				})
+				.setConfirmButton("Update", new LovelyTextInputDialog.OnTextInputConfirmListener() {
+					@Override
+					public void onTextInputConfirmed(final String text) {
+						sweetAlertDialog.show();
+						HashMap<String, Object> result = new HashMap<>();
+						result.put(key, text.trim());
+						reference.child(firebaseUser.getUid()).updateChildren(result)
+								.addOnSuccessListener(new OnSuccessListener<Void>() {
+									@Override
+									public void onSuccess(Void aVoid) {
+										sweetAlertDialog.dismiss();
+										new SweetAlertDialog(getActivity(), SweetAlertDialog.SUCCESS_TYPE).setTitleText("Updated!").show();
+									}
+								})
+								.addOnFailureListener(new OnFailureListener() {
+									@Override
+									public void onFailure(@NonNull Exception e) {
+										sweetAlertDialog.dismiss();
+										new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE).setTitleText("Error").setContentText(e.getMessage()).show();
+										Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+									}
+								});
 
-		LinearLayout linearLayout = new LinearLayout(getActivity());
-		linearLayout.setOrientation(LinearLayout.VERTICAL);
-		linearLayout.setPadding(10, 10, 10, 10);
-
-		final EditText editText = new EditText(getActivity());
-		editText.setHint("Enter " + key);
-
-		linearLayout.addView(editText);
-		builder.setView(linearLayout);
-
-		builder.setNegativeButton("Update", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				final String value = editText.getText().toString().trim();
-				if(!TextUtils.isEmpty(value))
-				{
-					progressDialog.show();
-					HashMap<String, Object> result = new HashMap<>();
-					result.put(key, value);
-					reference.child(firebaseUser.getUid()).updateChildren(result)
-							.addOnSuccessListener(new OnSuccessListener<Void>() {
+						if(key.equals("name"))
+						{
+							DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
+							Query query = ref.orderByChild("uid").equalTo(uid);
+							query.addListenerForSingleValueEvent(new ValueEventListener() {
 								@Override
-								public void onSuccess(Void aVoid) {
-									progressDialog.dismiss();
-									Toast.makeText(getActivity(), "Updated...", Toast.LENGTH_LONG).show();
+								public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+									for (DataSnapshot snapshot : dataSnapshot.getChildren())
+									{
+										String child = snapshot.getKey();
+										dataSnapshot.getRef().child(child).child("uName").setValue(text.trim());
+									}
 								}
-							})
-							.addOnFailureListener(new OnFailureListener() {
+
 								@Override
-								public void onFailure(@NonNull Exception e) {
-									progressDialog.dismiss();
-									Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+								public void onCancelled(@NonNull DatabaseError databaseError) {
+
 								}
 							});
-				}
-				else
-				{
-					Toast.makeText(getActivity(), "Please enter " + key, Toast.LENGTH_LONG).show();
-				}
 
-				if(key.equals("name"))
-				{
-					DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-					Query query = ref.orderByChild("uid").equalTo(uid);
-					query.addValueEventListener(new ValueEventListener() {
-						@Override
-						public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-							for (DataSnapshot snapshot : dataSnapshot.getChildren())
-							{
-								String child = snapshot.getKey();
-								dataSnapshot.getRef().child(child).child("uName").setValue(value);
-
-							}
-						}
-
-						@Override
-						public void onCancelled(@NonNull DatabaseError databaseError) {
-
-						}
-					});
-
-					ref.addListenerForSingleValueEvent(new ValueEventListener() {
-						@Override
-						public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-							for(DataSnapshot snapshot : dataSnapshot.getChildren())
-							{
-								String child = snapshot.getKey();
-								if(dataSnapshot.child(child).hasChild("Comments"))
-								{
-									String child1 = dataSnapshot.child(child).getKey();
-									Query child2 = FirebaseDatabase.getInstance().getReference("Post").child(child1).child("Comments").orderByChild("uId").equalTo(uid);
-									child2.addValueEventListener(new ValueEventListener() {
-										@Override
-										public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-											for(DataSnapshot snapshot1 : dataSnapshot.getChildren())
-											{
-												String child = snapshot1.getKey();
-												dataSnapshot.getRef().child(child).child("uName").setValue(value);
+							DatabaseReference refUpdateCmt = FirebaseDatabase.getInstance().getReference("Comments");
+							refUpdateCmt.addListenerForSingleValueEvent(new ValueEventListener() {
+								@Override
+								public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+									for(DataSnapshot snapshot : dataSnapshot.getChildren())
+									{
+										String child = snapshot.getKey();
+										String child1 = dataSnapshot.child(child).getKey();
+										Query child2 = FirebaseDatabase.getInstance().getReference("Comments").child(child1).orderByChild("uId").equalTo(uid);
+										child2.addListenerForSingleValueEvent(new ValueEventListener() {
+											@Override
+											public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+												for(DataSnapshot snapshot1 : dataSnapshot.getChildren())
+												{
+													String child = snapshot1.getKey();
+													dataSnapshot.getRef().child(child).child("uName").setValue(text.trim());
+												}
 											}
-										}
 
-										@Override
-										public void onCancelled(@NonNull DatabaseError databaseError) {
+											@Override
+											public void onCancelled(@NonNull DatabaseError databaseError) {
 
-										}
-									});
+											}
+										});
+									}
 								}
-							}
-						}
 
-						@Override
-						public void onCancelled(@NonNull DatabaseError databaseError) {
+								@Override
+								public void onCancelled(@NonNull DatabaseError databaseError) {
 
+								}
+							});
 						}
-					});
-				}
-			}
-		});
-		builder.setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				progressDialog.dismiss();
-			}
-		});
-		AlertDialog alertDialog = builder.create();
-		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-		alertDialog.show();
+					}
+				})
+				.show();
+
 	}
 
 	private void showImagePicDialog() {
-		String options[] = {"Camera", "Gallery"};
-		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-		builder.setTitle("Pick Image From");
-		builder.setItems(options, new DialogInterface.OnClickListener() {
+		circle_menu.setVisibility(View.VISIBLE);
+		circle_menu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
+					@Override
+					public void onMenuSelected(int index) {
+						switch (index)
+						{
+							case 0:
+								if(!checkCameraPermission())
+									requestCameraPermission();
+								else
+									pickFromCamera();
+								break;
+							case 1:
+								if(!checkStoragePermission())
+									requestStoragePermission();
+								else
+									pickFromGallery();
+								break;
+						}
+					}
+				})
+		.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
 			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				switch (which)
-				{
-					case 0:
-						if(!checkCameraPermission())
-							requestCameraPermission();
-						else
-							pickFromCamera();
-						break;
-					case 1:
-						if(!checkStoragePermission())
-							requestStoragePermission();
-						else
-							pickFromGallery();
-						break;
-				}
+			public void onMenuOpened() {
+
+			}
+
+			@Override
+			public void onMenuClosed() {
+				circle_menu.setVisibility(View.GONE);
 			}
 		});
-
-		builder.create().show();
 	}
 
 	@Override
@@ -560,6 +567,7 @@ public class ProfileFragment extends Fragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		circle_menu.setVisibility(View.GONE);
 		if(resultCode == RESULT_OK)
 		{
 			if(requestCode == IMAGE_PICK_GALLERY_CODE)
@@ -580,7 +588,7 @@ public class ProfileFragment extends Fragment {
 
 	private void uploadProfileCoverPhoto(final Uri uri) {
 		//upload ảnh lên storage firebase
-		progressDialog.show();
+		sweetAlertDialog.show();
 		String filePathAndName = storagePath + "" + profileOrCoverPhoto + "_" + firebaseUser.getUid();
 
 		StorageReference storageReference1 = storageReference.child(filePathAndName);
@@ -600,14 +608,15 @@ public class ProfileFragment extends Fragment {
 							.addOnSuccessListener(new OnSuccessListener<Void>() {
 								@Override
 								public void onSuccess(Void aVoid) {
-									progressDialog.dismiss();
-									Toast.makeText(getActivity(), "Image Updated...", Toast.LENGTH_LONG).show();
+									sweetAlertDialog.dismiss();
+									new SweetAlertDialog(getActivity(), SweetAlertDialog.SUCCESS_TYPE).setTitleText("Updated!").show();
 								}
 							})
 							.addOnFailureListener(new OnFailureListener() {
 								@Override
 								public void onFailure(@NonNull Exception e) {
-									progressDialog.dismiss();
+									sweetAlertDialog.dismiss();
+
 									Toast.makeText(getActivity(), "Error Update Image...", Toast.LENGTH_LONG).show();
 								}
 							});
@@ -630,32 +639,64 @@ public class ProfileFragment extends Fragment {
 							}
 						});
 
-						ref.addListenerForSingleValueEvent(new ValueEventListener() {
+//						ref.addListenerForSingleValueEvent(new ValueEventListener() {
+//							@Override
+//							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//								for(DataSnapshot snapshot : dataSnapshot.getChildren())
+//								{
+//									String child = snapshot.getKey();
+//									if(dataSnapshot.child(child).hasChild("Comments"))
+//									{
+//										String child1 = dataSnapshot.child(child).getKey();
+//										Query child2 = FirebaseDatabase.getInstance().getReference("Comments").child(child1).orderByChild("uid").equalTo(uid);
+//										child2.addValueEventListener(new ValueEventListener() {
+//											@Override
+//											public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//												for(DataSnapshot snapshot1 : dataSnapshot.getChildren())
+//												{
+//													String child = snapshot1.getKey();
+//													dataSnapshot.getRef().child(child).child("uDp").setValue(downloadUri.toString());
+//												}
+//											}
+//
+//											@Override
+//											public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//											}
+//										});
+//									}
+//								}
+//							}
+//
+//							@Override
+//							public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//							}
+//						});
+						DatabaseReference refUpdateCmt = FirebaseDatabase.getInstance().getReference("Comments");
+						refUpdateCmt.addListenerForSingleValueEvent(new ValueEventListener() {
 							@Override
 							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 								for(DataSnapshot snapshot : dataSnapshot.getChildren())
 								{
 									String child = snapshot.getKey();
-									if(dataSnapshot.child(child).hasChild("Comments"))
-									{
-										String child1 = dataSnapshot.child(child).getKey();
-										Query child2 = FirebaseDatabase.getInstance().getReference("Post").child(child1).child("Comments").orderByChild("uid").equalTo(uid);
-										child2.addValueEventListener(new ValueEventListener() {
-											@Override
-											public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-												for(DataSnapshot snapshot1 : dataSnapshot.getChildren())
-												{
-													String child = snapshot1.getKey();
-													dataSnapshot.getRef().child(child).child("uDp").setValue(downloadUri.toString());
-												}
+									String child1 = dataSnapshot.child(child).getKey();
+									Query child2 = FirebaseDatabase.getInstance().getReference("Comments").child(child1).orderByChild("uId").equalTo(uid);
+									child2.addListenerForSingleValueEvent(new ValueEventListener() {
+										@Override
+										public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+											for(DataSnapshot snapshot1 : dataSnapshot.getChildren())
+											{
+												String child = snapshot1.getKey();
+												dataSnapshot.getRef().child(child).child("uDp").setValue(downloadUri.toString());
 											}
+										}
 
-											@Override
-											public void onCancelled(@NonNull DatabaseError databaseError) {
+										@Override
+										public void onCancelled(@NonNull DatabaseError databaseError) {
 
-											}
-										});
-									}
+										}
+									});
 								}
 							}
 
@@ -672,8 +713,8 @@ public class ProfileFragment extends Fragment {
 		.addOnFailureListener(new OnFailureListener() {
 			@Override
 			public void onFailure(@NonNull Exception e) {
-				progressDialog.dismiss();
-				Toast.makeText(getActivity(), e.getMessage(), Toast.LENGTH_LONG).show();
+				sweetAlertDialog.dismiss();
+				new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE).setTitleText("Error").setContentText(e.getMessage()).show();
 			}
 		});
 	}

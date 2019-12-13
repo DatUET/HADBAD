@@ -87,6 +87,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 
 public class ChatActivity extends AppCompatActivity {
 
@@ -118,7 +120,7 @@ public class ChatActivity extends AppCompatActivity {
 
 	ValueEventListener seenListener;
 	DatabaseReference userFefForSeen;
-	ProgressDialog progressDialog;
+	SweetAlertDialog sweetAlertDialog;
 
 	List<Chat> chatList;
 	ChatAdapter chatAdapter;
@@ -163,8 +165,8 @@ public class ChatActivity extends AppCompatActivity {
 		video_chat = findViewById(R.id.video_chat);
 		srl_loadmore = findViewById(R.id.srl_loadmore);
 		requestQueue = Volley.newRequestQueue(getApplicationContext());
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
+		sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+		sweetAlertDialog.setCanceledOnTouchOutside(false);
 
 		chatList = new ArrayList<>();
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
@@ -210,7 +212,7 @@ public class ChatActivity extends AppCompatActivity {
 
 					try {
 						if(!TextUtils.isEmpty(hisImage)) {
-							Picasso.get().load(hisImage).placeholder(R.drawable.ic_default_img_white).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
+							Picasso.get().load(hisImage).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
 						}
 					}
 					catch (Exception ex)
@@ -511,8 +513,9 @@ public class ChatActivity extends AppCompatActivity {
 		else
 		{
 			if(videoUri != null) {
-				progressDialog.setMessage("Sending video. Please wait...");
-				progressDialog.show();
+				sweetAlertDialog.setTitleText("Sending video");
+				sweetAlertDialog.setContentText(" Please wait...");
+				sweetAlertDialog.show();
 				String filepathAndName = "ChatsVideo/" + "chat_" + timeStamp;
 				StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
 				storageReference.putFile(videoUri)
@@ -526,7 +529,7 @@ public class ChatActivity extends AppCompatActivity {
 									hashMap.put("image", "noImage");
 									hashMap.put("video", downloadUri);
 									databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
-									progressDialog.dismiss();
+									sweetAlertDialog.dismiss();
 								}
 							}
 						})
@@ -540,8 +543,9 @@ public class ChatActivity extends AppCompatActivity {
 			else
 			{
 				if(imgUri != null) {
-					progressDialog.setMessage("Sending image. Please wait...");
-					progressDialog.show();
+					sweetAlertDialog.setTitleText("Sending image");
+					sweetAlertDialog.setContentText(" Please wait...");
+					sweetAlertDialog.show();
 					String filepathAndName = "ChatsImg/" + "chat_" + timeStamp;
 					int quality = 100;
 					Cursor cursor = this.getContentResolver().query(imgUri,
@@ -557,7 +561,7 @@ public class ChatActivity extends AppCompatActivity {
 						Log.d("quality", quality + "");
 						byte[] data = baos.toByteArray();
 						StorageReference storageReference = FirebaseStorage.getInstance().getReference().child(filepathAndName);
-						storageReference.putFile(imgUri)
+						storageReference.putBytes(data)
 								.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
 									@Override
 									public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
@@ -569,7 +573,7 @@ public class ChatActivity extends AppCompatActivity {
 											hashMap.put("image", downloadUri);
 											hashMap.put("video", "noVideo");
 											databaseReference.child("Chats").child(Long.parseLong(MAX_TIME) - Long.parseLong(timeStamp) + "").setValue(hashMap);
-											progressDialog.dismiss();
+											sweetAlertDialog.dismiss();
 										}
 									}
 								})
@@ -628,7 +632,7 @@ public class ChatActivity extends AppCompatActivity {
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Token token = snapshot.getValue(Token.class);
-					Data data = new Data(myuid, name + ":" + message, "New Message", uid,"chat" , R.drawable.ic_defaut_img);
+					Data data = new Data(myuid, name + ":" + message, "New Message", uid,"chat" , R.drawable.user);
 					Sender sender = new Sender(data, token.getToken());
 					try {
 

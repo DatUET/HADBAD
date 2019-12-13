@@ -119,7 +119,7 @@ public class DashBoardActivity extends AppCompatActivity {
 	private void checkUserStatus()
 	{
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null)
+		if(firebaseUser != null && firebaseUser.isEmailVerified())
 		{
 			mUid = firebaseUser.getUid();
 			SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
@@ -152,10 +152,12 @@ public class DashBoardActivity extends AppCompatActivity {
 
 	private void checkOnlineStatus(String status)
 	{
-		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(mUid);
-		HashMap<String, Object> hashMap = new HashMap<>();
-		hashMap.put("onlineStatus", status);
-		dbRef.updateChildren(hashMap);
+		if(mUid != null) {
+			DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(mUid);
+			HashMap<String, Object> hashMap = new HashMap<>();
+			hashMap.put("onlineStatus", status);
+			dbRef.updateChildren(hashMap);
+		}
 	}
 
 	@Override

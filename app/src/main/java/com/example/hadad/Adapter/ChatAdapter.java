@@ -8,6 +8,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
@@ -46,6 +47,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 /**
  * thiết kế cho từng item chat
@@ -108,7 +111,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 			// ngược lại nếu ko có thì ẩn n đi
 			chatViewHolder.txt_message.setVisibility(View.GONE);
 		}
-		chatViewHolder.txt_time.setText(dateTime); // đưa thời gian đã gửi của tin nhắn vào TextView
+		//chatViewHolder.txt_time.setText(dateTime); // đưa thời gian đã gửi của tin nhắn vào TextView
 		try {
 			Picasso.get().load(imgUrl).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(chatViewHolder.img_avatar); // tải avater của người gửi vào ImageView
 		}
@@ -119,7 +122,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		if (!chat.getImage().equals("noImage"))
 		{
 			// nếu tin nhắn có ảnh thì load ảnh vào ImageView của item tin nhắn đó
-			chatViewHolder.img_chat.setVisibility(View.VISIBLE);
+			chatViewHolder.cv_img.setVisibility(View.VISIBLE);
 			try {
 				Picasso.get().load(chat.getImage()).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(chatViewHolder.img_chat);
 			}
@@ -127,6 +130,28 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 			{
 
 			}
+			chatViewHolder.img_delete.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+							.setTitleText("Are you sure?")
+							.setContentText("You won't be able to recover this message!")
+							.setCancelButton("Delete", new SweetAlertDialog.OnSweetClickListener() {
+								@Override
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									deleteMessage(i);
+									sweetAlertDialog.dismiss();
+								}
+							})
+							.setConfirmButton("No", new SweetAlertDialog.OnSweetClickListener() {
+								@Override
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									sweetAlertDialog.dismiss();
+								}
+							})
+							.show();
+				}
+			});
 		}
 		else
 		{
@@ -136,7 +161,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		if (!chat.getVideo().equals("noVideo"))
 		{
 			// tương tự cho video
-			chatViewHolder.video_chat.setVisibility(View.VISIBLE);
+			chatViewHolder.cv_video.setVisibility(View.VISIBLE);
 			Uri uri = Uri.parse(chat.getVideo());
 			chatViewHolder.video_chat.setVideoURI(uri);
 			chatViewHolder.video_chat.requestFocus();
@@ -145,6 +170,28 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 				public void onPrepared(MediaPlayer mp) {
 					mp.setLooping(true);
 					chatViewHolder.video_chat.start();
+				}
+			});
+			chatViewHolder.img_delete_video.setOnClickListener(new View.OnClickListener() {
+				@Override
+				public void onClick(View v) {
+					new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+							.setTitleText("Are you sure?")
+							.setContentText("You won't be able to recover this message!")
+							.setCancelButton("Delete", new SweetAlertDialog.OnSweetClickListener() {
+								@Override
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									deleteMessage(i);
+									sweetAlertDialog.dismiss();
+								}
+							})
+							.setConfirmButton("No", new SweetAlertDialog.OnSweetClickListener() {
+								@Override
+								public void onClick(SweetAlertDialog sweetAlertDialog) {
+									sweetAlertDialog.dismiss();
+								}
+							})
+							.show();
 				}
 			});
 
@@ -157,26 +204,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 		chatViewHolder.layout_message.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setTitle("Delete");
-				builder.setMessage("Are you sure to delete this message?");
-
-				builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						deleteMessage(i);
-					}
-				});
-
-				builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						dialog.dismiss();
-					}
-				});
-				AlertDialog alertDialog = builder.create();
-				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation; // tạo animation cho thông báo chạy từ dưới lên
-				alertDialog.show();
+				new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+						.setTitleText("Are you sure?")
+						.setContentText("You won't be able to recover this message!")
+						.setCancelButton("Delete", new SweetAlertDialog.OnSweetClickListener() {
+							@Override
+							public void onClick(SweetAlertDialog sweetAlertDialog) {
+								deleteMessage(i);
+								sweetAlertDialog.dismiss();
+							}
+						})
+						.setConfirmButton("No", new SweetAlertDialog.OnSweetClickListener() {
+							@Override
+							public void onClick(SweetAlertDialog sweetAlertDialog) {
+								sweetAlertDialog.dismiss();
+							}
+						})
+						.show();
 			}
 		});
 		if(i == chatList.size() -1)
@@ -223,21 +267,26 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 	// tìm các thành phần bên file layout
 	public class ChatViewHolder extends RecyclerView.ViewHolder {
 		CircularImageView img_avatar;
-		TextView txt_time, txt_message, txt_seen;
+		TextView txt_message, txt_seen;
 		LinearLayout layout_message;
-		ImageView img_chat;
+		ImageView img_chat, img_delete, img_delete_video;
 		VideoView video_chat;
+		CardView cv_img, cv_video;
 
 		public ChatViewHolder(@NonNull View itemView) {
 			super(itemView);
 
 			img_avatar = itemView.findViewById(R.id.img_avatar);
 			txt_message = itemView.findViewById(R.id.txt_message);
-			txt_time = itemView.findViewById(R.id.txt_time);
+			//txt_time = itemView.findViewById(R.id.txt_time);
 			txt_seen = itemView.findViewById(R.id.txt_seen);
 			layout_message = itemView.findViewById(R.id.layout_message);
 			img_chat = itemView.findViewById(R.id.img_chat);
 			video_chat = itemView.findViewById(R.id.video_chat);
+			img_delete = itemView.findViewById(R.id.img_delete);
+			img_delete_video = itemView.findViewById(R.id.img_delete_video);
+			cv_img = itemView.findViewById(R.id.cv_img);
+			cv_video = itemView.findViewById(R.id.cv_video);
 		}
 	}
 
@@ -255,7 +304,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 	}
 
 	private void deleteMessage(int position) {
-
 		final String myuid = FirebaseAuth.getInstance().getCurrentUser().getUid(); // lấy Id của người dùng đã được lưu trong app
 		String timestamp = chatList.get(position).getTimestamp();
 		DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -288,11 +336,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
 						snapshot.getRef().updateChildren(hashMap);
 
-						Toast.makeText(context, "Message deleted...", Toast.LENGTH_LONG).show();
+						new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE)
+							.setTitleText("Message deleted")
+							.show();
+						//Toast.makeText(context, "Message deleted...", Toast.LENGTH_LONG).show();
 					}
 					else
 					{
-						Toast.makeText(context, "You can delete only your messages.", Toast.LENGTH_LONG).show();
+						new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+								.setTitleText("Can't Delete")
+								.setContentText("You can delete only your messages!")
+								.show();
+						//Toast.makeText(context, "You can delete only your messages.", Toast.LENGTH_LONG).show();
 					}
 				}
 			}

@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.text.TextUtils;
@@ -50,6 +51,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 public class ThereProfileActivity extends AppCompatActivity {
 
 	private static final int REQUEST_CALL = 200;
@@ -67,6 +70,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 	LinearLayout layout_profile;
 	ImageButton btn_call_phone, btn_chat, btn_subscribe;
 	LinearLayoutManager linearLayoutManager;
+	SwipeRefreshLayout srl_post;
 
 	FirebaseAuth firebaseAuth;
 	String myUid;
@@ -105,6 +109,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 		btn_chat = findViewById(R.id.btn_chat);
 		btn_call_phone = findViewById(R.id.btn_call_phone);
 		btn_subscribe = findViewById(R.id.btn_subscribe);
+		srl_post = findViewById(R.id.srl_post);
 
 		Intent intent = getIntent();
 		uid = intent.getStringExtra("uid");
@@ -180,6 +185,15 @@ public class ThereProfileActivity extends AppCompatActivity {
 					isScrolling = false;
 					loadmoreData();
 				}
+			}
+		});
+
+		srl_post.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				indexLastKey = 0;
+				getListKey();
+				loadHisPost();
 			}
 		});
 	}
@@ -316,48 +330,47 @@ public class ThereProfileActivity extends AppCompatActivity {
 			}
 		});
 		indexLastKey += ITEM_LOAD;
+		srl_post.setRefreshing(false);
 	}
 
 
 	private void showDialogAddSubcribe() {
 		if (isFollowing) {
-			AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
-			builder.setTitle("Subcribe");
-			builder.setMessage("Do you unsubscribe " + txt_name.getText().toString());
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					unSubscribe();
-				}
-			})
-					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			new SweetAlertDialog(this, SweetAlertDialog.BUTTON_CONFIRM)
+					.setTitleText("Unsubcribe")
+					.setContentText("Do you unsubscribe " + txt_name.getText().toString())
+					.setConfirmButton("Yes", new SweetAlertDialog.OnSweetClickListener() {
 						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
+						public void onClick(SweetAlertDialog sweetAlertDialog) {
+							unSubscribe();
+							sweetAlertDialog.dismissWithAnimation();
 						}
-					});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-			alertDialog.show();
+					})
+					.setCancelButton("No", new SweetAlertDialog.OnSweetClickListener() {
+						@Override
+						public void onClick(SweetAlertDialog sweetAlertDialog) {
+							sweetAlertDialog.dismissWithAnimation();
+						}
+					})
+					.show();
 		} else {
-			AlertDialog.Builder builder = new AlertDialog.Builder(ThereProfileActivity.this);
-			builder.setTitle("Subcribe");
-			builder.setMessage("Do you subscribe " + txt_name.getText().toString());
-			builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					addSubscribe();
-				}
-			})
-					.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+			new SweetAlertDialog(this, SweetAlertDialog.BUTTON_CONFIRM)
+					.setTitleText("Subcribe")
+					.setContentText("Do you subscribe " + txt_name.getText().toString())
+					.setConfirmButton("Yes", new SweetAlertDialog.OnSweetClickListener() {
 						@Override
-						public void onClick(DialogInterface dialog, int which) {
-							dialog.dismiss();
+						public void onClick(SweetAlertDialog sweetAlertDialog) {
+							addSubscribe();
+							sweetAlertDialog.dismissWithAnimation();
 						}
-					});
-			AlertDialog alertDialog = builder.create();
-			alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-			alertDialog.show();
+					})
+					.setCancelButton("No", new SweetAlertDialog.OnSweetClickListener() {
+						@Override
+						public void onClick(SweetAlertDialog sweetAlertDialog) {
+							sweetAlertDialog.dismissWithAnimation();
+						}
+					})
+					.show();
 		}
 	}
 
@@ -403,8 +416,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 				for (DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Post post = snapshot.getValue(Post.class);
-					if(post.getpTitle().toLowerCase().contains(querySearch.toLowerCase()) ||
-							post.getpDescr().toLowerCase().contains(querySearch.toLowerCase())) {
+					if(post.getpDescr().toLowerCase().contains(querySearch.toLowerCase()) && !post.getpMode().equals("Private")) {
 						postList.add(post);
 					}
 

@@ -9,9 +9,13 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.view.ViewCompat;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.blogspot.atifsoftwares.circularimageview.CircularImageView;
@@ -20,6 +24,9 @@ import com.example.hadad.Model.User;
 
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
+import com.hitomi.cmlibrary.CircleMenu;
+import com.hitomi.cmlibrary.OnMenuSelectedListener;
+import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
@@ -30,10 +37,12 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 
 	Context context;
 	List<User> userList;
+	FrameLayout frame_users;
 
-	public UserAdapter(Context context, List<User> userList) {
+	public UserAdapter(Context context, List<User> userList, FrameLayout frame_users) {
 		this.context = context;
 		this.userList = userList;
+		this.frame_users = frame_users;
 	}
 
 	@NonNull
@@ -70,34 +79,76 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 			@Override
 			public void onClick(View v) {
 
-
-				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-				builder.setItems(new String[]{"Profile", "Chat"}, new DialogInterface.OnClickListener() {
+				final CircleMenu circleMenu = new CircleMenu(context);
+				circleMenu.setBackgroundColor(Color.parseColor("#40000000"));
+				circleMenu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
+						.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_chat_white)
+						.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_avatar);
+				circleMenu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
 					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						if(which == 0)
+					public void onMenuSelected(int index) {
+						switch (index)
 						{
-							userViewHolder.img_avatar.setTransitionName("transitionUsers");
-							Intent intent = new Intent(context, ThereProfileActivity.class);
-							intent.putExtra("uid", uid);
-							intent.putExtra("fromUsers", true);
-							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-							context.startActivity(intent, activityOptionsCompat.toBundle());
-						}
-						else
-						{
-							userViewHolder.img_avatar.setTransitionName("transition" + uid);
-							Intent intent = new Intent(context, ChatActivity.class);
-							intent.putExtra("uid", uid);
-							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-							context.startActivity(intent, activityOptionsCompat.toBundle());
+							case 0:
+								userViewHolder.img_avatar.setTransitionName("transition" + uid);
+								Intent intent = new Intent(context, ChatActivity.class);
+								intent.putExtra("uid", uid);
+								ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
+								context.startActivity(intent, activityOptionsCompat.toBundle());
+								break;
+							case 1:
+								userViewHolder.img_avatar.setTransitionName("transitionUsers");
+								Intent intent1 = new Intent(context, ThereProfileActivity.class);
+								intent1.putExtra("uid", uid);
+								intent1.putExtra("fromUsers", true);
+								ActivityOptionsCompat activityOptionsCompat1 = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
+								context.startActivity(intent1, activityOptionsCompat1.toBundle());
+								break;
 						}
 					}
 				});
 
-				AlertDialog alertDialog = builder.create();
-				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-				alertDialog.show();
+				circleMenu.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
+					@Override
+					public void onMenuOpened() {
+
+					}
+
+					@Override
+					public void onMenuClosed() {
+						circleMenu.setVisibility(View.GONE);
+					}
+				});
+
+				frame_users.addView(circleMenu);
+
+//				AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//				builder.setItems(new String[]{"Profile", "Chat"}, new DialogInterface.OnClickListener() {
+//					@Override
+//					public void onClick(DialogInterface dialog, int which) {
+//						if(which == 0)
+//						{
+//							userViewHolder.img_avatar.setTransitionName("transitionUsers");
+//							Intent intent = new Intent(context, ThereProfileActivity.class);
+//							intent.putExtra("uid", uid);
+//							intent.putExtra("fromUsers", true);
+//							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
+//							context.startActivity(intent, activityOptionsCompat.toBundle());
+//						}
+//						else
+//						{
+//							userViewHolder.img_avatar.setTransitionName("transition" + uid);
+//							Intent intent = new Intent(context, ChatActivity.class);
+//							intent.putExtra("uid", uid);
+//							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
+//							context.startActivity(intent, activityOptionsCompat.toBundle());
+//						}
+//					}
+//				});
+//
+//				AlertDialog alertDialog = builder.create();
+//				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
+//				alertDialog.show();
 			}
 		});
 	}

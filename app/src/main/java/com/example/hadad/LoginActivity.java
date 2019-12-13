@@ -12,6 +12,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.text.InputType;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
@@ -41,8 +42,11 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 
 import java.util.HashMap;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -50,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
 	EditText emailEd, passwordEd;
 	Button btn_login;
 	TextView not_have_account, recover_pass;
-	ProgressDialog progressDialog;
+	SweetAlertDialog sweetAlertDialog;
 	SignInButton btn_googlelogin;
 	GoogleSignInClient mGoogleSignInClient;
 
@@ -86,14 +90,13 @@ public class LoginActivity extends AppCompatActivity {
 		btn_login = findViewById(R.id.btn_login);
 		not_have_account = findViewById(R.id.not_have_account);
 		recover_pass = findViewById(R.id.recover_pass);
-		progressDialog = new ProgressDialog(this);
-		progressDialog.setCanceledOnTouchOutside(false);
+		sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+		sweetAlertDialog.setCanceledOnTouchOutside(false);
 		btn_googlelogin = findViewById(R.id.btn_googlelogin);
 
 		SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
 		String emailLast = sharedPreferences.getString("EMAIL_LAST", "None");
-		if (!emailLast.equals("None"))
-		{
+		if (!emailLast.equals("None")) {
 			emailEd.setText(emailLast);
 		}
 
@@ -115,13 +118,13 @@ public class LoginActivity extends AppCompatActivity {
 			public void onClick(View v) {
 				String email = emailEd.getText().toString();
 				String pass = passwordEd.getText().toString();
-				if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-				{
+				if (!Patterns.EMAIL_ADDRESS.matcher(email).matches() || TextUtils.isEmpty(email)) {
 					emailEd.setError("Invalid email");
 					emailEd.setFocusable(true);
-				}
-				else
-				{
+				} else if (TextUtils.isEmpty(pass)) {
+					passwordEd.setError("Invalid password");
+					passwordEd.setFocusable(true);
+				} else {
 					loginUser(email, pass);
 				}
 			}
@@ -132,13 +135,11 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onFocusChange(View v, boolean hasFocus) {
 				final String email = emailEd.getText().toString();
-				if(!hasFocus) {
-					if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
-					{
+				if (!hasFocus) {
+					if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
 						emailEd.setError("Invalid email");
 						emailEd.setFocusable(true);
-					}
-					else {
+					} else {
 						checkEmail(v, email.trim());
 					}
 				}
@@ -156,8 +157,8 @@ public class LoginActivity extends AppCompatActivity {
 		btn_googlelogin.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				progressDialog.setMessage("Logging in with Account Google....");
-				progressDialog.show();
+				sweetAlertDialog.setTitleText("Logging in with Account Google....");
+				sweetAlertDialog.show();
 				Intent signInIntent = mGoogleSignInClient.getSignInIntent();
 				startActivityForResult(signInIntent, RC_SIGN_IN);
 			}
@@ -171,102 +172,110 @@ public class LoginActivity extends AppCompatActivity {
 	}
 
 	private void loginUser(String email, String pass) {
-		progressDialog.setMessage("Logging in\nPlease wait...");
-		progressDialog.show();
+		sweetAlertDialog.setTitleText("Logging in\nPlease wait...");
+		sweetAlertDialog.show();
 		firebaseAuth.signInWithEmailAndPassword(email, pass)
 				.addOnCompleteListener(new OnCompleteListener<AuthResult>() {
 					@Override
 					public void onComplete(@NonNull Task<AuthResult> task) {
-						if(task.isSuccessful()) {
-							progressDialog.dismiss();
+						if (task.isSuccessful()) {
+							sweetAlertDialog.dismiss();
 							SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
 							final SharedPreferences.Editor editor = sharedPreferences.edit();
 							editor.putString("EMAIL_LAST", emailEd.getText().toString());
 							editor.apply();
 							FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-							Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
-							startActivity(intent);
-							finish();
-						}
-						else
-						{
-							progressDialog.dismiss();
-							AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-							builder.setTitle("ERROR");
-							builder.setMessage("Email or password is failed");
-							builder.create().show();
-						}
-					}
-				})
-		.addOnFailureListener(new OnFailureListener() {
-			@Override
-			public void onFailure(@NonNull Exception e) {
-				progressDialog.dismiss();
-				progressDialog.dismiss();
-				AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-				builder.setTitle("ERROR");
-				builder.setMessage(e.getMessage());
-				builder.create().show();
-			}
-		});
-	}
-
-	private void showRecoverDialog() {
-		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-		builder.setTitle("Recover pass");
-
-		LinearLayout linearLayout = new LinearLayout(this);
-		final EditText emailRecoverEd = new EditText(this);
-		emailRecoverEd.setHint("Email");
-		emailRecoverEd.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-		emailRecoverEd.setMinEms(16);
-		linearLayout.addView(emailRecoverEd);
-		linearLayout.setPadding(10, 10, 10, 10);
-		builder.setView(linearLayout);
-
-		builder.setPositiveButton("Recover", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				String email = emailRecoverEd.getText().toString();
-				sendRecover(email);
-			}
-		});
-
-		builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-			@Override
-			public void onClick(DialogInterface dialog, int which) {
-				progressDialog.dismiss();
-			}
-		});
-		AlertDialog alertDialog = builder.create();
-		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-		alertDialog.show();
-	}
-
-	private void sendRecover(String email) {
-		progressDialog.setMessage("Sending\nPlease wait...");
-		progressDialog.show();
-		firebaseAuth.sendPasswordResetEmail(email)
-				.addOnCompleteListener(new OnCompleteListener<Void>() {
-					@Override
-					public void onComplete(@NonNull Task<Void> task) {
-						if(task.isSuccessful())
-						{
-							progressDialog.dismiss();
-							Toast.makeText(LoginActivity.this, "Please check your email !", Toast.LENGTH_LONG).show();
-						}
-						else
-						{
-							progressDialog.dismiss();
-							Toast.makeText(LoginActivity.this,"Cannot failed", Toast.LENGTH_LONG).show();
+							if (firebaseUser.isEmailVerified()) {
+								Intent intent = new Intent(LoginActivity.this, DashBoardActivity.class);
+								startActivity(intent);
+								finish();
+							} else {
+								sweetAlertDialog.dismiss();
+								new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.WARNING_TYPE)
+										.setTitleText("Notification!")
+										.setContentText("Please verify your email address!")
+										.show();
+							}
+						} else {
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+									.setTitleText("ERROR")
+									.setContentText("Email or password is failed")
+									.setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+										@Override
+										public void onClick(SweetAlertDialog sweetAlertDialog) {
+											sweetAlertDialog.dismiss();
+										}
+									})
+									.show();
 						}
 					}
 				})
 				.addOnFailureListener(new OnFailureListener() {
 					@Override
 					public void onFailure(@NonNull Exception e) {
-						progressDialog.dismiss();
-						Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+						sweetAlertDialog.dismiss();
+						new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+								.setTitleText("ERROR")
+								.setContentText(e.getMessage())
+								.show();
+					}
+				});
+	}
+
+	private void showRecoverDialog() {
+		new LovelyTextInputDialog(this)
+				.setTopColor(Color.parseColor("#40C4FF"))
+				.setTitle("Recover pass")
+				.setMessage("Please enter your email")
+				.setInputFilter("Invalid email", new LovelyTextInputDialog.TextFilter() {
+					@Override
+					public boolean check(String text) {
+						return !TextUtils.isEmpty(text.trim()) || Patterns.EMAIL_ADDRESS.matcher(text.trim()).matches();
+					}
+				})
+				.setConfirmButton("Recover", new LovelyTextInputDialog.OnTextInputConfirmListener() {
+					@Override
+					public void onTextInputConfirmed(String text) {
+						sendRecover(text.trim());
+					}
+				}).show();
+	}
+
+	private void sendRecover(String email) {
+		sweetAlertDialog.setTitleText("Sending\nPlease wait...");
+		sweetAlertDialog.show();
+		firebaseAuth.sendPasswordResetEmail(email)
+				.addOnCompleteListener(new OnCompleteListener<Void>() {
+					@Override
+					public void onComplete(@NonNull Task<Void> task) {
+						if (task.isSuccessful()) {
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.SUCCESS_TYPE)
+									.setTitleText("SUCCESS!")
+									.setContentText("Please check your email !")
+									.show();
+							//Toast.makeText(LoginActivity.this, "Please check your email !", Toast.LENGTH_LONG).show();
+						} else {
+							sweetAlertDialog.dismiss();
+							new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+									.setTitleText("SORRY!")
+									.setContentText("Error! An error occurred. Please try again later")
+									.show();
+
+							//Toast.makeText(LoginActivity.this,"Cannot failed", Toast.LENGTH_LONG).show();
+						}
+					}
+				})
+				.addOnFailureListener(new OnFailureListener() {
+					@Override
+					public void onFailure(@NonNull Exception e) {
+						sweetAlertDialog.dismiss();
+						new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+								.setTitleText("SORRY!")
+								.setContentText("Error! An error occurred. Please try again later")
+								.show();
+						//Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
 					}
 				});
 	}
@@ -277,16 +286,13 @@ public class LoginActivity extends AppCompatActivity {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				boolean isRegisted = false;
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					User user = snapshot.getValue(User.class);
-					if(user.getEmail().equals(email))
-					{
+					if (user.getEmail().equals(email)) {
 						isRegisted = true;
 					}
 				}
-				if(!isRegisted)
-				{
+				if (!isRegisted) {
 					emailEd.setError("This email has not been registered");
 				}
 
@@ -326,16 +332,13 @@ public class LoginActivity extends AppCompatActivity {
 					@Override
 					public void onComplete(@NonNull Task<AuthResult> task) {
 						if (task.isSuccessful()) {
-							progressDialog.dismiss();
+							sweetAlertDialog.dismiss();
 							// Sign in success, update UI with the signed-in user's information
 							FirebaseUser user = firebaseAuth.getCurrentUser();
-							Log.d("is new",task.getResult().getAdditionalUserInfo().isNewUser() + "");
-							if(task.getResult().getAdditionalUserInfo().isNewUser())
-							{
+							if (task.getResult().getAdditionalUserInfo().isNewUser()) {
 								String email = user.getEmail();
 								String uid = user.getUid();
 								String name = user.getDisplayName();
-
 
 								HashMap<String, Object> hashMap = new HashMap<>();
 								hashMap.put("email", email);
@@ -346,7 +349,6 @@ public class LoginActivity extends AppCompatActivity {
 								hashMap.put("phone", ""); //lấy sau
 								hashMap.put("image", ""); //lấy sau
 								hashMap.put("cover", "");
-								hashMap.put("subscribers", "");
 
 								FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
 								DatabaseReference reference = firebaseDatabase.getReference("Users");
@@ -361,17 +363,20 @@ public class LoginActivity extends AppCompatActivity {
 							//updateUI(user);
 						} else {
 							// If sign in fails, display a message to the user.
-							Toast.makeText(LoginActivity.this, "Login failed..", Toast.LENGTH_LONG).show();
+							new SweetAlertDialog(LoginActivity.this, SweetAlertDialog.ERROR_TYPE)
+									.setTitleText("OOP...!")
+									.setContentText("Login failed..")
+									.show();
 							//updateUI(null);
 						}
 					}
 				})
-		.addOnFailureListener(new OnFailureListener() {
-			@Override
-			public void onFailure(@NonNull Exception e) {
-				Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
-			}
-		});
+				.addOnFailureListener(new OnFailureListener() {
+					@Override
+					public void onFailure(@NonNull Exception e) {
+						Toast.makeText(LoginActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
+					}
+				});
 	}
 
 	@Override

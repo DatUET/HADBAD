@@ -12,15 +12,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingTop="5dp"
-        android:paddingBottom="5dp">
+        android:paddingTop="5dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginLeft="3dp"
+            android:layout_marginLeft="8dp"
             android:layout_marginRight="3dp">
 
             <com.blogspot.atifsoftwares.circularimageview.CircularImageView
@@ -36,6 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:layout_marginLeft="5dp"
                 android:layout_weight="1">
 
                 <TextView
@@ -44,7 +44,7 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/colorWhite"
                     android:textStyle="bold"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -81,17 +81,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/txt_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="10dp"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:autoLink="all"
-                android:textColor="@color/colorWhite"/>
 
             <TextView
                 android:id="@+id/txt_description"
@@ -142,57 +131,96 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#1b1e44"/>
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:background="@color/colorPrimaryDark"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="3dp"
-            android:layout_marginRight="3dp"
-            android:orientation="horizontal"
-            android:gravity="center">
 
-            <Button
+            android:orientation="horizontal">
+
+            <LinearLayout
                 android:id="@+id/btn_like"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Like"
-                android:textAllCaps="false"
-                android:background="#1b1e44"
-                android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_like_black"
-                android:textColor="@color/colorWhite"/>
+                android:orientation="horizontal"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/img_btnlike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_like_black"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:id="@+id/txt_btnlike"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Like"
+                    android:textColor="@color/colorWhite"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="18sp"/>
+            </LinearLayout>
 
-            <Button
+            <LinearLayout
                 android:id="@+id/btn_comment"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Comment"
-                android:textAllCaps="false"
-                android:background="#1b1e44"
-                android:drawablePadding="5dp"
-                android:drawableStart="@drawable/ic_comment_black"
-                android:textColor="@color/colorWhite"/>
+                android:orientation="horizontal"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/img_btncomment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_comment_black"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:id="@+id/txt_btncomment"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Comment"
+                    android:textColor="@color/colorWhite"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="18sp"/>
+            </LinearLayout>
 
-            <Button
+            <LinearLayout
                 android:id="@+id/btn_share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="Share"
-                android:textAllCaps="false"
-                android:background="#1b1e44"
-                android:drawableStart="@drawable/ic_share_black"
-                android:drawablePadding="5dp"
-                android:textColor="@color/colorWhite"/>
+                android:orientation="horizontal"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:gravity="center">
+                <ImageView
+                    android:id="@+id/img_btnshare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_share_black"
+                    android:layout_gravity="center"/>
+                <TextView
+                    android:id="@+id/txt_btnshare"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Share"
+                    android:textColor="@color/colorWhite"
+                    android:layout_marginLeft="10dp"
+                    android:textSize="18sp"/>
+            </LinearLayout>
 
         </LinearLayout>
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="3dp"
+            android:layout_height="8dp"
             android:background="@color/colorPrimaryDark" />
     </LinearLayout>
 

@@ -8,6 +8,10 @@
     tools:context=".AddPostActivity"
     android:background="#1b1e44">
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,42 +19,17 @@
         android:orientation="vertical"
         android:background="#1b1e44">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Tile: "
-            android:textSize="18sp"
-            android:textColor="@color/colorWhite"
-            android:paddingLeft="10dp"
-            android:paddingBottom="5dp"/>
-
-        <EditText
-            android:id="@+id/txt_inputtitle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:hint="Enter title"
-            android:textColorHint="#C4C4C4"
-            android:singleLine="true"
-            android:textColor="@color/colorWhite"
-            android:background="@drawable/editextchat"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Description: "
-            android:textSize="18sp"
-            android:textColor="@color/colorWhite"
-            android:paddingLeft="10dp"
-            android:paddingTop="10dp"
-            android:paddingBottom="5dp"/>
 
         <EditText
             android:id="@+id/txt_description"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="120dp"
             android:padding="10dp"
-            android:hint="Enter Description"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="20dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginLeft="10dp"
+            android:hint="Share moments with everyone"
             android:textColorHint="#C4C4C4"
             android:inputType="textCapSentences|textMultiLine"
             android:gravity="start"
@@ -65,6 +44,7 @@
             android:drawableLeft="@drawable/ic_add_black"
             android:text="Add Photo"
             android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
             android:textSize="20sp"
             android:textColor="@color/colorWhite" />
 
@@ -103,6 +83,15 @@
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
             android:layout_marginBottom="10dp"/>
+
     </LinearLayout>
+        <com.hitomi.cmlibrary.CircleMenu
+            android:id="@+id/circle_menu"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#40000000"
+            android:visibility="gone"/>
+    </FrameLayout>
+
 
 </ScrollView>

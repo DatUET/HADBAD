@@ -17,7 +17,6 @@ import android.widget.VideoView;
 public class MainActivity extends AppCompatActivity {
 
 	Button btn_login, btn_register;
-	VideoView video_background;
 	MediaPlayer mediaPlayer;
 	public static Activity activity;
 	ImageView img_logo;
@@ -41,20 +40,6 @@ public class MainActivity extends AppCompatActivity {
 		img_logo.setAnimation(uptodown);
 		btn_login.setAnimation(downtoup);
 		btn_register.setAnimation(downtoup);
-		video_background = findViewById(R.id.video_background);
-
-		video_background.setVideoPath("android.resource://" + getPackageName() + "/" + R.raw.videoback2);
-		video_background.requestFocus();
-		video_background.setSoundEffectsEnabled(false);
-		video_background.start();
-		video_background.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-			@Override
-			public void onPrepared(MediaPlayer mp) {
-				mediaPlayer = mp;
-				mediaPlayer.setLooping(true);
-				mediaPlayer.start();
-			}
-		});
 
 		btn_login.setOnClickListener(new View.OnClickListener() {
 			@Override

@@ -68,13 +68,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
+
 
 public class PostDetailActivity extends AppCompatActivity {
 
 	ActionBar actionBar;
-	ImageView img_avatar, img_avatar_comment;
-	TextView txt_name, txt_time, txt_title, txt_description, txt_like, txt_comment;
-	Button btn_like, btn_comment, btn_share;
+	ImageView img_avatar, img_avatar_comment, img_btnlike;
+	TextView txt_name, txt_time, txt_description, txt_like, txt_comment, txt_btnlike;
+	LinearLayout btn_like, btn_share;
 	ImageButton btn_more, btn_send;
 	LinearLayout layout_profile;
 	EditText txt_inputcomment;
@@ -82,7 +84,6 @@ public class PostDetailActivity extends AppCompatActivity {
 	ViewPager vp_img;
 	List<Comment> commentList;
 	CommentAdapter commentAdapter;
-	ProgressDialog progressDialog;
 
 	RequestQueue requestQueue;
 
@@ -111,20 +112,19 @@ public class PostDetailActivity extends AppCompatActivity {
 		img_avatar = findViewById(R.id.img_avatar);
 		txt_name = findViewById(R.id.txt_name);
 		txt_time = findViewById(R.id.txt_time);
-		txt_title = findViewById(R.id.txt_title);
 		txt_description = findViewById(R.id.txt_description);
 		txt_like = findViewById(R.id.txt_like);
 		txt_comment = findViewById(R.id.txt_comment);
+		txt_btnlike = findViewById(R.id.txt_btnlike);
 		btn_more = findViewById(R.id.btn_more);
 		btn_like = findViewById(R.id.btn_like);
-		btn_comment = findViewById(R.id.btn_comment);
 		btn_share = findViewById(R.id.btn_share);
 		layout_profile = findViewById(R.id.layout_profile);
 		img_avatar_comment = findViewById(R.id.img_avatar_comment);
+		img_btnlike = findViewById(R.id.img_btnlike);
 		btn_send = findViewById(R.id.btn_send);
 		txt_inputcomment =findViewById(R.id.txt_inputcomment);
 		arrUserCommented = new ArrayList<>();
-		progressDialog = new ProgressDialog(this);
 
 		requestQueue = Volley.newRequestQueue(getApplicationContext());
 
@@ -166,9 +166,8 @@ public class PostDetailActivity extends AppCompatActivity {
 		btn_share.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				String pTitle = txt_title.getText().toString();
 				String pDescr = txt_description.getText().toString();
-				beginShare(pTitle, pDescr, pImage, hostUid);
+				beginShare(pDescr, pImage, hostUid);
 			}
 		});
 
@@ -189,7 +188,7 @@ public class PostDetailActivity extends AppCompatActivity {
 		});
 	}
 
-	private void beginShare(final String pTitle, final String pDescr, final String pImage, final String hostUid) {
+	private void beginShare(final String pDescr, final String pImage, final String hostUid) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("Share");
 		builder.setMessage("Do you want to share this  post?");
@@ -210,7 +209,6 @@ public class PostDetailActivity extends AppCompatActivity {
 						hashMap.put("uEmail", user.getEmail());
 						hashMap.put("uDp", user.getImage());
 						hashMap.put("pId", timeID);
-						hashMap.put("pTitle", pTitle);
 						hashMap.put("pDescr", pDescr);
 						hashMap.put("pImage", pImage);
 						hashMap.put("pTime", timeID);
@@ -344,13 +342,15 @@ public class PostDetailActivity extends AppCompatActivity {
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				if(dataSnapshot.child(postId).hasChild(myUid))
 				{
-					btn_like.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_liked, 0, 0, 0);
-					btn_like.setText("Liked");
+					img_btnlike.setImageResource(R.drawable.ic_liked);
+					txt_btnlike.setText("Liked");
+					txt_btnlike.setTextColor(Color.parseColor("#40C4FF"));
 				}
 				else
 				{
-					btn_like.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_like_black, 0, 0, 0);
-					btn_like.setText("Like");
+					img_btnlike.setImageResource(R.drawable.ic_like_black);
+					txt_btnlike.setText("Like");
+					txt_btnlike.setTextColor(Color.WHITE);
 				}
 			}
 
@@ -365,8 +365,10 @@ public class PostDetailActivity extends AppCompatActivity {
 		String comment = txt_inputcomment.getText().toString().trim();
 		if(!TextUtils.isEmpty(comment))
 		{
-			progressDialog.setMessage("Adding Comment...");
-			progressDialog.show();
+			//progressDialog.setMessage("Adding Comment...");
+			//progressDialog.show();
+			final SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(PostDetailActivity.this, SweetAlertDialog.PROGRESS_TYPE);
+			sweetAlertDialog.setTitleText("Adding Comment").show();
 			DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
 			String timestam = String.valueOf(System.currentTimeMillis());
 
@@ -383,8 +385,8 @@ public class PostDetailActivity extends AppCompatActivity {
 					.addOnSuccessListener(new OnSuccessListener<Void>() {
 						@Override
 						public void onSuccess(Void aVoid) {
-							progressDialog.dismiss();
-							Toast.makeText(PostDetailActivity.this, "Comment Added", Toast.LENGTH_LONG).show();
+							sweetAlertDialog.dismiss();
+							//Toast.makeText(PostDetailActivity.this, "Comment Added", Toast.LENGTH_LONG).show();
 							txt_inputcomment.setText("");
 							DatabaseReference refsendNoti = FirebaseDatabase.getInstance().getReference("Comments").child(postId);
 							refsendNoti.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -412,7 +414,8 @@ public class PostDetailActivity extends AppCompatActivity {
 					.addOnFailureListener(new OnFailureListener() {
 						@Override
 						public void onFailure(@NonNull Exception e) {
-							progressDialog.dismiss();
+							//progressDialog.dismiss();
+							sweetAlertDialog.dismiss();
 							Toast.makeText(PostDetailActivity.this, e.getMessage(), Toast.LENGTH_LONG).show();
 						}
 					});
@@ -428,7 +431,7 @@ public class PostDetailActivity extends AppCompatActivity {
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Token token = snapshot.getValue(Token.class);
-					Data data = new Data(postId, body,title, uid, "comment", R.drawable.ic_defaut_img);
+					Data data = new Data(postId, body,title, uid, "comment", R.drawable.user);
 					Sender sender = new Sender(data, token.getToken());
 					try {
 
@@ -534,7 +537,7 @@ public class PostDetailActivity extends AppCompatActivity {
 					myDp = snapshot.child("image").getValue() + "";
 				}
 				try {
-					Picasso.get().load(myDp).placeholder(R.drawable.ic_defaut_img).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar_comment);
+					Picasso.get().load(myDp).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar_comment);
 				}
 				catch (Exception ex)
 				{
@@ -558,7 +561,6 @@ public class PostDetailActivity extends AppCompatActivity {
 				for (DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					imgList.clear();
-					String pTitle = snapshot.child("pTitle").getValue() + "";
 					String pDescr = snapshot.child("pDescr").getValue() + "";
 					String pTimeStamp = snapshot.child("pTime").getValue() + "";
 					pImage = snapshot.child("pImage").getValue() + "";
@@ -573,7 +575,6 @@ public class PostDetailActivity extends AppCompatActivity {
 					cal.setTimeInMillis(Long.parseLong(pTimeStamp));
 					String pTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
 
-					txt_title.setText(pTitle);
 					txt_time.setText(pTime);
 					txt_description.setText(pDescr);
 					DatabaseReference refLike = FirebaseDatabase.getInstance().getReference("Likes").child(postId);
@@ -621,7 +622,7 @@ public class PostDetailActivity extends AppCompatActivity {
 					}
 
 					try {
-						Picasso.get().load(hisDp).placeholder(R.drawable.ic_defaut_img).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
+						Picasso.get().load(hisDp).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
 					}
 					catch (Exception ex)
 					{

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
+import android.graphics.Color;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.Gravity;
@@ -46,8 +47,10 @@ import com.example.hadad.Notification.Token;
 import com.example.hadad.PostDetailActivity;
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -71,6 +74,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder> {
@@ -111,9 +116,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	@Override
 	public void onBindViewHolder(@NonNull final PostViewHolder postViewHolder, final int i) {
 		Post post = postList.get(i);
-		final String pId, pTitle, pDescr, pImage, pTimestamp, uid, uEmail, uDp, uName, hostUid, pMode;
+		final String pId, pDescr, pImage, pTimestamp, uid, uEmail, uDp, uName, hostUid, pMode;
 		pId = post.getpId();
-		pTitle = post.getpTitle();
 		pDescr = post.getpDescr();
 		pImage = post.getpImage();
 		pTimestamp = post.getpTime();
@@ -132,8 +136,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		final String pTime = DateFormat.format("dd/MM/yyyy hh:mm aa", cal).toString();
 
 		postViewHolder.txt_name.setText(uName);
+		postViewHolder.txt_name.setShadowLayer(6, 0, 5, Color.parseColor("#000000"));
 		postViewHolder.txt_time.setText(pTime);
-		postViewHolder.txt_title.setText(pTitle);
 		postViewHolder.txt_description.setText(pDescr);
 		refLikes.child(pId).addValueEventListener(new ValueEventListener() {
 			@Override
@@ -198,7 +202,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		postViewHolder.btn_more.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-					showMoreOption(postViewHolder.btn_more, uid, myUid, pId, imgList, hostUid);
+					showMoreOption(postViewHolder.btn_more, uid, myUid, pId, imgList, hostUid, i);
 			}
 		});
 
@@ -267,7 +271,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			@Override
 			public void onClick(View v) {
 
-				beginShare(pTitle, pDescr, pImage, hostUid);
+				beginShare(pDescr, pImage, hostUid);
 
 			}
 		});
@@ -314,7 +318,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 					for(DataSnapshot snapshot : dataSnapshot.getChildren())
 					{
 						Token token = snapshot.getValue(Token.class);
-						Data data = new Data(pId, name + " liked on your post","Like", uid, "comment", R.drawable.ic_defaut_img);
+						Data data = new Data(pId, name + " liked on your post","Like", uid, "comment", R.drawable.user);
 						Sender sender = new Sender(data, token.getToken());
 						try {
 
@@ -358,13 +362,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		}
 	}
 
-	private void beginShare(final String pTitle, final String pDescr, final String pImage, final String hostUid) {
+	private void beginShare(final String pDescr, final String pImage, final String hostUid) {
 		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		builder.setTitle("Share");
 		builder.setMessage("Do you want to share this  post?");
 		builder.setPositiveButton("Share", new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
+				final SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(context);
+				sweetAlertDialog.setTitleText("Sharing")
+						.setContentText("Please wait...")
+						.show();
 				DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
 				reference.addListenerForSingleValueEvent(new ValueEventListener() {
 					@Override
@@ -379,7 +387,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 						hashMap.put("uEmail", user.getEmail());
 						hashMap.put("uDp", user.getImage());
 						hashMap.put("pId", Long.parseLong(MAX_TIME) - Long.parseLong(timeID) + "");
-						hashMap.put("pTitle", pTitle);
 						hashMap.put("pDescr", pDescr);
 						hashMap.put("pImage", pImage);
 						hashMap.put("pTime", timeID);
@@ -391,13 +398,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 								.addOnSuccessListener(new OnSuccessListener<Void>() {
 									@Override
 									public void onSuccess(Void aVoid) {
-										Toast.makeText(context, "Post publised", Toast.LENGTH_LONG).show();
+										sweetAlertDialog.dismiss();
+										new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE)
+												.setTitleText("complete")
+												.setContentText("This post was shared!")
+												.show();
 									}
 								})
 								.addOnFailureListener(new OnFailureListener() {
 									@Override
 									public void onFailure(@NonNull Exception e) {
-										Toast.makeText( context, e.getMessage(), Toast.LENGTH_LONG).show();
+										sweetAlertDialog.dismiss();
+										new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+												.setTitleText("Error")
+												.setContentText(e.getMessage())
+												.show();
 									}
 								});
 					}
@@ -428,13 +443,15 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				if(dataSnapshot.child(postKey).hasChild(myUid))
 				{
-					holder.btn_like.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_liked, 0, 0, 0);
-					holder.btn_like.setText("Liked");
+					holder.img_btnlike.setImageResource(R.drawable.ic_liked);
+					holder.txt_btnlike.setText("Liked");
+					holder.txt_btnlike.setTextColor(Color.parseColor("#40C4FF"));
 				}
 				else
 				{
-					holder.btn_like.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.ic_like_black, 0, 0, 0);
-					holder.btn_like.setText("Like");
+					holder.img_btnlike.setImageResource(R.drawable.ic_like_black);
+					holder.txt_btnlike.setText("Like");
+					holder.txt_btnlike.setTextColor(Color.WHITE);
 				}
 			}
 
@@ -445,7 +462,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		});
 	}
 
-	private void showMoreOption(final ImageButton btn_more, String uid, String myUid, final String pId, final List<String> imgList, final String hostUid) {
+	private void showMoreOption(final ImageButton btn_more, String uid, String myUid, final String pId, final List<String> imgList, final String hostUid, final int i) {
 		PopupMenu popupMenu = new PopupMenu(context, btn_more, Gravity.END);
 		if(myUid.equals(uid)) {
 			popupMenu.getMenu().add(Menu.NONE, 0, 0, "Delete");
@@ -458,23 +475,23 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 				int id = item.getItemId();
 				switch (id) {
 					case 0:
-						AlertDialog.Builder builder = new AlertDialog.Builder(context);
-						builder.setMessage("Are you sure delete this post");
-						builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								beginDelete(pId, imgList, hostUid);
-							}
-						});
-						builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								dialog.dismiss();
-							}
-						});
-						AlertDialog alertDialog = builder.create();
-						alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-						alertDialog.show();
+						new SweetAlertDialog(context, SweetAlertDialog.WARNING_TYPE)
+								.setTitleText("Delete")
+								.setContentText("Are you sure delete this post?")
+								.setCancelButton("Yes", new SweetAlertDialog.OnSweetClickListener() {
+									@Override
+									public void onClick(SweetAlertDialog sweetAlertDialog) {
+										beginDelete(pId, imgList, hostUid, i);
+										sweetAlertDialog.dismiss();
+									}
+								})
+								.setConfirmButton("No", new SweetAlertDialog.OnSweetClickListener() {
+									@Override
+									public void onClick(SweetAlertDialog sweetAlertDialog) {
+										sweetAlertDialog.dismiss();
+									}
+								})
+								.show();
 						break;
 
 					case 1:
@@ -496,8 +513,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 		popupMenu.show();
 	}
 
-	private void beginDelete(String pId, List<String> imgList, String hostUid) {
-		deleteWithoutImage(pId);
+	private void beginDelete(String pId, List<String> imgList, String hostUid, int i) {
+		deleteWithoutImage(pId, i);
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Likes").child(pId);
 		databaseReference.removeValue();
 	}
@@ -505,28 +522,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	// xóa post có ảnh
 
 	// xóa post ko có ảnh
-	private void deleteWithoutImage(String pId) {
-		final ProgressDialog progressDialog = new ProgressDialog(context);
-		progressDialog.setMessage("Deleting...");
+	private void deleteWithoutImage(String pId, final int i) {
+		final SweetAlertDialog progressDialog = new SweetAlertDialog(context);
+		progressDialog.setTitleText("Deleting...");
 		progressDialog.show();
 
-		Query query = FirebaseDatabase.getInstance().getReference("Post").orderByChild("pId").equalTo(pId);
-		query.addValueEventListener(new ValueEventListener() {
+		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post").child(pId);
+		ref.removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
 			@Override
-			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
-					snapshot.getRef().removeValue();
+			public void onComplete(@NonNull Task<Void> task) {
+				if(task.isSuccessful()) {
 					progressDialog.dismiss();
-					Toast.makeText(context, "Delete successfully", Toast.LENGTH_LONG).show();
+					new SweetAlertDialog(context, SweetAlertDialog.SUCCESS_TYPE)
+							.setTitleText("Delete Successful")
+							.show();
+					postList.remove(i);
+					notifyDataSetChanged();
 				}
 			}
-
-			@Override
-			public void onCancelled(@NonNull DatabaseError databaseError) {
-
-			}
-		});
+		})
+				.addOnFailureListener(new OnFailureListener() {
+					@Override
+					public void onFailure(@NonNull Exception e) {
+						progressDialog.dismiss();
+						new SweetAlertDialog(context, SweetAlertDialog.ERROR_TYPE)
+								.setTitleText(e.getMessage())
+								.show();
+					}
+				});
 	}
 
 	@Override
@@ -535,9 +558,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 	}
 
 	public class PostViewHolder extends RecyclerView.ViewHolder {
-		ImageView img_avatar, img_mode;
-		TextView txt_name, txt_time, txt_title, txt_description, txt_like, txt_comment;
-		Button btn_like, btn_comment, btn_share;
+		ImageView img_avatar, img_mode, img_btnlike;
+		TextView txt_name, txt_time, txt_description, txt_like, txt_comment, txt_btnlike;
+		LinearLayout btn_like, btn_comment, btn_share;
 		ImageButton btn_more;
 		LinearLayout layout_profile, layout_post;
 		ViewPager vp_img;
@@ -548,7 +571,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			img_avatar.setTransitionName(nameTran);
 			txt_name = itemView.findViewById(R.id.txt_name);
 			txt_time = itemView.findViewById(R.id.txt_time);
-			txt_title = itemView.findViewById(R.id.txt_title);
 			txt_description = itemView.findViewById(R.id.txt_description);
 			txt_like = itemView.findViewById(R.id.txt_like);
 			txt_comment = itemView.findViewById(R.id.txt_comment);
@@ -560,7 +582,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			layout_post = itemView.findViewById(R.id.layout_post);
 			vp_img = itemView.findViewById(R.id.vp_img);
 			img_mode = itemView.findViewById(R.id.img_mode);
-
+			txt_btnlike = itemView.findViewById(R.id.txt_btnlike);
+			img_btnlike = itemView.findViewById(R.id.img_btnlike);
 		}
 	}
 }

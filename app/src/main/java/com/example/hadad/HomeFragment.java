@@ -11,6 +11,7 @@ import androidx.core.view.MenuItemCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.appcompat.widget.SearchView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.os.Handler;
 import android.text.TextUtils;
@@ -56,6 +57,7 @@ public class HomeFragment extends Fragment {
 	PostAdapter postAdapter;
 	ProgressBar prg_load, prg_loadmore;
 	FrameLayout frame_home;
+	SwipeRefreshLayout srl_post;
 
 	Boolean isScrolling = false;
 	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
@@ -84,6 +86,7 @@ public class HomeFragment extends Fragment {
 		recycler_post.setLayoutManager(linearLayoutManager);
 		postList = new ArrayList<>();
 		ref = FirebaseDatabase.getInstance().getReference("Post");
+		srl_post = view.findViewById(R.id.srl_post);
 
 		getListKey();
 		loadPost();
@@ -110,6 +113,15 @@ public class HomeFragment extends Fragment {
 					isScrolling = false;
 					loadmoreData();
 				}
+			}
+		});
+
+		srl_post.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+			@Override
+			public void onRefresh() {
+				indexLastKey = 0;
+				getListKey();
+				loadPost();
 			}
 		});
 
@@ -187,6 +199,7 @@ public class HomeFragment extends Fragment {
 				}
 			});
 		indexLastKey += ITEM_LOAD;
+		srl_post.setRefreshing(false);
 	}
 
 	private void searchPost(final String query)
@@ -198,8 +211,7 @@ public class HomeFragment extends Fragment {
 				for(DataSnapshot snapshot : dataSnapshot.getChildren())
 				{
 					Post post = snapshot.getValue(Post.class);
-					if( (post.getpTitle().toLowerCase().contains(query.toLowerCase()) ||
-							post.getpDescr().toLowerCase().contains(query.toLowerCase())) && !post.getpMode().equals("Private"))
+					if(post.getpDescr().toLowerCase().contains(query.toLowerCase()) && !post.getpMode().equals("Private"))
 					{
 						postList.add(post);
 					}
@@ -306,11 +318,11 @@ public class HomeFragment extends Fragment {
 		dbRef.updateChildren(hashMap);
 	}
 
-	@Override
-	public void onResume() {
-		super.onResume();
-		indexLastKey = 0;
-		getListKey();
-		loadPost();
-	}
+//	@Override
+//	public void onResume() {
+//		super.onResume();
+//		indexLastKey = 0;
+//		getListKey();
+//		loadPost();
+//	}
 }

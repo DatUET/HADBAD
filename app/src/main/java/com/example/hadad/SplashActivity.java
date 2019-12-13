@@ -16,8 +16,6 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class SplashActivity extends AppCompatActivity {
-    VideoView video_background;
-    MediaPlayer mediaPlayer;
     FirebaseUser firebaseUser;
     Animation uptodown;
     ImageView img_logo;
@@ -40,20 +38,6 @@ public class SplashActivity extends AppCompatActivity {
             img_logo = findViewById(R.id.img_logo);
             uptodown = AnimationUtils.loadAnimation(this, R.anim.uptodown);
             img_logo.setAnimation(uptodown);
-            video_background = findViewById(R.id.video_background);
-
-            video_background.setVideoPath("android.resource://" + getPackageName() + "/" + R.raw.videoback2);
-            video_background.requestFocus();
-            video_background.setSoundEffectsEnabled(false);
-            video_background.start();
-            video_background.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mp) {
-                    mediaPlayer = mp;
-                    mediaPlayer.setLooping(true);
-                    mediaPlayer.start();
-                }
-            });
 
             final Thread thread = new Thread(new Runnable() {
                 @Override
