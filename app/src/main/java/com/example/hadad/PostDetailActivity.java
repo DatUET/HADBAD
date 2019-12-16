@@ -91,7 +91,7 @@ public class PostDetailActivity extends AppCompatActivity {
 	postId, hisDp, hisName, hisUid, pImage, hostUid;
 	List<String> arrUserCommented, imgList;
 
-	boolean isProcessComment = false, isProcessLike = false;
+	boolean isProcessLike = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

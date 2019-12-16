@@ -341,10 +341,9 @@ public class AddPostActivity extends AppCompatActivity {
 						try {
 							Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
-							if (file_size > 1024)
-								quality = (int) (1536.0 / file_size * 100.0);
+							if (file_size > 700)
+								quality = (int) (700 / file_size * 100.0);
 							bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-							Log.d("quality", quality + "");
 							byte[] data = baos.toByteArray();
 							String filepathAndName = "Post/" + "post_" + timestamp + "_" + n;
 							n++;
@@ -471,8 +470,8 @@ public class AddPostActivity extends AppCompatActivity {
 				try {
 					Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					if (file_size > 1024)
-						quality = (int) (1536.0 / file_size * 100.0);
+					if (file_size > 700)
+						quality = (int) (700 / file_size * 100.0);
 					bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
 					Log.d("quality", quality + "");
 					byte[] data = baos.toByteArray();

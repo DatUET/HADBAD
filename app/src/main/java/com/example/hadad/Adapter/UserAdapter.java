@@ -80,7 +80,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 			public void onClick(View v) {
 
 				final CircleMenu circleMenu = new CircleMenu(context);
-				circleMenu.setBackgroundColor(Color.parseColor("#40000000"));
+				circleMenu.setBackgroundColor(Color.parseColor("#80000000"));
 				circleMenu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
 						.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_chat_white)
 						.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_avatar);

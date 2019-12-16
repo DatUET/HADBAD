@@ -35,7 +35,7 @@
             android:name=".VideoViewActivity"
             android:label=""
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Design.NoActionBar"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity
             android:name=".ListLikedActivity"
@@ -74,7 +74,7 @@
             android:name=".ImagePostActivity"
             android:label=""
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.Design.NoActionBar"
+            android:theme="@style/Theme.AppCompat.NoActionBar"
             />
         <activity
             android:name=".PostDetailActivity"

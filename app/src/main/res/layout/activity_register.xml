@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -8,10 +8,14 @@
     android:background="@drawable/backgroundlogin"
     tools:context=".RegisterActivity">
 
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC1B1E44">
+
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="#CC1B1E44">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/img_logo"
@@ -176,7 +180,6 @@
                 android:layout_height="match_parent"
                 android:layout_below="@id/btn_register"
                 android:layout_marginTop="40dp"
-                android:layout_marginBottom="20sp"
                 android:orientation="horizontal"
                 android:gravity="center">
 
@@ -197,4 +200,8 @@
 
         </RelativeLayout>
 
-</ScrollView>
+    </androidx.core.widget.NestedScrollView>
+
+
+
+</FrameLayout>

@@ -8,18 +8,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:256712103295:android:d14bd923a1558cd1dcb64a",
+        "mobilesdk_app_id": "1:256712103295:android:cf489e5983f272d6dcb64a",
         "android_client_info": {
           "package_name": "com.example.hadad"
         }
       },
       "oauth_client": [
         {
-          "client_id": "256712103295-endt119j1aqmld68uh1otv9nb7gqr8sm.apps.googleusercontent.com",
+          "client_id": "256712103295-hmg9monm2q5oadea2uf7chg6e6e9b062.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.hadad",
-            "certificate_hash": "28051e92cba474668f4e584af18405a118ca9219"
+            "certificate_hash": "67ef14c4de55d14d8cb2779ea0bddbadf7c73aaa"
           }
         },
         {
