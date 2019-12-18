@@ -5,9 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="1dp"
-    app:contentPadding="2dp"
-    app:cardBackgroundColor="#1b1e44"
-    android:elevation="0dp">
+    app:cardBackgroundColor="#1b1e44">
 
     <RelativeLayout
         android:id="@+id/layout"
@@ -20,8 +18,7 @@
             android:layout_height="40dp"
             android:layout_marginEnd="5dp"
             android:layout_marginStart="8dp"
-            android:src="@drawable/user"
-            android:transitionName="transition"/>
+            android:src="@drawable/user"/>
 
         <TextView
             android:id="@+id/txt_name"
@@ -54,6 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="1dp"
             android:background="@color/colorPrimaryDark"
+            android:layout_marginBottom="3dp"
             android:layout_below="@id/txt_time"/>
 
     </RelativeLayout>

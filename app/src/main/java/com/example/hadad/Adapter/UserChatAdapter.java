@@ -41,7 +41,6 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 	private DatabaseReference reference;
 	String myuid;
 	Chat lastChat;
-	boolean isFindLastMsg;
 
 	public UserChatAdapter(Context context, List<User> userList) {
 		this.context = context;
@@ -51,7 +50,6 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 			reference = FirebaseDatabase.getInstance().getReference("Chats");
 			lastChat = new Chat();
 		}
-		isFindLastMsg = false;
 	}
 
 	@NonNull
@@ -72,15 +70,14 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 		final String email = user.getEmail();
 		String avatar = user.getImage();
 		final String uid = user.getUid();
+		String online = user.getOnlineStatus();
 
 		userChatViewHolder.txt_name.setText(name);
 		userChatViewHolder.txt_email.setText(email);
 		userChatViewHolder.img_avatar.setTransitionName("transition" + uid);
 		try {
 			Picasso.get().load(avatar).placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(userChatViewHolder.img_avatar);
-		}
-		catch (Exception ex)
-		{
+		} catch (Exception ex) {
 
 		}
 
@@ -90,16 +87,19 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 
 				Intent intent = new Intent(context, ChatActivity.class);
 				intent.putExtra("uid", uid);
-				ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity)context, userChatViewHolder.img_avatar, ViewCompat.getTransitionName(userChatViewHolder.img_avatar));
-				context.startActivity(intent, activityOptionsCompat.toBundle());
+				context.startActivity(intent);
 			}
 		});
 
+		if (online.equals("online")) {
+			userChatViewHolder.img_online.setImageResource(R.drawable.dot_online);
+		} else {
+			userChatViewHolder.img_online.setImageResource(R.drawable.dot_offline);
+		}
 
-
-		readLastMsg(uid, userChatViewHolder.txt_last_msg, userChatViewHolder.txt_check_seen, userChatViewHolder.img_dot_new_msg);
-		setOnline(uid, userChatViewHolder.img_online);
+		readLastMsg(uid, userChatViewHolder.txt_last_msg, userChatViewHolder.txt_check_seen, userChatViewHolder.txt_new_msg);
 	}
+
 	// check ng dùng có online hay ko
 	private void setOnline(String uid, final ImageView img_online) {
 		DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users").child(uid).child("onlineStatus");
@@ -107,12 +107,9 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				String online = dataSnapshot.getValue(String.class);
-				if(online.equals("online"))
-				{
+				if (online.equals("online")) {
 					img_online.setImageResource(R.drawable.dot_online);
-				}
-				else
-				{
+				} else {
 					img_online.setImageResource(R.drawable.dot_offline);
 				}
 			}
@@ -125,39 +122,35 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 	}
 
 	// lấy tin nhắn cuối cùng
-	private void readLastMsg(final String uid, final TextView txt_last_msg, final TextView txt_check_seen, final CircularImageView img_dot_new_msg) {
-		if(reference != null) {
+	private void readLastMsg(final String uid, final TextView txt_last_msg, final TextView txt_check_seen, final TextView txt_new_msg) {
+		if (reference != null) {
 			reference.addValueEventListener(new ValueEventListener() {
 				@Override
 				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+					int n = 0;
 					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 						Chat chat = snapshot.getValue(Chat.class);
 						if (((chat.getReciver().equals(myuid) && chat.getSender().equals(uid)) ||
-								chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) && !isFindLastMsg) {
+								chat.getReciver().equals(uid) && chat.getSender().equals(myuid)) && n == 0) {
 							lastChat = chat;
-							isFindLastMsg = true;
+							n++;
 						}
 					}
-					if(!lastChat.getImage().equals("noImage"))
-					{
+					if (!lastChat.getImage().equals("noImage")) {
 						txt_last_msg.setText("This is a image");
-					}
-					else if(!lastChat.getVideo().equals("noVideo"))
-					{
+					} else if (!lastChat.getVideo().equals("noVideo")) {
 						txt_last_msg.setText("This is a video");
-					}
-					else {
+					} else {
 						txt_last_msg.setText(lastChat.getMessage());
 					}
 					if (lastChat.getSender().equals(myuid) && lastChat.isIsseen()) {
-
 						txt_check_seen.setVisibility(View.VISIBLE);
 					} else {
-						img_dot_new_msg.setVisibility(View.GONE);
+						txt_new_msg.setVisibility(View.GONE);
 						txt_check_seen.setVisibility(View.GONE);
 					}
 					if (!lastChat.getSender().equals(myuid) && !lastChat.isIsseen()) {
-						img_dot_new_msg.setVisibility(View.VISIBLE);
+						txt_new_msg.setVisibility(View.VISIBLE);
 						txt_last_msg.setTypeface(Typeface.DEFAULT_BOLD);
 					} else {
 						txt_last_msg.setTypeface(Typeface.DEFAULT);
@@ -179,9 +172,9 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 
 	public class UserChatViewHolder extends RecyclerView.ViewHolder {
 
-		CircularImageView img_avatar, img_dot_new_msg;
+		CircularImageView img_avatar;
 		ImageView img_online;
-		TextView txt_name, txt_email, txt_last_msg, txt_check_seen;
+		TextView txt_name, txt_email, txt_last_msg, txt_check_seen, txt_new_msg;
 
 		public UserChatViewHolder(@NonNull View itemView) {
 			super(itemView);
@@ -191,7 +184,7 @@ public class UserChatAdapter extends RecyclerView.Adapter<UserChatAdapter.UserCh
 			txt_email = itemView.findViewById(R.id.txt_email);
 			txt_last_msg = itemView.findViewById(R.id.txt_last_msg);
 			txt_check_seen = itemView.findViewById(R.id.txt_check_seen);
-			img_dot_new_msg = itemView.findViewById(R.id.img_dot_new_msg);
+			txt_new_msg = itemView.findViewById(R.id.txt_new_msg);
 			img_online = itemView.findViewById(R.id.img_online);
 		}
 	}

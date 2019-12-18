@@ -8,7 +8,6 @@ import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
@@ -72,6 +71,7 @@ import com.squareup.picasso.Picasso;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -228,6 +228,7 @@ public class ProfileFragment extends Fragment {
 		fab_avatar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				circle_menu.openMenu();
 				profileOrCoverPhoto = "image";
 				showImagePicDialog();
 			}
@@ -236,6 +237,7 @@ public class ProfileFragment extends Fragment {
 		fab_cover.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				circle_menu.openMenu();
 				profileOrCoverPhoto = "cover";
 				showImagePicDialog();
 			}
@@ -544,6 +546,7 @@ public class ProfileFragment extends Fragment {
 
 					@Override
 					public void onMenuClosed() {
+						circle_menu.closeMenu();
 						circle_menu.setVisibility(View.GONE);
 					}
 				});
@@ -574,6 +577,7 @@ public class ProfileFragment extends Fragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		circle_menu.closeMenu();
 		circle_menu.setVisibility(View.GONE);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == IMAGE_PICK_GALLERY_CODE) {
@@ -595,14 +599,11 @@ public class ProfileFragment extends Fragment {
 	private void uploadProfileCoverPhoto(final Uri uri) {
 		//upload ảnh lên storage firebase
 		int quality = 100;
-		Cursor cursor = getActivity().getContentResolver().query(uri,
-				null, null, null, null);
-		cursor.moveToFirst();
-		double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
-		cursor.close();
-		Log.d("imagesize", file_size + "");
 		sweetAlertDialog.show();
 		try {
+			InputStream is = getActivity().getContentResolver().openInputStream(uri);
+			int byte_size = is.available();
+			int file_size=byte_size/1024;
 			Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			if (file_size > 500)

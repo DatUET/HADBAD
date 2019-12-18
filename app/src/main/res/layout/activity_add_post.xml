@@ -41,7 +41,7 @@
             android:id="@+id/txt_add_img"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawableLeft="@drawable/ic_add_black"
+            android:drawableStart="@drawable/ic_add_black"
             android:text="Add Photo"
             android:layout_marginTop="10dp"
             android:layout_marginLeft="10dp"

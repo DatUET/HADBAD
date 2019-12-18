@@ -266,8 +266,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.PostViewHolder
 			public void onClick(View v) {
 				Intent intent = new Intent(context, ThereProfileActivity.class);
 				intent.putExtra("uid", uid);
-				ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, postViewHolder.img_avatar, ViewCompat.getTransitionName(postViewHolder.img_avatar));
-				context.startActivity(intent, activityOptionsCompat.toBundle());
+				context.startActivity(intent);
 			}
 		});
 

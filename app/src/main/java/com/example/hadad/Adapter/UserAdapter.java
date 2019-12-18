@@ -101,8 +101,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 								Intent intent1 = new Intent(context, ThereProfileActivity.class);
 								intent1.putExtra("uid", uid);
 								intent1.putExtra("fromUsers", true);
-								ActivityOptionsCompat activityOptionsCompat1 = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-								context.startActivity(intent1, activityOptionsCompat1.toBundle());
+								context.startActivity(intent1);
 								break;
 						}
 					}

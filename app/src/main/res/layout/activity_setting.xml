@@ -42,7 +42,7 @@
                 android:text="   You should change your password every 3 months to ensure the security"
                 android:textColor="#C4C4C4"
                 android:textSize="15sp"
-                android:layout_marginLeft="10dp"/>
+                android:layout_marginStart="10dp"/>
 
         </LinearLayout>
 

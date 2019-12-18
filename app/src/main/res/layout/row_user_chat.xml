@@ -1,90 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardUseCompatPadding="true"
-    app:cardCornerRadius="2dp"
-    app:cardElevation="2dp"
-    app:cardBackgroundColor="@color/colorPrimaryDark"
-    app:contentPadding="3dp">
+    android:background="#1b1e44">
 
-
-    <LinearLayout
-        android:id="@+id/layout_profile"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
-
-        <com.blogspot.atifsoftwares.circularimageview.CircularImageView
-            android:id="@+id/img_avatar"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:src="@drawable/user"/>
+        android:layout_marginStart="5dp"
+        android:layout_marginEnd="5dp"
+        app:cardBackgroundColor="#1b1e44">
 
         <LinearLayout
+            android:id="@+id/layout_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="5dp"
-            android:orientation="vertical">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/txt_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="18sp"
-                android:textColor="@color/colorWhite"/>
-
-            <TextView
-                android:id="@+id/txt_email"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#C4C4C4"/>
+            <com.blogspot.atifsoftwares.circularimageview.CircularImageView
+                android:id="@+id/img_avatar"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:src="@drawable/user"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_marginLeft="5dp"
+                android:orientation="vertical">
 
                 <TextView
-                    android:id="@+id/txt_last_msg"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txt_name"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:textColor="@color/colorWhite"
-                    android:maxLines="1"
-                    android:layout_weight="1"/>
+                    android:textSize="18sp"
+                    android:textColor="@color/colorWhite"/>
 
                 <TextView
-                    android:id="@+id/txt_check_seen"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/txt_email"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:drawableLeft="@drawable/ic_check_seen"
-                    android:text="Seen"
-                    android:paddingLeft="5dp"
-                    android:paddingRight="5dp"
-                    android:visibility="gone"
                     android:textColor="#C4C4C4"/>
 
-                <com.blogspot.atifsoftwares.circularimageview.CircularImageView
-                    android:id="@+id/img_dot_new_msg"
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
-                    android:background="@drawable/dot"
-                    android:layout_marginRight="10dp"
-                    android:layout_marginTop="5dp"
-                    android:visibility="gone"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/txt_last_msg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/colorWhite"
+                        android:maxLines="1"
+                        android:layout_weight="1"/>
+
+                    <TextView
+                        android:id="@+id/txt_check_seen"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:drawableLeft="@drawable/ic_check_seen"
+                        android:text="Seen"
+                        android:paddingLeft="5dp"
+                        android:paddingRight="5dp"
+                        android:visibility="gone"
+                        android:textColor="#C4C4C4"/>
+
+
+                    <TextView
+                        android:id="@+id/txt_new_msg"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="New"
+                        android:textColor="@color/colorBlack"
+                        android:background="@drawable/dot"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_marginTop="5dp"
+                        android:visibility="gone"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
         </LinearLayout>
 
-    </LinearLayout>
+        <ImageView
+            android:id="@+id/img_online"
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:layout_margin="3dp"/>
 
-    <ImageView
-        android:id="@+id/img_online"
-        android:layout_width="15dp"
-        android:layout_height="15dp"
-        android:layout_margin="3dp"/>
+    </androidx.cardview.widget.CardView>
 
-</androidx.cardview.widget.CardView>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimaryDark"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@+id/cv"/>
+</RelativeLayout>

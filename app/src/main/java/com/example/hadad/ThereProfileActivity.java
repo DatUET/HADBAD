@@ -114,11 +114,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 		Intent intent = getIntent();
 		uid = intent.getStringExtra("uid");
 		boolean fromUsers = intent.getBooleanExtra("fromUsers", false);
-		if (fromUsers) {
-			img_avatar.setTransitionName("transitionUsers");
-		} else {
-			img_avatar.setTransitionName("transition");
-		}
 		postList = new ArrayList<>();
 		postKeyList = new ArrayList<>();
 

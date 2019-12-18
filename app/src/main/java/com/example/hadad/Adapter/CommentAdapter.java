@@ -100,8 +100,7 @@ public class CommentAdapter extends RecyclerView.Adapter<CommentAdapter.CommentV
 			public void onClick(View v) {
 				Intent intent = new Intent(context, ThereProfileActivity.class);
 				intent.putExtra("uid", uid);
-				ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity)context, commentViewHolder.img_avatar, ViewCompat.getTransitionName(commentViewHolder.img_avatar)); // hiệu ứng chuyển activity
-				context.startActivity(intent, activityOptionsCompat.toBundle());
+				context.startActivity(intent);
 			}
 		});
 

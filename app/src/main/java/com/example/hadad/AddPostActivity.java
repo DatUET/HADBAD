@@ -82,6 +82,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -221,7 +222,7 @@ public class AddPostActivity extends AppCompatActivity {
 		txt_add_img.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-
+				circle_menu.openMenu();
 				showImagePickDialog();
 			}
 		});
@@ -334,11 +335,11 @@ public class AddPostActivity extends AppCompatActivity {
 				for (Uri uri : uriList) {
 					if (uriListToShowImgs.contains(uri)) {
 						int quality = 100;
-						Cursor cursor = this.getContentResolver().query(uri,
-								null, null, null, null);
-						cursor.moveToFirst();
-						double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
+
 						try {
+							InputStream is=  getContentResolver().openInputStream(uri);
+							int byte_size = is.available();
+							int file_size=byte_size/1024;
 							Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 							ByteArrayOutputStream baos = new ByteArrayOutputStream();
 							if (file_size > 700)
@@ -400,7 +401,6 @@ public class AddPostActivity extends AppCompatActivity {
 													.show();
 										}
 									});
-							cursor.close();
 						} catch (Exception ex) {
 							ex.printStackTrace();
 						}
@@ -462,16 +462,14 @@ public class AddPostActivity extends AppCompatActivity {
 
 			for (Uri uri : uriListToShowImgs) {
 				int quality = 100;
-				Cursor cursor = this.getContentResolver().query(uri,
-						null, null, null, null);
-				cursor.moveToFirst();
-				double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
-				Log.d("file size", file_size + "-" + quality);
 				try {
+					InputStream is = getContentResolver().openInputStream(uri);
+					int byte_size = is.available();
+					double file_size = byte_size/1024.0;
 					Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), uri);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					if (file_size > 700)
-						quality = (int) (700 / file_size * 100.0);
+						quality = (int) (700.0 / file_size * 100.0);
 					bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
 					Log.d("quality", quality + "");
 					byte[] data = baos.toByteArray();
@@ -535,7 +533,6 @@ public class AddPostActivity extends AppCompatActivity {
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
-				cursor.close();
 			}
 		} else {
 			HashMap<String, Object> hashMap = new HashMap<>();
@@ -718,6 +715,7 @@ public class AddPostActivity extends AppCompatActivity {
 
 					@Override
 					public void onMenuClosed() {
+						circle_menu.closeMenu();
 						circle_menu.setVisibility(View.GONE);
 					}
 				});
@@ -815,6 +813,7 @@ public class AddPostActivity extends AppCompatActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		circle_menu.closeMenu();
 		circle_menu.setVisibility(View.GONE);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == IMAGE_PICK_GALLERY_CODE) {
@@ -823,6 +822,18 @@ public class AddPostActivity extends AppCompatActivity {
 
 				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
+
+				try {
+					InputStream is=  getContentResolver().openInputStream(data.getData());
+					int byte_size = is.available();
+					int file_size=byte_size/1024;
+					Toast.makeText(AddPostActivity.this, "file size " + file_size, Toast.LENGTH_LONG).show();
+					Log.d("filesize", file_size + "");
+				}
+				catch (Exception ex)
+				{
+
+				}
 			}
 
 			if (requestCode == IMAGE_PICK_CAMERA_CODE) {

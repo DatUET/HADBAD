@@ -54,15 +54,15 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_inputname"
                     android:textColorHint="#C4C4C4"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="8dp">
+                    android:layout_marginStart="15dp"
+                    android:layout_marginEnd="8dp">
                     <EditText
                         android:id="@+id/firstNameEd"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="First Name"
-                        android:layout_marginLeft="28dp"
-                        android:layout_marginRight="28dp"
+                        android:layout_marginStart="28dp"
+                        android:layout_marginEnd="28dp"
                         android:textColorHint="#C4C4C4"
                         android:inputType="textCapSentences"
                         android:textColor="@color/colorWhite"/>
@@ -75,14 +75,14 @@
                     android:layout_weight="1"
                     android:background="@drawable/bg_inputname"
                     android:textColorHint="#C4C4C4"
-                    android:layout_marginLeft="8dp"
-                    android:layout_marginRight="15dp">
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="15dp">
                     <EditText
                         android:id="@+id/lastNameEd"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="28dp"
-                        android:layout_marginRight="28dp"
+                        android:layout_marginStart="28dp"
+                        android:layout_marginEnd="28dp"
                         android:hint="Last Name"
                         android:inputType="textCapSentences"
                         android:textColor="@color/colorWhite"/>
@@ -99,16 +99,16 @@
                 android:background="@drawable/bg_inputtest"
                 android:textColorHint="#C4C4C4"
                 android:layout_below="@id/layout_name"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
                 android:layout_marginTop="10dp">
                 <EditText
                     android:id="@+id/phoneEd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="Number Phone"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
+                    android:layout_marginStart="28dp"
+                    android:layout_marginEnd="28dp"
                     android:inputType="phone"
                     android:textColor="@color/colorWhite"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -122,15 +122,15 @@
                 android:layout_below="@id/phoneTIL"
                 android:background="@drawable/bg_inputtest"
                 android:textColorHint="#C4C4C4"
-                android:layout_marginLeft="15dp"
-                android:layout_marginRight="15dp"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="15dp"
                 android:layout_marginTop="10dp">
                 <EditText
                     android:id="@+id/emailEd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
+                    android:layout_marginStart="28dp"
+                    android:layout_marginEnd="28dp"
                     android:hint="Email"
                     android:inputType="textEmailAddress"
                     android:textColor="@color/colorWhite"/>
@@ -146,15 +146,15 @@
                 app:passwordToggleEnabled="true"
                 android:background="@drawable/bg_inputtest"
                 android:textColorHint="#C4C4C4"
-                android:layout_marginRight="15dp"
-                android:layout_marginLeft="15dp"
+                android:layout_marginEnd="15dp"
+                android:layout_marginStart="15dp"
                 android:layout_marginTop="10dp">
                 <EditText
                     android:id="@+id/passwordEd"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="28dp"
-                    android:layout_marginRight="28dp"
+                    android:layout_marginStart="28dp"
+                    android:layout_marginEnd="28dp"
                     android:hint="Password"
                     android:inputType="textPassword"
                     android:textColor="@color/colorWhite"/>

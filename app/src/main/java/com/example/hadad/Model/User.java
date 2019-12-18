@@ -9,14 +9,16 @@ public class User {
 	private String phone;
 	private String image; //URL của ảnh đại diện người dùng
 	private String cover; //URL của ảnh bìa
+	private String onlineStatus;
 
-	public User(String email, String name, String uid, String phone, String image, String cover) {
+	public User(String email, String name, String uid, String phone, String image, String cover, String onlineStatus) {
 		this.email = email;
 		this.name = name;
 		this.uid = uid;
 		this.phone = phone;
 		this.image = image;
 		this.cover = cover;
+		this.onlineStatus = onlineStatus;
 	}
 
 	public User() {
@@ -68,5 +70,13 @@ public class User {
 
 	public void setCover(String cover) {
 		this.cover = cover;
+	}
+
+	public String getOnlineStatus() {
+		return onlineStatus;
+	}
+
+	public void setOnlineStatus(String onlineStatus) {
+		this.onlineStatus = onlineStatus;
 	}
 }

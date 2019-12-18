@@ -79,6 +79,7 @@ import com.squareup.picasso.Picasso;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -178,7 +179,6 @@ public class ChatActivity extends AppCompatActivity {
 		firebaseAuth = FirebaseAuth.getInstance();
 		Intent intent = getIntent();
 		uid = intent.getStringExtra("uid");
-		img_avatar.setTransitionName("transition" + uid);
 
 		firebaseDatabase = FirebaseDatabase.getInstance();
 		usersDbRef = firebaseDatabase.getReference("Users");
@@ -548,11 +548,10 @@ public class ChatActivity extends AppCompatActivity {
 					sweetAlertDialog.show();
 					String filepathAndName = "ChatsImg/" + "chat_" + timeStamp;
 					int quality = 100;
-					Cursor cursor = this.getContentResolver().query(imgUri,
-							null, null, null, null);
-					cursor.moveToFirst();
-					double file_size = (int) (cursor.getLong(cursor.getColumnIndex(OpenableColumns.SIZE))) / 1024.0;
 					try {
+						InputStream is=  getContentResolver().openInputStream(imgUri);
+						int byte_size = is.available();
+						int file_size=byte_size/1024;
 						Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imgUri);
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
 						if (file_size > 1024)
