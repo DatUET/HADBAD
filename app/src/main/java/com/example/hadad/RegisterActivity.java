@@ -34,11 +34,11 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class RegisterActivity extends AppCompatActivity {
 
-	EditText emailEd, passwordEd, firstNameEd, lastNameEd, phoneEd;
+	EditText nameEd, emailEd, passwordEd, phoneEd;
 	Button btn_register;
 	SweetAlertDialog sweetAlertDialog;
 	TextView have_account;
-	String firstName, lastName, phone = "";
+	String name, phone = "";
 	Boolean isInvalid = true;
 
 	private FirebaseAuth firebaseAuth;
@@ -63,10 +63,9 @@ public class RegisterActivity extends AppCompatActivity {
 		actionBar.setDisplayHomeAsUpEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
 
+		nameEd = findViewById(R.id.nameEd);
 		emailEd = findViewById(R.id.emailEd);
 		passwordEd = findViewById(R.id.passwordEd);
-		firstNameEd = findViewById(R.id.firstNameEd);
-		lastNameEd = findViewById(R.id.lastNameEd);
 		phoneEd = findViewById(R.id.phoneEd);
 		btn_register = findViewById(R.id.btn_register);
 		have_account = findViewById(R.id.have_account);
@@ -94,8 +93,7 @@ public class RegisterActivity extends AppCompatActivity {
 				isInvalid = true;
 				String email = emailEd.getText().toString();
 				String pass = passwordEd.getText().toString();
-				firstName = firstNameEd.getText().toString();
-				lastName = lastNameEd.getText().toString();
+				name = nameEd.getText().toString();
 				phone = phoneEd.getText().toString();
 
 				if(!Patterns.EMAIL_ADDRESS.matcher(email).matches())
@@ -110,16 +108,10 @@ public class RegisterActivity extends AppCompatActivity {
 					passwordEd.setFocusable(true);
 					isInvalid = false;
 				}
-				if(TextUtils.isEmpty(firstName))
+				if(TextUtils.isEmpty(name))
 				{
-					firstNameEd.setError("First name is empty");
-					firstNameEd.setFocusable(true);
-					isInvalid = false;
-				}
-				if(TextUtils.isEmpty(lastName))
-				{
-					lastNameEd.setError("Last name is empty");
-					lastNameEd.setFocusable(true);
+					nameEd.setError("First name is empty");
+					nameEd.setFocusable(true);
 					isInvalid = false;
 				}
 				if(isInvalid)
@@ -211,7 +203,7 @@ public class RegisterActivity extends AppCompatActivity {
 												HashMap<String, Object> hashMap = new HashMap<>();
 												hashMap.put("email", email);
 												hashMap.put("uid", uid);
-												hashMap.put("name", firstName + " " + lastName); //lấy sau
+												hashMap.put("name", name); //lấy sau
 												hashMap.put("onlineStatus", "online");
 												hashMap.put("typingTo", "noOne");
 												hashMap.put("phone", phone); //lấy sau

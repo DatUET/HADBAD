@@ -24,7 +24,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.FrameLayout;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import com.example.hadad.Adapter.PostAdapter;
@@ -56,7 +58,6 @@ public class HomeFragment extends Fragment {
 	static List<String> postKeyList;
 	PostAdapter postAdapter;
 	ProgressBar prg_load, prg_loadmore;
-	FrameLayout frame_home;
 	SwipeRefreshLayout srl_post;
 
 	Boolean isScrolling = false;
@@ -77,7 +78,6 @@ public class HomeFragment extends Fragment {
 		firebaseAuth = FirebaseAuth.getInstance();
 		prg_load = view.findViewById(R.id.prg_load);
 		prg_loadmore = view.findViewById(R.id.prg_loadmore);
-		frame_home = view.findViewById(R.id.frame_home);
 		recycler_post = view.findViewById(R.id.recycler_post);
 		postKeyList = new ArrayList<>();
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());

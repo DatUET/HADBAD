@@ -99,8 +99,10 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="10dp"
                     android:orientation="horizontal">
 
                     <TextView
@@ -108,7 +110,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:textColor="@color/colorPrimary"/>
+                        android:textColor="@color/colorWhite"/>
 
                     <TextView
                         android:id="@+id/txt_comment"
@@ -116,7 +118,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:textAlignment="textEnd"
-                        android:textColor="@color/colorPrimary"
+                        android:textColor="@color/colorWhite"
                         android:gravity="end"/>
                 </LinearLayout>
 
@@ -141,7 +143,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_like_black"
-                            android:layout_gravity="center"/>
+                            android:layout_gravity="center"
+                            android:scaleX="0.8"
+                            android:scaleY="0.8"/>
                         <TextView
                             android:id="@+id/txt_btnlike"
                             android:layout_width="wrap_content"
@@ -149,7 +153,7 @@
                             android:text="Like"
                             android:textColor="@color/colorWhite"
                             android:layout_marginStart="10dp"
-                            android:textSize="18sp"/>
+                            android:textSize="15sp"/>
                     </LinearLayout>
 
                     <LinearLayout
@@ -166,7 +170,9 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:src="@drawable/ic_share_black"
-                            android:layout_gravity="center"/>
+                            android:layout_gravity="center"
+                            android:scaleX="0.8"
+                            android:scaleY="0.8"/>
                         <TextView
                             android:id="@+id/txt_btnshare"
                             android:layout_width="wrap_content"
@@ -174,7 +180,7 @@
                             android:text="Share"
                             android:textColor="@color/colorWhite"
                             android:layout_marginStart="10dp"
-                            android:textSize="18sp"/>
+                            android:textSize="15sp"/>
                     </LinearLayout>
 
                 </LinearLayout>
