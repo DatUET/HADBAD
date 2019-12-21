@@ -105,7 +105,7 @@ public class PostDetailActivity extends AppCompatActivity {
 	private void addControl() {
 		actionBar = getSupportActionBar();
 		actionBar.setTitle("Post Detail");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1A1A1A")));
 		actionBar.setDisplayShowHomeEnabled(true);
 		actionBar.setDisplayHomeAsUpEnabled(true);
 

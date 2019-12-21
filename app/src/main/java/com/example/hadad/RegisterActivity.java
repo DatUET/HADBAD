@@ -57,7 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
 		//Actionbar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle("Create Account");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1A1A1A")));
 
 		//bật chế độ back
 		actionBar.setDisplayHomeAsUpEnabled(true);

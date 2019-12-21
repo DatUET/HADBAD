@@ -171,7 +171,7 @@ public class ChatListFragment extends Fragment {
 
         MenuItem menuItem = menu.findItem(R.id.it_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
-        searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+        searchView.setBackgroundColor(Color.parseColor("#1A1A1A"));
         searchView.setMaxWidth(Integer.MAX_VALUE);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override

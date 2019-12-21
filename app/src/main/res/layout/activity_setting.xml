@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".SettingActivity"
-    android:background="#1b1e44">
+    android:background="@color/colorBlack">
 
     <LinearLayout
         android:id="@+id/layout_change_pass"
@@ -76,6 +76,6 @@
         android:id="@+id/recycler_user_post"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#1b1e44"/>
+        android:background="@color/colorBlack"/>
 
 </LinearLayout>

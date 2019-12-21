@@ -73,7 +73,7 @@ public class LoginActivity extends AppCompatActivity {
 		//Actionbar
 		ActionBar actionBar = getSupportActionBar();
 		actionBar.setTitle("Login");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1A1A1A")));
 
 		//bật chế độ back
 		actionBar.setDisplayHomeAsUpEnabled(true);

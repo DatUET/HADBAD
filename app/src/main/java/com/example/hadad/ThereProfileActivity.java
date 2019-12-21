@@ -73,10 +73,10 @@ public class ThereProfileActivity extends AppCompatActivity {
 	SwipeRefreshLayout srl_post;
 
 	FirebaseAuth firebaseAuth;
-	String myUid;
+	String myUid, keyWord = "";
 	boolean isFollowing = false;
 
-	boolean isScrolling = false;
+	boolean isScrolling = false, loadmore4Search = false;
 	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
 
 	@Override
@@ -113,7 +113,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 		Intent intent = getIntent();
 		uid = intent.getStringExtra("uid");
-		boolean fromUsers = intent.getBooleanExtra("fromUsers", false);
 		postList = new ArrayList<>();
 		postKeyList = new ArrayList<>();
 
@@ -162,8 +161,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
 				super.onScrollStateChanged(recyclerView, newState);
-				if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
-				{
+				if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
 					isScrolling = true;
 				}
 			}
@@ -175,8 +173,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 				currentItem = linearLayoutManager.getChildCount();
 				totalItem = linearLayoutManager.getItemCount();
 				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
-				if(isScrolling && (currentItem + scrollOutItem == totalItem))
-				{
+				if (((isScrolling && (currentItem + scrollOutItem == totalItem)) && postList.size() < postKeyList.size()) || (postList.size() == 1 && postKeyList.size() > 1)) {
 					isScrolling = false;
 					loadmoreData();
 				}
@@ -187,8 +184,13 @@ public class ThereProfileActivity extends AppCompatActivity {
 			@Override
 			public void onRefresh() {
 				indexLastKey = 0;
-				getListKey();
-				loadHisPost();
+				if(loadmore4Search){
+					searchHisPost(keyWord);
+				}
+				else {
+					getListKey();
+					loadHisPost();
+				}
 			}
 		});
 	}
@@ -259,7 +261,6 @@ public class ThereProfileActivity extends AppCompatActivity {
 					if (!post.getpMode().equals("Private") || post.getUid().equals(myUid)) {
 						postKeyList.add(snapshot.getKey());
 					}
-					Log.d("size key", postKeyList.size() + "");
 				}
 			}
 
@@ -268,12 +269,9 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 			}
 		});
-
-		Log.d("size key 1", postKeyList.size() + "");
 	}
 
 	private void loadmoreData() {
-		Log.d("size key load more", postKeyList.size() + "");
 		final DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Post");
 		new Handler().postDelayed(new Runnable() {
 			@Override
@@ -283,7 +281,15 @@ public class ThereProfileActivity extends AppCompatActivity {
 						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
 							@Override
 							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-								postList.add(dataSnapshot.getValue(Post.class));
+								Post post = dataSnapshot.getValue(Post.class);
+								if(loadmore4Search){
+									if(post.getpDescr().toLowerCase().contains(keyWord.toLowerCase()) && !post.getpMode().equals("Private")){
+										postList.add(post);
+									}
+								}
+								else {
+									postList.add(post);
+								}
 								postAdapter.notifyDataSetChanged();
 							}
 
@@ -308,8 +314,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
-				for (DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					Post post = snapshot.getValue(Post.class);
 					if (!post.getpMode().equals("Private") || post.getUid().equals(myUid)) {
 						postList.add(post);
@@ -381,37 +386,30 @@ public class ThereProfileActivity extends AppCompatActivity {
 	}
 
 	private void callPhone() {
-		if(txt_phone.getText().toString().trim().length() > 0)
-		{
-			if(ContextCompat.checkSelfPermission(ThereProfileActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED)
-			{
-				ActivityCompat.requestPermissions(ThereProfileActivity.this, new String[] {Manifest.permission.CALL_PHONE}, REQUEST_CALL);
-			}
-			else
-			{
+		if (txt_phone.getText().toString().trim().length() > 0) {
+			if (ContextCompat.checkSelfPermission(ThereProfileActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+				ActivityCompat.requestPermissions(ThereProfileActivity.this, new String[]{Manifest.permission.CALL_PHONE}, REQUEST_CALL);
+			} else {
 				String dial = "tel:" + txt_phone.getText().toString();
 				startActivity(new Intent(Intent.ACTION_CALL, Uri.parse(dial)));
 			}
-		}
-		else
-		{
+		} else {
 			Toast.makeText(ThereProfileActivity.this, "This user has not added a phone number yet", Toast.LENGTH_LONG).show();
 		}
 	}
 
 
-	private void searchHisPost(final String querySearch)
-	{
+	private void searchHisPost(final String querySearch) {
+		indexLastKey = 0;
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-		Query query = ref.orderByChild("uid").equalTo(uid);
+		Query query = ref.orderByChild("uid").equalTo(uid).limitToFirst(ITEM_LOAD);
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
-				for (DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					Post post = snapshot.getValue(Post.class);
-					if(post.getpDescr().toLowerCase().contains(querySearch.toLowerCase()) && !post.getpMode().equals("Private")) {
+					if (post.getpDescr().toLowerCase().contains(querySearch.toLowerCase()) && !post.getpMode().equals("Private")) {
 						postList.add(post);
 					}
 
@@ -425,21 +423,19 @@ public class ThereProfileActivity extends AppCompatActivity {
 				Toast.makeText(ThereProfileActivity.this, databaseError.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		});
+		indexLastKey += ITEM_LOAD;
+		srl_post.setRefreshing(false);
 	}
 
-	private void checkFollowing()
-	{
+	private void checkFollowing() {
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Follows").child(myUid).child(uid);
 		ref.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-				if(dataSnapshot.exists())
-				{
+				if (dataSnapshot.exists()) {
 					isFollowing = true;
 					btn_subscribe.setImageResource(R.drawable.ic_subscribed_post);
-				}
-				else
-				{
+				} else {
 					isFollowing = false;
 					btn_subscribe.setImageResource(R.drawable.ic_subscribe_post);
 				}
@@ -452,21 +448,16 @@ public class ThereProfileActivity extends AppCompatActivity {
 		});
 	}
 
-	private void checkUserStatus()
-	{
+	private void checkUserStatus() {
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null)
-		{
+		if (firebaseUser != null) {
 			myUid = firebaseUser.getUid();
-			if(uid.equals(myUid))
-			{
+			if (uid.equals(myUid)) {
 				btn_chat.setVisibility(View.GONE);
 				btn_call_phone.setVisibility(View.GONE);
 				btn_subscribe.setVisibility(View.GONE);
 			}
-		}
-		else
-		{
+		} else {
 			Intent intent = new Intent(ThereProfileActivity.this, MainActivity.class);
 			startActivity(intent);
 			finish();
@@ -480,17 +471,17 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setBackgroundColor(Color.parseColor("#1A1A1A"));
 		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
-				if(!TextUtils.isEmpty(s))
-				{
+				if (!TextUtils.isEmpty(s)) {
+					loadmore4Search = true;
+					keyWord = s;
 					searchHisPost(s);
-				}
-				else
-				{
+				} else {
+					loadmore4Search = false;
 					loadHisPost();
 				}
 				return false;
@@ -498,9 +489,12 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 			@Override
 			public boolean onQueryTextChange(String s) {
-				if(!TextUtils.isEmpty(s))
-				{
+				if (!TextUtils.isEmpty(s)) {
+					loadmore4Search = true;
+					keyWord = s;
 					searchHisPost(s);
+				} else {
+					loadmore4Search = false;
 				}
 				return false;
 			}
@@ -510,14 +504,10 @@ public class ThereProfileActivity extends AppCompatActivity {
 
 	@Override
 	public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-		if(requestCode == REQUEST_CALL)
-		{
-			if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-			{
+		if (requestCode == REQUEST_CALL) {
+			if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 				callPhone();
-			}
-			else
-			{
+			} else {
 				Toast.makeText(ThereProfileActivity.this, "Permission Denied!!!", Toast.LENGTH_LONG).show();
 			}
 		}
@@ -527,15 +517,12 @@ public class ThereProfileActivity extends AppCompatActivity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if(id == R.id.it_logout)
-		{
+		if (id == R.id.it_logout) {
 			String timestamp = String.valueOf(System.currentTimeMillis());
 			checkOnlineStatus(timestamp);
 			firebaseAuth.signOut();
 			checkUserStatus();
-		}
-		else if(id == R.id.it_setting)
-		{
+		} else if (id == R.id.it_setting) {
 			Intent intent = new Intent(ThereProfileActivity.this, SettingActivity.class);
 			startActivity(intent);
 		}
@@ -548,8 +535,7 @@ public class ThereProfileActivity extends AppCompatActivity {
 		return super.onSupportNavigateUp();
 	}
 
-	private void checkOnlineStatus(String status)
-	{
+	private void checkOnlineStatus(String status) {
 		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(myUid);
 		HashMap<String, Object> hashMap = new HashMap<>();
 		hashMap.put("onlineStatus", status);

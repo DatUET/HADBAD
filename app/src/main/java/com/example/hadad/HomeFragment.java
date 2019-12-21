@@ -60,9 +60,10 @@ public class HomeFragment extends Fragment {
 	ProgressBar prg_load, prg_loadmore;
 	SwipeRefreshLayout srl_post;
 
-	Boolean isScrolling = false;
+	Boolean isScrolling = false, loadmore4Search = false;
 	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
 	DatabaseReference ref;
+	String keyWord = "";
 
 	public HomeFragment() {
 		// Required empty public constructor
@@ -71,7 +72,7 @@ public class HomeFragment extends Fragment {
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
-	                         Bundle savedInstanceState) {
+							 Bundle savedInstanceState) {
 		// Inflate the layout for this fragment
 		View view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -95,8 +96,7 @@ public class HomeFragment extends Fragment {
 			@Override
 			public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
 				super.onScrollStateChanged(recyclerView, newState);
-				if(newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL)
-				{
+				if (newState == AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL) {
 					isScrolling = true;
 				}
 			}
@@ -108,8 +108,7 @@ public class HomeFragment extends Fragment {
 				currentItem = linearLayoutManager.getChildCount();
 				totalItem = linearLayoutManager.getItemCount();
 				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
-				if(isScrolling && (currentItem + scrollOutItem == totalItem - 1))
-				{
+				if (((isScrolling && (currentItem + scrollOutItem == totalItem - 1)) && postList.size() < postKeyList.size()) || (postList.size() == 1 && postKeyList.size() > 1)) {
 					isScrolling = false;
 					loadmoreData();
 				}
@@ -120,23 +119,26 @@ public class HomeFragment extends Fragment {
 			@Override
 			public void onRefresh() {
 				indexLastKey = 0;
-				getListKey();
-				loadPost();
+				if(loadmore4Search){
+				    searchPost(keyWord);
+                }
+				else {
+                    getListKey();
+                    loadPost();
+                }
 			}
 		});
 
 		return view;
 	}
 
-	private void getListKey()
-	{
+	private void getListKey() {
 		Query query = ref.orderByChild("pMode").equalTo("Public");
 		query.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postKeyList.clear();
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					postKeyList.add(snapshot.getKey());
 				}
 			}
@@ -154,12 +156,20 @@ public class HomeFragment extends Fragment {
 		new Handler().postDelayed(new Runnable() {
 			@Override
 			public void run() {
-				for(int i = indexLastKey;i < indexLastKey + ITEM_LOAD; i++) {
+				for (int i = indexLastKey; i < indexLastKey + ITEM_LOAD; i++) {
 					if (i < postKeyList.size()) {
 						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
 							@Override
 							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-								postList.add(dataSnapshot.getValue(Post.class));
+								Post post = dataSnapshot.getValue(Post.class);
+								if(loadmore4Search){
+									if(post.getpDescr().toLowerCase().contains(keyWord.toLowerCase())){
+										postList.add(post);
+									}
+								}
+								else {
+									postList.add(post);
+								}
 								postAdapter.notifyDataSetChanged();
 							}
 
@@ -178,45 +188,42 @@ public class HomeFragment extends Fragment {
 
 
 	private void loadPost() {
-
+		indexLastKey = 0;
 		Query query = ref.orderByChild("pMode").equalTo("Public").limitToFirst(ITEM_LOAD);
 		query.addListenerForSingleValueEvent(new ValueEventListener() {
-				@Override
-				public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-					postList.clear();
-					for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-						postList.add(snapshot.getValue(Post.class));
-					}
-					postAdapter = new PostAdapter(getActivity(), postList, "transition");
-					recycler_post.setAdapter(postAdapter);
-					prg_load.setVisibility(View.GONE);
-					postAdapter.notifyDataSetChanged();
+			@Override
+			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+				postList.clear();
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+					postList.add(snapshot.getValue(Post.class));
 				}
+				postAdapter = new PostAdapter(getActivity(), postList, "transition");
+				recycler_post.setAdapter(postAdapter);
+				prg_load.setVisibility(View.GONE);
+				postAdapter.notifyDataSetChanged();
+			}
 
-				@Override
-				public void onCancelled(@NonNull DatabaseError databaseError) {
-					Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
-				}
-			});
+			@Override
+			public void onCancelled(@NonNull DatabaseError databaseError) {
+				Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
+			}
+		});
 		indexLastKey += ITEM_LOAD;
 		srl_post.setRefreshing(false);
 	}
 
-	private void searchPost(final String query)
-	{
-		ref.addListenerForSingleValueEvent(new ValueEventListener() {
+	private void searchPost(final String query) {
+		indexLastKey = 0;
+		Query querySearch = ref.limitToFirst(ITEM_LOAD);
+		querySearch.addListenerForSingleValueEvent(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				postList.clear();
-				for(DataSnapshot snapshot : dataSnapshot.getChildren())
-				{
+				for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 					Post post = snapshot.getValue(Post.class);
-					if(post.getpDescr().toLowerCase().contains(query.toLowerCase()) && !post.getpMode().equals("Private"))
-					{
+					if (post.getpDescr().toLowerCase().contains(query.toLowerCase()) && !post.getpMode().equals("Private")) {
 						postList.add(post);
 					}
-
-
 					postAdapter = new PostAdapter(getActivity(), postList, "transition");
 					recycler_post.setAdapter(postAdapter);
 				}
@@ -224,20 +231,18 @@ public class HomeFragment extends Fragment {
 
 			@Override
 			public void onCancelled(@NonNull DatabaseError databaseError) {
-				Toast.makeText(getActivity(),databaseError.getMessage(), Toast.LENGTH_LONG).show();
+				Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		});
+		srl_post.setRefreshing(false);
+		indexLastKey += ITEM_LOAD;
 	}
 
-	private void checkUserStatus()
-	{
+	private void checkUserStatus() {
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null)
-		{
+		if (firebaseUser != null) {
 
-		}
-		else
-		{
+		} else {
 			Intent intent = new Intent(getActivity(), MainActivity.class);
 			startActivity(intent);
 			getActivity().finish();
@@ -256,17 +261,17 @@ public class HomeFragment extends Fragment {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setBackgroundColor(Color.parseColor("#1A1A1A"));
 		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
-				if(!TextUtils.isEmpty(s))
-				{
+				if (!TextUtils.isEmpty(s)) {
+					loadmore4Search = true;
+					keyWord = s;
 					searchPost(s);
-				}
-				else
-				{
+				} else {
+					loadmore4Search = false;
 					loadPost();
 				}
 				return false;
@@ -274,9 +279,13 @@ public class HomeFragment extends Fragment {
 
 			@Override
 			public boolean onQueryTextChange(String s) {
-				if(!TextUtils.isEmpty(s))
-				{
+				if (!TextUtils.isEmpty(s)) {
+					loadmore4Search = true;
+					keyWord = s;
 					searchPost(s);
+				}
+				else {
+					loadmore4Search = false;
 				}
 				return false;
 			}
@@ -288,29 +297,23 @@ public class HomeFragment extends Fragment {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		int id = item.getItemId();
-		if(id == R.id.it_logout) {
+		if (id == R.id.it_logout) {
 			String timestamp = String.valueOf(System.currentTimeMillis());
 			checkOnlineStatus(timestamp);
 			firebaseAuth.signOut();
 			checkUserStatus();
-		}
-
-		else if(id == R.id.it_add_post)
-		{
+		} else if (id == R.id.it_add_post) {
 			Intent intent = new Intent(getActivity(), AddPostActivity.class);
 			intent.putExtra("key", "addPost");
 			startActivity(intent);
-		}
-		else if(id == R.id.it_setting)
-		{
+		} else if (id == R.id.it_setting) {
 			Intent intent = new Intent(getActivity(), SettingActivity.class);
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void checkOnlineStatus(String status)
-	{
+	private void checkOnlineStatus(String status) {
 		FirebaseUser user = firebaseAuth.getCurrentUser();
 		DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
 		HashMap<String, Object> hashMap = new HashMap<>();

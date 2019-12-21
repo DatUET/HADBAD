@@ -125,8 +125,9 @@ public class ProfileFragment extends Fragment {
 	PostAdapter postAdapter;
 	String uid, imgavarta, imgcover;
 
-	Boolean isScrolling = false;
+	Boolean isScrolling = false, loadmore4Search = false;
 	int currentItem, totalItem, scrollOutItem, indexLastKey = 0;
+    String keyWord = "";
 
 	public ProfileFragment() {
 		// Required empty public constructor
@@ -162,8 +163,8 @@ public class ProfileFragment extends Fragment {
 		fab_phone = view.findViewById(R.id.fab_phone);
 		circle_menu = view.findViewById(R.id.circle_menu);
 		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
-				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_camera)
-				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_gallery);
+				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_camera)
+				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_gallery);
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 		recycler_post = view.findViewById(R.id.recycler_post);
 		recycler_post.setLayoutManager(linearLayoutManager);
@@ -293,7 +294,7 @@ public class ProfileFragment extends Fragment {
 				currentItem = linearLayoutManager.getChildCount();
 				totalItem = linearLayoutManager.getItemCount();
 				scrollOutItem = linearLayoutManager.findFirstVisibleItemPosition();
-				if (isScrolling && (currentItem + scrollOutItem == totalItem)) {
+				if (((isScrolling && (currentItem + scrollOutItem == totalItem)) && postList.size() < postKeyList.size()) || (postList.size() == 1 && postKeyList.size() > 1)) {
 					isScrolling = false;
 					loadmoreData();
 				}
@@ -303,9 +304,15 @@ public class ProfileFragment extends Fragment {
 		srl_post.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
 			@Override
 			public void onRefresh() {
-				indexLastKey = 0;
-				getListKey();
-				loadMyPost();
+                indexLastKey = 0;
+			    if(loadmore4Search){
+			        searchMyPost(keyWord);
+                }
+			    else {
+
+                    getListKey();
+                    loadMyPost();
+                }
 			}
 		});
 
@@ -322,7 +329,15 @@ public class ProfileFragment extends Fragment {
 						ref.child(postKeyList.get(i)).addListenerForSingleValueEvent(new ValueEventListener() {
 							@Override
 							public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-								postList.add(dataSnapshot.getValue(Post.class));
+							    Post post = dataSnapshot.getValue(Post.class);
+							    if(loadmore4Search){
+							        if(post.getpDescr().toLowerCase().contains(keyWord.toLowerCase())){
+							            postList.add(post);
+                                    }
+                                }
+							    else {
+                                    postList.add(post);
+                                }
 								postAdapter.notifyDataSetChanged();
 							}
 
@@ -382,10 +397,9 @@ public class ProfileFragment extends Fragment {
 	}
 
 	private void searchMyPost(final String querySearch) {
-
-
+	    indexLastKey = 0;
 		DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Post");
-		Query query = ref.orderByChild("uid").equalTo(uid);
+		Query query = ref.orderByChild("uid").equalTo(uid).limitToFirst(ITEM_LOAD);
 		query.addValueEventListener(new ValueEventListener() {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -406,6 +420,8 @@ public class ProfileFragment extends Fragment {
 				Toast.makeText(getActivity(), databaseError.getMessage(), Toast.LENGTH_LONG).show();
 			}
 		});
+		indexLastKey += ITEM_LOAD;
+		srl_post.setRefreshing(false);
 	}
 
 	private boolean checkStoragePermission() {
@@ -783,14 +799,17 @@ public class ProfileFragment extends Fragment {
 
 		MenuItem item = menu.findItem(R.id.it_search);
 		SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-		searchView.setBackgroundColor(Color.parseColor("#2d3447"));
+		searchView.setBackgroundColor(Color.parseColor("#1A1A1A"));
 		searchView.setMaxWidth(Integer.MAX_VALUE);
 		searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 			@Override
 			public boolean onQueryTextSubmit(String s) {
 				if (!TextUtils.isEmpty(s)) {
+                    loadmore4Search = true;
+                    keyWord = s;
 					searchMyPost(s);
 				} else {
+                    loadmore4Search = false;
 					loadMyPost();
 				}
 				return false;
@@ -799,8 +818,13 @@ public class ProfileFragment extends Fragment {
 			@Override
 			public boolean onQueryTextChange(String s) {
 				if (!TextUtils.isEmpty(s)) {
+                    loadmore4Search = true;
+                    keyWord = s;
 					searchMyPost(s);
 				}
+				else {
+				    loadmore4Search = false;
+                }
 				return false;
 			}
 		});

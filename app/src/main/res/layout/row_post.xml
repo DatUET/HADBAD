@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     app:cardElevation="0dp"
     android:background="@drawable/recycler_custom"
-    app:cardBackgroundColor="#1b1e44">
+    app:cardBackgroundColor="@color/colorBlack">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -99,7 +99,7 @@
                 android:layout_height="350dp"
                 android:paddingBottom="8dp"
                 android:paddingTop="8dp"
-                android:background="#1b1e44"
+                android:background="@color/colorBlack"
                 android:visibility="gone"/>
 
         </LinearLayout>

@@ -145,7 +145,7 @@ public class AddPostActivity extends AppCompatActivity {
 	private void addControl() {
 		actionBar = getSupportActionBar();
 		actionBar.setTitle("Add Post");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1A1A1A")));
 		actionBar.setDisplayShowHomeEnabled(true);
 		actionBar.setDisplayShowHomeEnabled(true);
 
@@ -164,8 +164,8 @@ public class AddPostActivity extends AppCompatActivity {
 		modeList.add("Private");
 		circle_menu = findViewById(R.id.circle_menu);
 		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
-				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_camera)
-				.addSubMenu(Color.parseColor("#40C4FF"), R.drawable.ic_gallery);
+				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_camera)
+				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_gallery);
 		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 		recycler_img_add_post.setHasFixedSize(true);

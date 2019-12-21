@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:background="#1b1e44">
+    android:background="@color/colorBlack">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/cv"
@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="5dp"
-        app:cardBackgroundColor="#1b1e44">
+        app:cardBackgroundColor="@color/colorBlack">
 
         <LinearLayout
             android:id="@+id/layout_profile"

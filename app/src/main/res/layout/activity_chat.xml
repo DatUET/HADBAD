@@ -60,7 +60,7 @@
             android:id="@+id/recycler_chats"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#1b1e44"/>
+            android:background="@color/colorBlack"/>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 
@@ -70,7 +70,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#1b1e44"
+        android:background="@color/colorBlack"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -123,7 +123,7 @@
             android:layout_width="wrap_content"
             android:layout_height="200dp"
             android:visibility="gone"
-            android:background="#1b1e44">
+            android:background="@color/colorBlack">
 
             <ImageView
                 android:id="@+id/img_delete"
@@ -138,7 +138,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:background="#1b1e44"/>
+                android:background="@color/colorBlack"/>
 
         </LinearLayout>
 
@@ -147,7 +147,7 @@
             android:layout_width="wrap_content"
             android:layout_height="200dp"
             android:visibility="gone"
-            android:background="#1b1e44">
+            android:background="@color/colorBlack">
 
             <ImageView
                 android:id="@+id/img_delete_video"
@@ -162,7 +162,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"
-                android:background="#1b1e44"/>
+                android:background="@color/colorBlack"/>
 
         </LinearLayout>
 

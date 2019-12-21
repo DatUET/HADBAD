@@ -70,7 +70,7 @@ public class SettingActivity extends AppCompatActivity {
 	private void addControl() {
 		actionBar = getSupportActionBar();
 		actionBar.setTitle("Setting");
-		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#2d3447")));
+		actionBar.setBackgroundDrawable(new ColorDrawable(Color.parseColor("#1A1A1A")));
 
 		//bật chế độ back
 		actionBar.setDisplayHomeAsUpEnabled(true);

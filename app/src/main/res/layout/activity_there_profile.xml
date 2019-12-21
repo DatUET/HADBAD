@@ -25,13 +25,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:layout_collapseMode="parallax"
-                android:background="#1b1e44">
+                android:background="@color/colorBlack">
 
                 <ImageView
                     android:id="@+id/img_cover"
                     android:layout_width="match_parent"
                     android:layout_height="180dp"
-                    android:background="#282E74"
+                    android:background="@color/colorPrimaryDark"
                     android:scaleType="fitXY"/>
 
                 <FrameLayout
@@ -151,7 +151,7 @@
             android:id="@+id/recycler_post"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#1b1e44"/>
+            android:background="@color/colorBlack"/>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
