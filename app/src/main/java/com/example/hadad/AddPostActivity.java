@@ -1,35 +1,24 @@
 package com.example.hadad;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.graphics.Path;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.FileUtils;
 import android.provider.MediaStore;
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.solver.widgets.Snapshot;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.provider.OpenableColumns;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -40,7 +29,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -53,7 +41,6 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.hadad.Adapter.ImgAddPostAdapter;
-import com.example.hadad.Model.User;
 import com.example.hadad.Notification.Data;
 import com.example.hadad.Notification.Sender;
 import com.example.hadad.Notification.Token;
@@ -72,16 +59,11 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.google.gson.Gson;
-import com.hitomi.cmlibrary.CircleMenu;
-import com.hitomi.cmlibrary.OnMenuSelectedListener;
-import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 
 import org.json.JSONObject;
+import org.michaelbel.bottomsheet.BottomSheet;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -123,7 +105,6 @@ public class AddPostActivity extends AppCompatActivity {
 	List<String> modeList;
 	ArrayAdapter<String> modeAdapter;
 	RequestQueue requestQueue;
-	CircleMenu circle_menu;
 
 	List<Uri> uriList, uriListOfOldPost, uriListToShowImgs;
 	ImgAddPostAdapter imgAddPostAdapter;
@@ -154,7 +135,7 @@ public class AddPostActivity extends AppCompatActivity {
 		btn_upload = findViewById(R.id.btn_upload);
 		txt_add_img = findViewById(R.id.txt_add_img);
 		frame_img_post = findViewById(R.id.frame_img_post);
-		sweetAlertDialog = new SweetAlertDialog(this);
+		sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
 		sweetAlertDialog.setCanceledOnTouchOutside(false);
 		uriList = new ArrayList<>();
 		uriListOfOldPost = new ArrayList<>();
@@ -162,10 +143,6 @@ public class AddPostActivity extends AppCompatActivity {
 		modeList = new ArrayList<>();
 		modeList.add("Public");
 		modeList.add("Private");
-		circle_menu = findViewById(R.id.circle_menu);
-		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
-				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_camera)
-				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_gallery);
 		recycler_img_add_post = findViewById(R.id.recycler_img_add_post);
 		LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
 		recycler_img_add_post.setHasFixedSize(true);
@@ -222,8 +199,32 @@ public class AddPostActivity extends AppCompatActivity {
 		txt_add_img.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				circle_menu.openMenu();
-				showImagePickDialog();
+				String[] nameList = {"Camera", "Gallery"};
+				int[] iconList = {R.drawable.ic_camera, R.drawable.ic_gallery};
+				BottomSheet.Builder builder = new BottomSheet.Builder(AddPostActivity.this);
+				builder.setTitle("Choose Photo From")
+						.setItems(nameList, iconList, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+								if(which == 0){
+									if (!checkCameraPermission())
+										requestCameraPermission();
+									else
+										pickFromCamera();
+								} else if (which == 1) {
+									//show gallery
+									if (!checkStoragePermission())
+										requestStoragePermission();
+									else
+										pickFromGallery();
+								}
+							}
+						})
+						.setIconColor(Color.WHITE)
+						.setDividers(true)
+						.setDarkTheme(true)
+						.show();
 			}
 		});
 
@@ -514,7 +515,7 @@ public class AddPostActivity extends AppCompatActivity {
 								}
 							});
 
-					if (n == uriListToShowImgs.size()) {
+					if (n == uriListToShowImgs.size() - 1) {
 						sweetAlertDialog.dismiss();
 						uriList.clear();
 						imageUri = null;
@@ -687,64 +688,6 @@ public class AddPostActivity extends AppCompatActivity {
 		});
 	}
 
-	private void showImagePickDialog() {
-		circle_menu.setVisibility(View.VISIBLE);
-		circle_menu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
-			@Override
-			public void onMenuSelected(int index) {
-				if (index == 0) {
-					// show camera
-					if (!checkCameraPermission())
-						requestCameraPermission();
-					else
-						pickFromCamera();
-				} else if (index == 1) {
-					//show gallery
-					if (!checkStoragePermission())
-						requestStoragePermission();
-					else
-						pickFromGallery();
-				}
-			}
-		})
-				.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
-					@Override
-					public void onMenuOpened() {
-
-					}
-
-					@Override
-					public void onMenuClosed() {
-						circle_menu.closeMenu();
-						circle_menu.setVisibility(View.GONE);
-					}
-				});
-//		String[] option = {"Camera", "Gallery"};
-//
-//		AlertDialog.Builder builder = new AlertDialog.Builder(this);
-//		builder.setItems(option, new DialogInterface.OnClickListener() {
-//			@Override
-//			public void onClick(DialogInterface dialog, int which) {
-//				if (which == 0) {
-//					// show camera
-//					if (!checkCameraPermission())
-//						requestCameraPermission();
-//					else
-//						pickFromCamera();
-//				} else if (which == 1) {
-//					//show gallery
-//					if (!checkStoragePermission())
-//						requestStoragePermission();
-//					else
-//						pickFromGallery();
-//				}
-//			}
-//		});
-//
-//		AlertDialog alertDialog = builder.create();
-//		alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-//		alertDialog.show();
-	}
 
 	private void pickFromGallery() {
 		Intent intent = new Intent(Intent.ACTION_PICK);
@@ -813,8 +756,6 @@ public class AddPostActivity extends AppCompatActivity {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		circle_menu.closeMenu();
-		circle_menu.setVisibility(View.GONE);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == IMAGE_PICK_GALLERY_CODE) {
 				uriList.add(data.getData());
@@ -822,18 +763,6 @@ public class AddPostActivity extends AppCompatActivity {
 
 				imgAddPostAdapter = new ImgAddPostAdapter(AddPostActivity.this, uriListToShowImgs);
 				recycler_img_add_post.setAdapter(imgAddPostAdapter);
-
-				try {
-					InputStream is=  getContentResolver().openInputStream(data.getData());
-					int byte_size = is.available();
-					int file_size=byte_size/1024;
-					Toast.makeText(AddPostActivity.this, "file size " + file_size, Toast.LENGTH_LONG).show();
-					Log.d("filesize", file_size + "");
-				}
-				catch (Exception ex)
-				{
-
-				}
 			}
 
 			if (requestCode == IMAGE_PICK_CAMERA_CODE) {

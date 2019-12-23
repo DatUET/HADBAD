@@ -1,8 +1,11 @@
 package com.example.hadad;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -11,6 +14,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.example.hadad.Notification.Token;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,6 +27,8 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.HashMap;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class DashBoardActivity extends AppCompatActivity {
 
@@ -47,7 +53,7 @@ public class DashBoardActivity extends AppCompatActivity {
 		actionBar = getSupportActionBar();
 		actionBar.setBackgroundDrawable(getDrawable(R.drawable.appbar));
 
-		navigation =findViewById(R.id.navigation);
+		navigation = findViewById(R.id.navigation);
 
 		firebaseAuth = FirebaseAuth.getInstance();
 
@@ -66,8 +72,7 @@ public class DashBoardActivity extends AppCompatActivity {
 		navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 			@Override
 			public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-				switch (menuItem.getItemId())
-				{
+				switch (menuItem.getItemId()) {
 					case R.id.it_home:
 						//chuyển qua fragment home
 						actionBar.setTitle("");
@@ -116,11 +121,9 @@ public class DashBoardActivity extends AppCompatActivity {
 		ref.child(mUid).setValue(mToken);
 	}
 
-	private void checkUserStatus()
-	{
+	private void checkUserStatus() {
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null && firebaseUser.isEmailVerified())
-		{
+		if (firebaseUser != null && firebaseUser.isEmailVerified()) {
 			mUid = firebaseUser.getUid();
 			SharedPreferences sharedPreferences = getSharedPreferences("SP_USER", MODE_PRIVATE);
 			final Editor editor = sharedPreferences.edit();
@@ -141,18 +144,15 @@ public class DashBoardActivity extends AppCompatActivity {
 
 
 			updateToken(FirebaseInstanceId.getInstance().getToken());
-		}
-		else
-		{
+		} else {
 			Intent intent = new Intent(DashBoardActivity.this, MainActivity.class);
 			startActivity(intent);
 			finish();
 		}
 	}
 
-	private void checkOnlineStatus(String status)
-	{
-		if(mUid != null) {
+	private void checkOnlineStatus(String status) {
+		if (mUid != null) {
 			DatabaseReference dbRef = FirebaseDatabase.getInstance().getReference("Users").child(mUid);
 			HashMap<String, Object> hashMap = new HashMap<>();
 			hashMap.put("onlineStatus", status);
@@ -162,13 +162,21 @@ public class DashBoardActivity extends AppCompatActivity {
 
 	@Override
 	protected void onStart() {
-		checkUserStatus();
-		checkOnlineStatus("online");
-		if (first == 0)
-		{
-			first++;
-			startActivity(new Intent(DashBoardActivity.this, SplashActivity.class));
-			finish();
+		if(!isOnline()) {
+			SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+					.setTitleText("OOP...!")
+					.setContentText("No internet. Please connect to internet to use.");
+			sweetAlertDialog.setCanceledOnTouchOutside(false);
+			sweetAlertDialog.show();
+		}
+		else {
+			checkUserStatus();
+			checkOnlineStatus("online");
+			if (first == 0) {
+				first++;
+				startActivity(new Intent(DashBoardActivity.this, SplashActivity.class));
+				finish();
+			}
 		}
 		super.onStart();
 	}
@@ -195,9 +203,16 @@ public class DashBoardActivity extends AppCompatActivity {
 	protected void onDestroy() {
 		super.onDestroy();
 		FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-		if(firebaseUser != null) {
+		if (firebaseUser != null) {
 			String timestamp = String.valueOf(System.currentTimeMillis());
 			checkOnlineStatus(timestamp);
 		}
+	}
+
+	private boolean isOnline() {
+		NetworkInfo activeNetworkInfo = ((ConnectivityManager)
+				getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+		return activeNetworkInfo != null &&
+				activeNetworkInfo.isConnectedOrConnecting();
 	}
 }

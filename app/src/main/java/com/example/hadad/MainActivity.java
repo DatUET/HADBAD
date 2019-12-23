@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.media.MediaPlayer;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import android.view.View;
@@ -13,6 +15,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.VideoView;
+
+import cn.pedant.SweetAlert.SweetAlertDialog;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,5 +62,24 @@ public class MainActivity extends AppCompatActivity {
 				overridePendingTransition(R.anim.uptodown, R.anim.dowtouptran);
 			}
 		});
+	}
+
+	@Override
+	protected void onStart() {
+		if(!isOnline()) {
+			SweetAlertDialog sweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+					.setTitleText("OOP...!")
+					.setContentText("No internet. Please connect to internet to use.");
+			sweetAlertDialog.setCanceledOnTouchOutside(false);
+			sweetAlertDialog.show();
+		}
+		super.onStart();
+	}
+
+	private boolean isOnline() {
+		NetworkInfo activeNetworkInfo = ((ConnectivityManager)
+				getSystemService(CONNECTIVITY_SERVICE)).getActiveNetworkInfo();
+		return activeNetworkInfo != null &&
+				activeNetworkInfo.isConnectedOrConnecting();
 	}
 }

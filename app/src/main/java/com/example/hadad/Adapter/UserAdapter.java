@@ -24,12 +24,11 @@ import com.example.hadad.Model.User;
 
 import com.example.hadad.R;
 import com.example.hadad.ThereProfileActivity;
-import com.hitomi.cmlibrary.CircleMenu;
-import com.hitomi.cmlibrary.OnMenuSelectedListener;
-import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+
+import org.michaelbel.bottomsheet.BottomSheet;
 
 import java.util.List;
 
@@ -60,7 +59,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 	public void onBindViewHolder(@NonNull final UserViewHolder userViewHolder, int i) {
 		User user = userList.get(i);
 
-		String name = user.getName();
+		final String name = user.getName();
 		final String email = user.getEmail();
 		String avatar = user.getImage();
 		final String uid = user.getUid();
@@ -79,75 +78,30 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.UserViewHolder
 			@Override
 			public void onClick(View v) {
 
-				final CircleMenu circleMenu = new CircleMenu(context);
-				circleMenu.setBackgroundColor(Color.parseColor("#80000000"));
-				circleMenu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
-						.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_chat_white)
-						.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_avatar);
-				circleMenu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
-					@Override
-					public void onMenuSelected(int index) {
-						switch (index)
-						{
-							case 0:
-								userViewHolder.img_avatar.setTransitionName("transition" + uid);
-								Intent intent = new Intent(context, ChatActivity.class);
-								intent.putExtra("uid", uid);
-								ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-								context.startActivity(intent, activityOptionsCompat.toBundle());
-								break;
-							case 1:
-								userViewHolder.img_avatar.setTransitionName("transitionUsers");
-								Intent intent1 = new Intent(context, ThereProfileActivity.class);
-								intent1.putExtra("uid", uid);
-								intent1.putExtra("fromUsers", true);
-								context.startActivity(intent1);
-								break;
-						}
-					}
-				});
-
-				circleMenu.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
-					@Override
-					public void onMenuOpened() {
-
-					}
-
-					@Override
-					public void onMenuClosed() {
-						circleMenu.setVisibility(View.GONE);
-					}
-				});
-
-				frame_users.addView(circleMenu);
-
-//				AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//				builder.setItems(new String[]{"Profile", "Chat"}, new DialogInterface.OnClickListener() {
-//					@Override
-//					public void onClick(DialogInterface dialog, int which) {
-//						if(which == 0)
-//						{
-//							userViewHolder.img_avatar.setTransitionName("transitionUsers");
-//							Intent intent = new Intent(context, ThereProfileActivity.class);
-//							intent.putExtra("uid", uid);
-//							intent.putExtra("fromUsers", true);
-//							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-//							context.startActivity(intent, activityOptionsCompat.toBundle());
-//						}
-//						else
-//						{
-//							userViewHolder.img_avatar.setTransitionName("transition" + uid);
-//							Intent intent = new Intent(context, ChatActivity.class);
-//							intent.putExtra("uid", uid);
-//							ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, userViewHolder.img_avatar, ViewCompat.getTransitionName(userViewHolder.img_avatar));
-//							context.startActivity(intent, activityOptionsCompat.toBundle());
-//						}
-//					}
-//				});
-//
-//				AlertDialog alertDialog = builder.create();
-//				alertDialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-//				alertDialog.show();
+				String[] nameList = {"Chat", "Profile"};
+				int[] iconList = {R.drawable.ic_profile_white, R.drawable.ic_chat_white};
+				BottomSheet.Builder builder = new BottomSheet.Builder(context);
+				builder.setTitle(name)
+						.setItems(nameList, iconList, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								dialog.dismiss();
+								if(which == 0){
+									Intent intent = new Intent(context, ChatActivity.class);
+									intent.putExtra("uid", uid);
+									context.startActivity(intent);
+								} else if (which == 1) {
+									Intent intent1 = new Intent(context, ThereProfileActivity.class);
+									intent1.putExtra("uid", uid);
+									intent1.putExtra("fromUsers", true);
+									context.startActivity(intent1);
+								}
+							}
+						})
+						.setIconColor(Color.WHITE)
+						.setDividers(true)
+						.setDarkTheme(true)
+						.show();
 			}
 		});
 	}

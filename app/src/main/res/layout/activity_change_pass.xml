@@ -81,7 +81,7 @@
             android:id="@+id/retypepasswordEd"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Re-type New Password"
+            android:hint="Confirm New Password"
             android:inputType="textPassword"
             android:textColor="@color/colorWhite"/>
     </com.google.android.material.textfield.TextInputLayout>

@@ -62,13 +62,12 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import com.hitomi.cmlibrary.CircleMenu;
-import com.hitomi.cmlibrary.OnMenuSelectedListener;
-import com.hitomi.cmlibrary.OnMenuStatusChangeListener;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 import com.yarolegovich.lovelydialog.LovelyTextInputDialog;
+
+import org.michaelbel.bottomsheet.BottomSheet;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -112,8 +111,6 @@ public class ProfileFragment extends Fragment {
 	RecyclerView recycler_post;
 	SwipeRefreshLayout srl_post;
 	FrameLayout rll_fab;
-
-	CircleMenu circle_menu;
 
 	SweetAlertDialog sweetAlertDialog;
 	Uri imageUri;
@@ -161,10 +158,6 @@ public class ProfileFragment extends Fragment {
 		fab_cover = view.findViewById(R.id.fab_cover);
 		fab_name = view.findViewById(R.id.fab_name);
 		fab_phone = view.findViewById(R.id.fab_phone);
-		circle_menu = view.findViewById(R.id.circle_menu);
-		circle_menu.setMainMenu(Color.parseColor("#C4C4C4"), R.drawable.ic_add, R.drawable.ic_delete_white)
-				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_camera)
-				.addSubMenu(Color.parseColor("#1A1A1A"), R.drawable.ic_gallery);
 		final LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
 		recycler_post = view.findViewById(R.id.recycler_post);
 		recycler_post.setLayoutManager(linearLayoutManager);
@@ -229,18 +222,16 @@ public class ProfileFragment extends Fragment {
 		fab_avatar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				circle_menu.openMenu();
 				profileOrCoverPhoto = "image";
-				showImagePicDialog();
+				showImagePicDialog(" Your Avatar");
 			}
 		});
 
 		fab_cover.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				circle_menu.openMenu();
 				profileOrCoverPhoto = "cover";
-				showImagePicDialog();
+				showImagePicDialog(" Your Cover");
 			}
 		});
 
@@ -533,39 +524,33 @@ public class ProfileFragment extends Fragment {
 
 	}
 
-	private void showImagePicDialog() {
-		circle_menu.setVisibility(View.VISIBLE);
-		circle_menu.setOnMenuSelectedListener(new OnMenuSelectedListener() {
-			@Override
-			public void onMenuSelected(int index) {
-				switch (index) {
-					case 0:
-						if (!checkCameraPermission())
-							requestCameraPermission();
-						else
-							pickFromCamera();
-						break;
-					case 1:
-						if (!checkStoragePermission())
-							requestStoragePermission();
-						else
-							pickFromGallery();
-						break;
-				}
-			}
-		})
-				.setOnMenuStatusChangeListener(new OnMenuStatusChangeListener() {
+	private void showImagePicDialog(String type) {
+		String[] nameList = {"Camera", "Gallery"};
+		int[] iconList = {R.drawable.ic_camera, R.drawable.ic_gallery};
+		BottomSheet.Builder builder = new BottomSheet.Builder(getActivity());
+		builder.setTitle("Choose" + type + " From")
+				.setItems(nameList, iconList, new DialogInterface.OnClickListener() {
 					@Override
-					public void onMenuOpened() {
-
+					public void onClick(DialogInterface dialog, int which) {
+						dialog.dismiss();
+						if(which == 0){
+							if (!checkCameraPermission())
+								requestCameraPermission();
+							else
+								pickFromCamera();
+						} else if (which == 1) {
+							//show gallery
+							if (!checkStoragePermission())
+								requestStoragePermission();
+							else
+								pickFromGallery();
+						}
 					}
-
-					@Override
-					public void onMenuClosed() {
-						circle_menu.closeMenu();
-						circle_menu.setVisibility(View.GONE);
-					}
-				});
+				})
+				.setIconColor(Color.WHITE)
+				.setDividers(true)
+				.setDarkTheme(true)
+				.show();
 	}
 
 	@Override
@@ -593,8 +578,6 @@ public class ProfileFragment extends Fragment {
 
 	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		circle_menu.closeMenu();
-		circle_menu.setVisibility(View.GONE);
 		if (resultCode == RESULT_OK) {
 			if (requestCode == IMAGE_PICK_GALLERY_CODE) {
 				imageUri = data.getData();

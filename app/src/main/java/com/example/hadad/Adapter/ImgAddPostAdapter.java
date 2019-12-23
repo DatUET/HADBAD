@@ -1,9 +1,13 @@
 package com.example.hadad.Adapter;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +18,8 @@ import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -41,7 +47,25 @@ public class ImgAddPostAdapter extends RecyclerView.Adapter<ImgAddPostAdapter.Im
 
     @Override
     public void onBindViewHolder(@NonNull ImgAddPostViewHolder imgAddPostViewHolder, final int i) {
-        Picasso.get().load(uriList.get(i)).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(imgAddPostViewHolder.img_post);
+        Uri uri = uriList.get(i);
+        int quality = 100;
+        try {
+            InputStream is=  context.getContentResolver().openInputStream(uri);
+            int byte_size = is.available();
+            int file_size=byte_size/1024;
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            if (file_size > 700)
+                quality = (int) (700 / file_size * 100.0);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+            byte[] data = baos.toByteArray();
+            Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+            imgAddPostViewHolder.img_post.setImageBitmap(Bitmap.createBitmap(bmp));
+        }
+        catch (Exception ex)
+        {
+            ex.printStackTrace();
+        }
         imgAddPostViewHolder.img_delete.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

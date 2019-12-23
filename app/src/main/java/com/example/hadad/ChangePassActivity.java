@@ -110,7 +110,7 @@ public class ChangePassActivity extends AppCompatActivity {
 			@Override
 			public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 				if(!TextUtils.isEmpty(dataSnapshot.getValue().toString()))
-					Picasso.get().load(dataSnapshot.getValue() + "").networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
+					Picasso.get().load(dataSnapshot.getValue() + "").placeholder(R.drawable.user).networkPolicy(NetworkPolicy.NO_CACHE).memoryPolicy(MemoryPolicy.NO_CACHE).into(img_avatar);
 			}
 
 			@Override
