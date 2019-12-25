@@ -307,6 +307,7 @@ public class AddPostActivity extends AppCompatActivity {
 										@Override
 										public void onClick(SweetAlertDialog sweetAlertDialog) {
 											sweetAlertDialog.dismiss();
+											setResult(HomeFragment.REQUEST_ADD_POST);
 											finish();
 										}
 									})
@@ -374,6 +375,7 @@ public class AddPostActivity extends AppCompatActivity {
 																		@Override
 																		public void onClick(SweetAlertDialog sweetAlertDialog) {
 																			sweetAlertDialog.dismiss();
+																			setResult(HomeFragment.REQUEST_ADD_POST);
 																			finish();
 																		}
 																	}).show();
@@ -421,6 +423,7 @@ public class AddPostActivity extends AppCompatActivity {
 											@Override
 											public void onClick(SweetAlertDialog sweetAlertDialog) {
 												sweetAlertDialog.dismiss();
+												setResult(HomeFragment.REQUEST_ADD_POST);
 												finish();
 											}
 										})
@@ -515,7 +518,7 @@ public class AddPostActivity extends AppCompatActivity {
 								}
 							});
 
-					if (n == uriListToShowImgs.size() - 1) {
+					if (n == uriListToShowImgs.size()) {
 						sweetAlertDialog.dismiss();
 						uriList.clear();
 						imageUri = null;
@@ -526,6 +529,7 @@ public class AddPostActivity extends AppCompatActivity {
 									@Override
 									public void onClick(SweetAlertDialog sweetAlertDialog) {
 										sweetAlertDialog.dismiss();
+										setResult(HomeFragment.REQUEST_ADD_POST);
 										finish();
 									}
 								})
@@ -564,6 +568,7 @@ public class AddPostActivity extends AppCompatActivity {
 										@Override
 										public void onClick(SweetAlertDialog sweetAlertDialog) {
 											sweetAlertDialog.dismiss();
+											setResult(HomeFragment.REQUEST_ADD_POST);
 											finish();
 										}
 									})

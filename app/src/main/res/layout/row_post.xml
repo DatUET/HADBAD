@@ -91,7 +91,8 @@
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:textColor="#C4C4C4"
-                android:autoLink="all"/>
+                android:autoLink="all"
+                android:maxLines="3"/>
 
             <androidx.viewpager.widget.ViewPager
                 android:id="@+id/vp_img"

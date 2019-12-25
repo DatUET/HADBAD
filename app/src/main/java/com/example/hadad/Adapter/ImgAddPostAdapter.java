@@ -48,23 +48,25 @@ public class ImgAddPostAdapter extends RecyclerView.Adapter<ImgAddPostAdapter.Im
     @Override
     public void onBindViewHolder(@NonNull ImgAddPostViewHolder imgAddPostViewHolder, final int i) {
         Uri uri = uriList.get(i);
-        int quality = 100;
-        try {
-            InputStream is=  context.getContentResolver().openInputStream(uri);
-            int byte_size = is.available();
-            int file_size=byte_size/1024;
-            Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            if (file_size > 700)
-                quality = (int) (700 / file_size * 100.0);
-            bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
-            byte[] data = baos.toByteArray();
-            Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
-            imgAddPostViewHolder.img_post.setImageBitmap(Bitmap.createBitmap(bmp));
-        }
-        catch (Exception ex)
-        {
-            ex.printStackTrace();
+        if(uri.toString().contains("http"))
+            Picasso.get().load(uri).into(imgAddPostViewHolder.img_post);
+        else {
+            int quality = 100;
+            try {
+                InputStream is = context.getContentResolver().openInputStream(uri);
+                int byte_size = is.available();
+                int file_size = byte_size / 1024;
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                if (file_size > 700)
+                    quality = (int) (700 / file_size * 100.0);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, quality, baos);
+                byte[] data = baos.toByteArray();
+                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                imgAddPostViewHolder.img_post.setImageBitmap(Bitmap.createBitmap(bmp));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
         }
         imgAddPostViewHolder.img_delete.setOnClickListener(new View.OnClickListener() {
             @Override

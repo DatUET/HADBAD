@@ -51,6 +51,7 @@ import java.util.List;
 public class HomeFragment extends Fragment {
 
 	private static final int ITEM_LOAD = 5;
+	public static final int REQUEST_ADD_POST = 111;
 
 	FirebaseAuth firebaseAuth;
 	RecyclerView recycler_post;
@@ -128,6 +129,7 @@ public class HomeFragment extends Fragment {
                 }
 			}
 		});
+
 
 		return view;
 	}
@@ -305,12 +307,21 @@ public class HomeFragment extends Fragment {
 		} else if (id == R.id.it_add_post) {
 			Intent intent = new Intent(getActivity(), AddPostActivity.class);
 			intent.putExtra("key", "addPost");
-			startActivity(intent);
+			startActivityForResult(intent, REQUEST_ADD_POST);
 		} else if (id == R.id.it_setting) {
 			Intent intent = new Intent(getActivity(), SettingActivity.class);
 			startActivity(intent);
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+		super.onActivityResult(requestCode, resultCode, data);
+		if(requestCode == REQUEST_ADD_POST){
+			getListKey();
+			loadPost();
+		}
 	}
 
 	private void checkOnlineStatus(String status) {
